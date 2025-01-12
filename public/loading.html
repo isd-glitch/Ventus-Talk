@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loading-container">
+        <h2>ロード中...</h2>
+    </div>
+
+    <script>
+        // ログイン情報のチェック
+        const username = localStorage.getItem('username');
+        const password = localStorage.getItem('password');
+
+        if (username && password) {
+            // ログイン情報がある場合はトークページへリダイレクト
+           window.location.href = './talk/index.html';
+         // window.location.href = './login/login.html';
+        } else {
+            // ログイン情報がない場合はログインページへリダイレクト
+            window.location.href = './login/login.html';
+        }
+    </script>
+</body>
+</html>
