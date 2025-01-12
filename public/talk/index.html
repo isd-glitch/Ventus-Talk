@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventus-Talk</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../menu.css">
+    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+</head>
+<body>
+    <div id="container">
+        <div id="left-panel">
+            <div id="user-info">
+                <img src="profile-pic.jpg" alt="Profile Picture">
+                <div id="username">ユーザー名</div>
+                <div id="status">ステータス</div>
+            </div>
+            <div id="chat-list">
+                <!-- トーク一覧のアイテムをここに追加 -->
+                <div class="chat-item" data-chat-id="f1">トーク1</div>
+                <div class="chat-item" data-chat-id="f2">トーク2</div>
+                <div class="chat-item" data-chat-id="f3">トーク3</div>
+                <!-- 追加のトークアイテム -->
+            </div>
+            <div id="menu-bar">
+                <div class="menu-item" data-page="home">
+                    <img src="home-icon.png" alt="ホームアイコン">
+                    <div>ホーム</div>
+                </div>
+                <div class="menu-item" data-page="talk">
+                    <img src="talk-icon.png" alt="トークアイコン">
+                    <div>トーク</div>
+                </div>
+                <div class="menu-item" data-page="settings">
+                    <img src="settings-icon.png" alt="設定アイコン">
+                    <div>設定</div>
+                </div>
+            </div>
+        </div>
+        <div id="right-panel">
+            <div id="chat-box"></div>
+            <input type="text" id="chat-input" placeholder="Type a message..." required>
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+    <script src="../isLogined.js"></script>
+    <script src="../menuNavigation.js"></script>
+</body>
+</html>
