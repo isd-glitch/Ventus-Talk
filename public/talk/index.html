@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ventus-Talk</title>
+    <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="../menu.css">
     <script src="//cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
+    <script>eruda.init();console.log('eruda-index')</script>
 </head>
 <body>
     <div id="container">
@@ -15,7 +16,8 @@
             <div id="user-info">
                 <img src="profile-pic.jpg" alt="Profile Picture">
                 <div id="username">ユーザー名</div>
-                <div id="status">ステータス</div>
+                <!--<button onclick="">更新</button>-->
+                <div id="status">トークグループを作る</div>
             </div>
             <div id="chat-list">
                 <!-- トーク一覧のアイテムをここに追加 -->
@@ -26,28 +28,63 @@
             </div>
             <div id="menu-bar">
                 <div class="menu-item" data-page="home">
-                    <img src="home-icon.png" alt="ホームアイコン">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOhome.png?v=1736752485769" alt="ホームアイコン">
                     <div>ホーム</div>
                 </div>
                 <div class="menu-item" data-page="talk">
-                    <img src="talk-icon.png" alt="トークアイコン">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOTalk.png?v=1736752489537" alt="トークアイコン">
                     <div>トーク</div>
                 </div>
                 <div class="menu-item" data-page="settings">
-                    <img src="settings-icon.png" alt="設定アイコン">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOsettings.png?v=1736752493753" alt="設定アイコン">
                     <div>設定</div>
                 </div>
             </div>
         </div>
         <div id="right-panel">
-            <div id="chat-box"></div>
-            <textarea id="chat-input" placeholder="Type a message..." required></textarea>
-            <button id="send-button">Send</button>
+            <div id="menu-bar-top">
+                <!-- メニューバーの内容をここに追加 -->
+                <button id="menu-button">Menu</button>
+            </div>
+            <div id="chat-box">
+              <img id="logo" src="ロゴ画像のURL" alt="ロゴ" style="width: 100%; height: auto;">
+            </div>
+            <div id="tool-bar">
+                <textarea id="chat-input" placeholder="Type a message..." required></textarea>
+                <button id="send-button">Send</button>
+            </div>
         </div>
     </div>
-
     <script type="module" src="./app.js"></script>
     <script src="../isLogined.js"></script>
     <script src="../menuNavigation.js"></script>
+    <script>
+    // Adjust textarea height automatically
+const chatInput = document.getElementById('chat-input');
+const menuBar = document.getElementById('menu-bar-top');
+const initialHeight = menuBar.offsetHeight; // メニューバーの高さを初期高さに設定
+const maxHeight = initialHeight * 3; // メニューバーの高さの2倍を最大高さに設定
+
+chatInput.style.height = `${initialHeight}px`; // 初期高さを設定
+
+chatInput.addEventListener('input', function() {
+    chatInput.style.height = 'auto'; // Reset height to auto
+    chatInput.style.height = Math.min(chatInput.scrollHeight, maxHeight) + 'px'; // Set height to scrollHeight, capped at maxHeight
+    if (chatInput.scrollHeight > maxHeight) {
+        chatInput.style.overflowY = 'scroll'; // Enable scroll if height exceeds maxHeight
+    } else {
+        chatInput.style.overflowY = 'hidden'; // Hide scroll otherwise
+    }
+});
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('../service-worker.js')
+            .then(registration => {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            })
+            .catch(error => {
+                console.log('ServiceWorker registration failed: ', error);
+            });
+    }
+    </script>
 </body>
 </html>
