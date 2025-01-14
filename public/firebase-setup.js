@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy } 
+import { getFirestore, collection, addDoc,getDocs,limit, serverTimestamp, onSnapshot, query, orderBy,setDoc,doc ,getDoc} 
 from "https://www.gstatic.com/firebasejs/9.17.0/firebase-firestore.js";
 import { firebaseConfigDev, firebaseConfig1, firebaseConfig2, firebaseConfigUsers, firebaseConfigInfo } 
 from './firebase_keys.js';
@@ -19,17 +19,14 @@ const dbUsers = getFirestore(appUsers);
 const dbInfo = getFirestore(appInfo);
 
 // DOM要素の取得
-const chatBox = document.getElementById('chat-box');
-const chatInput = document.getElementById('chat-input');
-const sendButton = document.getElementById('send-button');
-
 // ローカルストレージからユーザー名の取得
 const username = localStorage.getItem('username');
+const myuserId = localStorage.getItem('userID');
+
 
 // 必要なものをエクスポート
 export { 
     appd, app1, app2, appUsers, appInfo,
     dbdev, db1, db2, dbUsers, dbInfo, 
-    collection, addDoc, serverTimestamp, onSnapshot, query, orderBy,
-    chatBox, chatInput, sendButton, username 
+    collection, addDoc, serverTimestamp, limit,onSnapshot, query, orderBy, username ,getDocs,setDoc,doc,myuserId,getDoc
 };
