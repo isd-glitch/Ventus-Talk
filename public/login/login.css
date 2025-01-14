@@ -1,0 +1,106 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+#container {
+    width: 100%;
+    max-width: 400px;
+    overflow: hidden;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#form-container {
+    position: relative;
+    width: 200%;
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.form-section {
+    width: 50%;
+    padding: 20px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    display: none; /* Ensure only active section is displayed */
+}
+
+#login-container, #register-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#login-container.active, #register-container.active {
+    display: flex;
+}
+
+input[type="text"], input[type="password"] {
+    padding: 10px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    width: 90%;
+  float: center;
+    /*display: block; Ensures the input is a block-level element */
+    margin-left: auto; /* Centers the input */
+    margin-right: auto; /* Centers the input */
+}
+button[type="submit"] {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+}
+
+button[type="submit"].enabled {
+    background-color: #4CAF50;
+    color: white;
+}
+
+button[type="submit"].disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+button[type="submit"]:hover.enabled {
+    background-color: #45a049;
+}
+
+#username-check {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.username-check-loading {
+    color: black;
+}
+
+.username-check-error {
+    color: red;
+}
+
+.username-check-available {
+    color: green;
+}
+
+.toggle-text {
+    margin-top: 20px;
+    color: blue;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
