@@ -4,36 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+  <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="../menu.css">
-  <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="home.css">
+  <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
 </head>
 <body>
     <div id="container">
         <div id="left-panel">
+            <!-- Add the button with image and text -->
+            <div id="add-friend">
+                <img src="add-friend-icon.png" alt="友達追加アイコン">
+                <div class="add-friend-text">友達追加</div>
+            </div>
             <div id="user-info">
                 <img src="profile-pic.jpg" alt="Profile Picture">
                 <div id="username">ユーザー名</div>
                 <div id="status">ステータス</div>
             </div>
             <div id="friend-list">
-                <!-- 友達一覧のアイテムをここに追加 -->
-                <div class="friend-item">友達1</div>
-                <div class="friend-item">友達2</div>
-                <div class="friend-item">友達3</div>
-                <!-- 追加の友達アイテム -->
+                
             </div>
             <div id="menu-bar">
                 <div class="menu-item" data-page="home">
-                    <img src="home-icon.png" alt="ホームアイコン">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOhome.png?v=1736752485769" alt="ホームアイコン">
                     <div>ホーム</div>
                 </div>
                 <div class="menu-item" data-page="talk">
-                    <img src="talk-icon.png" alt="トークアイコン">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOTalk.png?v=1736752489537" alt="トークアイコン">
                     <div>トーク</div>
                 </div>
                 <div class="menu-item" data-page="settings">
-                    <img src="settings-icon.png" alt="設定アイコン">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOsettings.png?v=1736752493753" alt="設定アイコン">
                     <div>設定</div>
                 </div>
             </div>
@@ -41,10 +45,48 @@
         <div id="right-panel">
             <!-- ホームページのコンテンツをここに追加 -->
         </div>
+        <!-- Add the sliding window here -->
+        <div id="add-friend-window" class="hidden">
+            <div class="window-content">
+                <span id="user-id-display">ユーザーID: --Loading--</span>
+              <label onclick="copyUserIdToClipboard()">UserIDをクリップボードにコピー</label>
+                <img id="qr-code" src="qr-code-placeholder.png" alt="QRコード">
+                <label for="user-id">友達をUser IDで登録：</label>
+                <input type="text" id="user-id" name="user-id">
+                <button id="register-button" >登録</button>
+            </div>
+        </div>
+
+
     </div>
 
     <script type="module" src="./app.js"></script>
-  <script src="../isLogined.js"></script>
-  <script src="../menuNavigation.js"></script>
+    <script src="../isLogined.js"></script>
+    <script src="../menuNavigation.js"></script>
+    <script type="module" src="./addFriend.js"></script>
+  
+  <script>
+function copyUserIdToClipboard() {
+    const userIdText = document.getElementById('user-id-display').textContent;
+    navigator.clipboard.writeText(userIdText.replace('ユーザーID: ', '')).then(function() {
+        alert('User IDがクリップボードにコピーされました。');
+    }).catch(function(error) {
+        console.error('コピーに失敗しました: ', error);
+    });
+}
+</script>
+  
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('../service-worker.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        })
+        .catch(error => {
+          console.log('ServiceWorker registration failed: ', error);
+        });
+    }
+  </script>
 </body>
 </html>
