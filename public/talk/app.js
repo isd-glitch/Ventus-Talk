@@ -1,12 +1,16 @@
 import { 
-  dbdev, collection, addDoc, serverTimestamp, onSnapshot, limit,query, orderBy, username,getDocs,getDoc, myuserId ,doc
+  dbdev, collection, addDoc, setDoc,serverTimestamp, startAfter,onSnapshot, limit,query, orderBy, username,getDocs,getDoc, myuserId ,doc
 } from '../firebase-setup.js';
 
 const chatBox = document.getElementById('chat-box');
 const chatInput = document.getElementById('chat-input');
 const sendButton = document.getElementById('send-button');
 let selectedChatId = null;
-
+chatInput.addEventListener('keydown', function(event) {
+  if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+    sendButton.click();
+  }
+});
 sendButton.addEventListener('click', async () => {
   const message = chatInput.value.trim();
   if (!message || !selectedChatId) {
@@ -21,6 +25,10 @@ sendButton.addEventListener('click', async () => {
       sender: username,
       timestamp: serverTimestamp(),
     });
+    /*
+    const last = doc(dbdev, 'users', myuserId, 'chatIdList', selectedChatId);
+    await setDoc(last, {lastmessage:message});
+    */
     chatInput.value = '';
   } catch (error) {
     console.error('Error adding document: ', error);
@@ -33,47 +41,36 @@ let unsubscribeMessages = null; // 現在のチャットのスナップショッ
 let otherChatListeners = {}; // その他のチャットのスナップショットリスナーを保持するオブジェクト
 
 function loadMessages(chatId) {
-  if (!chatId) {
-    chatBox.innerHTML = '<p>チャットを選択してください。</p>';
-    return;
-  }
-
-  // 前のスナップショットリスナーを解除
-  if (unsubscribeMessages) {
-    unsubscribeMessages();
-  }
-
+  if (!chatId) {chatBox.innerHTML = '<p>チャットを選択してください。</p>';return;}
+  if (unsubscribeMessages) {unsubscribeMessages();}
   selectedChatId = chatId;
-
   const q = query(
     collection(dbdev, `ChatGroup/${chatId}/messages`),
-    orderBy('timestamp')
+    orderBy('timestamp','desc'),limit(15)
   );
-
   unsubscribeMessages = onSnapshot(q, (snapshot) => {
     chatBox.innerHTML = snapshot.empty
       ? '<p>メッセージはまだありません。</p>'
-      : snapshot.docs.map(doc => {
+      : snapshot.docs.reverse().map(doc => {
           const { sender, text } = doc.data();
           return `<div class="message-item ${sender === username ? 'self' : 'other'}">
             ${sender}: ${text}
           </div>`;
         }).join('');
     chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
-
     // 現在のチャットの最終メッセージIDを保存
     if (!snapshot.empty) {
       const lastMessageId = snapshot.docs[snapshot.docs.length - 1].id;
-      localStorage.setItem(`lastSeenMessageId_${chatId}`, lastMessageId);
+      localStorage.setItem(`LastMessageId_${chatId}`, lastMessageId);
     }
   }, (error) => {
     console.error('Error fetching messages: ', error);
     alert('メッセージ取得中にエラーが発生しました: ' + error.message);
   });
-
   // 他のチャットに対するリスナーを設定
   updateOtherChatListeners();
 }
+
 
 async function updateOtherChatListeners() {
   const q = collection(dbdev, `users/${myuserId}/chatIdList`);
@@ -94,7 +91,10 @@ async function updateOtherChatListeners() {
       otherChatListeners[chatId] = onSnapshot(q, (snapshot) => {
         if (!snapshot.empty) {
           const newMessage = snapshot.docs[0];
-          const lastSeenMessageId = localStorage.getItem(`lastSeenMessageId_${chatId}`);
+          //const { text, sender } = snapshot.docs[0].data();
+            //console.log(`New message in ${chatId}: ${text} by ${sender}`);
+            
+          const lastSeenMessageId = localStorage.getItem(`LastMessageId_${chatId}`);
           if (newMessage.id !== lastSeenMessageId && selectedChatId !== chatId) {
             const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
             if (chatItem && !chatItem.classList.contains('new-message')) {
@@ -142,31 +142,33 @@ async function updateChatList() {
 
   const chatItems = [];
   snapshot.forEach((doc) => {
-    const { pinned, timestamp } = doc.data();
+    const { pinned, timestamp, lastMessage } = doc.data();
     const chatId = doc.id;
-    chatItems.push({ chatId, pinned, timestamp });
+    chatItems.push({ chatId, pinned, timestamp, lastMessage });
   });
 
   chatItems.sort((a, b) => {
     if (a.pinned === b.pinned) return b.timestamp - a.timestamp;
     return b.pinned - a.pinned;
   });
-
-  chatList.innerHTML = chatItems.map(({ chatId }) => `
+//アイコンは::beforeによって設定されている、後からロードする
+  chatList.innerHTML = chatItems.map(({ chatId, lastMessage }) => `
     <div class="chat-item" data-chat-id="${chatId}">
-      Chat ID: ${chatId}
+      <div class="chat-details">
+        <div class="chat-group-name">Chat ID: ${chatId}</div>
+        <div class="chat-last-message">${lastMessage || 'No messages yet'}</div>
+      </div>
     </div>
   `).join('');
 
   addEventListenersToChatItems();
 
-  // chatGroupNameを取得して名前を更新
   for (const { chatId } of chatItems) {
     const chatGroupRef = doc(dbdev, `ChatGroup/${chatId}`);
     const chatGroupDoc = await getDoc(chatGroupRef);
     if (chatGroupDoc.exists()) {
       const { chatGroupName } = chatGroupDoc.data();
-      const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
+      const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"] .chat-group-name`);
       if (chatItem && chatGroupName) {
         chatItem.textContent = chatGroupName;
       }
@@ -178,4 +180,5 @@ async function updateChatList() {
 
 document.addEventListener('DOMContentLoaded', () => {
   updateChatList();
+  updateOtherChatListeners();
 });
