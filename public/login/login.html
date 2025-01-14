@@ -3,18 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="../style.css">
+    <title>Login/Register</title>
+    <link rel="stylesheet" href="login.css">
+    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
 </head>
 <body>
-    <div id="login-container">
-        <h2>ログイン</h2>
-        <form id="login-form">
-            <input type="text" id="username" placeholder="ユーザー名" required>
-            <input type="password" id="password" placeholder="パスワード" required>
-            <button type="submit">ログイン</button>
-        </form>
+    <div id="container">
+        <div id="form-container">
+            <div id="login-container" class="form-section active">
+                <h2>サインイン</h2>
+                <form id="login-form">
+                    <input type="text" id="login-username" placeholder="ユーザー名" required>
+                    <input type="password" id="login-password" placeholder="パスワード" required>
+                    <button type="submit">サインイン</button>
+                </form>
+                <p class="toggle-text" id="show-register">新規登録はこちら</p>
+            </div>
+            <div id="register-container" class="form-section">
+                <h2>新規登録</h2>
+                <form id="register-form">
+                    <input type="text" id="username" placeholder="ユーザー名" required>
+                    <small id="username-check"><span id="loading-spinner" style="display:none;">⏳ チェック中...</span></small>
+                    <input type="password" id="password" placeholder="パスワード" required>
+                    <label>
+                        <input type="checkbox" id="terms-checkbox"> 利用規約に同意します
+                    </label>
+                    <button type="submit" id="submit-button" disabled>登録</button>
+                </form>
+                <p class="toggle-text" id="show-login">サインインはこちら</p>
+            </div>
+        </div>
     </div>
-<script type="module" src="login.js"></script>
+    <script type="module" src="login.js"></script>
 </body>
 </html>
