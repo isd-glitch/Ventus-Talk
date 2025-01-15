@@ -1,5 +1,5 @@
 import { 
-  dbdev, collection, doc,addDoc, setDoc,serverTimestamp,startAfter,onSnapshot, limit,query, orderBy,getDocs,getDoc
+  dbdev, collection, doc,addDoc,arrayUnion,reloadPage,updateDoc, setDoc,serverTimestamp,startAfter,onSnapshot, limit,query, orderBy,getDocs,getDoc
 } from '../firebase-setup.js';
 const username = localStorage.getItem('username');
 const myuserId = localStorage.getItem('userID');
@@ -21,17 +21,22 @@ let otherChatListeners = {}; // その他のチャットのスナップショッ
 function generateRandomId() {
   return Math.random().toString(36).substring(2, 18);
 }
-
 sendButton.addEventListener('click', async () => {
   const message = chatInput.value.trim();
   if (!message || !selectedChatId) {
     alert(!selectedChatId ? 'チャットが選択されていません。' : 'メッセージが空です。');
     return;
   }
+
   const formattedMessage = message.replace(/\n/g, '<br>');
   const timestamp = new Date().toISOString();
   const messageId = generateRandomId();
-  const newMessage = `<!&!timestamp=${timestamp}!&!><!&!sender=${username}!&!><url=><!&!message=${formattedMessage}!&!><!&!messageId=${messageId}!&!>`;
+  const newMessage = {
+    timestamp: timestamp,
+    message: formattedMessage,
+    messageId: messageId,
+    sender: username
+  };
 
   try {
     const chatRef = doc(dbdev, `ChatGroup/${selectedChatId}`);
@@ -44,17 +49,14 @@ sendButton.addEventListener('click', async () => {
     } else {
       await setDoc(chatRef, { messages: [newMessage] });
     }
-
-    /*
-    const last = doc(dbdev, 'users', myuserId, 'chatIdList', selectedChatId);
-    await setDoc(last, { lastmessage: message });
-    */
     chatInput.value = '';
   } catch (error) {
     console.error('Error adding document: ', error);
     alert('メッセージ送信中にエラーが発生しました: ' + error.message);
+    reloadPage();
   }
 });
+
 
 function loadMessages(chatId) {
   if (!chatId) {
@@ -76,15 +78,7 @@ function loadMessages(chatId) {
     chatBox.innerHTML = messages.length === 0
       ? '<p>メッセージはまだありません。</p>'
       : messages.map((message, index) => {
-          const timestampMatch = message.match(/<!&!timestamp=(.*?)!&!>/);
-          const senderMatch = message.match(/<!&!sender=(.*?)!&!>/);
-          const messageMatch = message.match(/<!&!message=(.*?)!&!>/);
-          const messageIdMatch = message.match(/<!&!messageId=(.*?)!&!>/);
-
-          const timestamp = timestampMatch ? timestampMatch[1] : '';
-          const sender = senderMatch ? senderMatch[1] : '';
-          const messageText = messageMatch ? messageMatch[1] : '';
-          const messageId = messageIdMatch ? messageIdMatch[1] : '';
+          const { timestamp, sender, message: messageText, messageId } = message;
 
           // 最後のメッセージIDをローカルストレージに保存
           if (index === messages.length - 1) {
@@ -105,44 +99,78 @@ function loadMessages(chatId) {
 }
 
 async function updateOtherChatListeners() {
-  const q = collection(dbdev, `users/${myuserId}/chatIdList`);
-  const snapshot = await getDocs(q);
-  if (snapshot.empty) {
-    alert('ChatIdListが空です。');
-    return;
-  }
-  // 現在のチャットを除外したその他のチャットに対してリスナーを設定
-  snapshot.forEach((chatDoc) => { // 変数名を変更
-    const chatId = chatDoc.id;
-    if (chatId !== selectedChatId && !otherChatListeners[chatId]) {
-      const chatRef = doc(dbdev, `ChatGroup/${chatId}`);
-      otherChatListeners[chatId] = onSnapshot(chatRef, (doc) => {
-        if (doc.exists()) {
-          const messages = doc.data().messages || [];
-          if (messages.length > 0) {
-            const newMessage = messages[messages.length - 1]; // 最新のメッセージを取得
-            const messageIdMatch = newMessage.match(/<!&!messageId=(.*?)!&!>/);
-            const messageId = messageIdMatch ? messageIdMatch[1] : '';
-            const lastSeenMessageId = localStorage.getItem(`LastMessageId_${chatId}`);
-            
-            if (messageId !== lastSeenMessageId && selectedChatId !== chatId) {
-              const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
-              if (chatItem && !chatItem.classList.contains('new-message')) {
-                chatItem.classList.add('new-message');
-                const newMark = document.createElement('span');
-                newMark.classList.add('new-mark');
-                newMark.textContent = 'New!';
-                chatItem.appendChild(newMark);
+  console.log('update chat list');
+  const userDocRef = doc(dbdev, 'users', myuserId);
+  
+  try {
+    // タイムアウトを設定
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Firestore request timed out')), 8000)
+    );
+
+    const userDoc = await Promise.race([getDoc(userDocRef), timeoutPromise]);
+    console.log('res');  // デバッグ用ログ
+
+    if (!userDoc.exists()) {
+      alert('User document not found.');
+      return;
+    }
+
+    const chatIdList = userDoc.data().chatIdList || [];
+
+    if (chatIdList.length === 0) {
+      alert('ChatIdListが空です。');
+      return;
+    }
+
+    // 現在のチャットを除外したその他のチャットに対してリスナーを設定
+    chatIdList.forEach(({ chatId }) => {
+      console.log(chatId, 'chatgroup');  // デバッグ用ログ
+
+      if (chatId !== selectedChatId && !otherChatListeners[chatId]) {
+        const chatRef = doc(dbdev, `ChatGroup/${chatId}`);
+        
+        otherChatListeners[chatId] = onSnapshot(chatRef, (doc) => {
+          console.log('onSnapshot called for chatId:', chatId);  // デバッグ用ログ
+
+          if (doc.exists()) {
+            console.log('Document exists for chatId:', chatId);  // デバッグ用ログ
+            const messages = doc.data().messages || [];
+
+            if (messages.length > 0) {
+              const newMessage = messages[messages.length - 1]; // 最新のメッセージを取得
+              const { messageId, sender, message: messageText } = newMessage;
+              const lastSeenMessageId = localStorage.getItem(`LastMessageId_${chatId}`);
+
+              if (messageId !== lastSeenMessageId && selectedChatId !== chatId) {
+                console.log(`New message in chat ${chatId}:`, messageText, `from ${sender}`);
+
+                const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
+                if (chatItem && !chatItem.classList.contains('new-message')) {
+                  chatItem.classList.add('new-message');
+                  const newMark = document.createElement('span');
+                  newMark.classList.add('new-mark');
+                  newMark.textContent = 'New!';
+                  chatItem.appendChild(newMark);
+                }
               }
             }
+          } else {
+            console.log('No document exists for chatId:', chatId);  // デバッグ用ログ
           }
-        }
-      }, (error) => {
-        console.error(`Error fetching messages for chat ${chatId}: `, error);
-      });
-    }
-  });
+        }, (error) => {
+          console.error(`Error fetching messages for chat ${chatId}:`, error);
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Error updating chat list:', error);
+    alert('エラーが発生しました。再試行してください: ' + error.message);
+    reloadPage();
+  }
 }
+
+
 
 function addEventListenersToChatItems() {
   document.querySelectorAll('.chat-item').forEach((chatItem) => {
@@ -162,68 +190,195 @@ function addEventListenersToChatItems() {
 }
 
 async function updateChatList() {
+  console.log('updatechat list');
   const chatList = document.getElementById('chat-list');
-  const q = collection(dbdev, `users/${myuserId}/chatIdList`);
-  const Asnapshot = await getDocs(q);
+  const userDocRef = doc(dbdev, 'users', myuserId);
 
-  if (Asnapshot.empty) {
-    alert('ChatIdListが空です。');
-    return;
-  }
-
-  const chatItems = [];
-  Asnapshot.forEach((doc) => {
-    const { pinned, lastMessage } = doc.data();
-    const chatId = doc.id;
-    chatItems.push({ chatId, pinned, lastMessage });
-  });
-/*
-  chatItems.sort((a, b) => {
-    if (a.pinned === b.pinned) return b.timestamp - a.timestamp;
-    return b.pinned - a.pinned;
-  });
-  
-  */
-//アイコンは::beforeによって設定されている、後からロードする
-  chatList.innerHTML = chatItems.map(({ chatId, lastMessage }) => `
-    <div class="chat-item" data-chat-id="${chatId}">
-      <div class="chat-details">
-        <div class="chat-group-name">Chat ID: ${chatId}</div>
-        <div class="chat-last-message">${lastMessage || 'No messages yet'}</div>
-      </div>
-    </div>
-  `).join('');
-
-  addEventListenersToChatItems();
-
-  for (const { chatId } of chatItems) {
-    const chatGroupRef = doc(dbdev, `ChatGroup/${chatId}`);
-    const chatGroupDoc = await getDoc(chatGroupRef);
-    if (chatGroupDoc.exists()) {
-      const { chatGroupName } = chatGroupDoc.data();
-      const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"] .chat-group-name`);
-      if (chatItem && chatGroupName) {
-        chatItem.textContent = chatGroupName;
-      }
-    } else {
-      console.error('ChatGroup document does not exist: ', chatId);
+  try {
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Firestore request timed out')), 8000)
+    );
+    const userDoc = await Promise.race([getDoc(userDocRef), timeoutPromise]);
+    if (!userDoc.exists()) {
+      alert('User document not found。');
+      return;
     }
+    const chatIdList = userDoc.data().chatIdList || [];
+    if (chatIdList.length === 0) {
+      alert('ChatIdListが空です。');
+      return;
+    }
+    // debug: chatIdListの内容を確認
+    console.log('chatIdList:', chatIdList);
+    const chatItems = chatIdList.map(({ chatId, pinned, serverId }) => ({ chatId, pinned, serverId }));
+    // debug: chatItemsの内容を確認
+    console.log('chatItems:', chatItems);
+    // チャットリストの表示更新
+    chatList.innerHTML = chatItems.map(({ chatId }) => `
+      <div class="chat-item" data-chat-id="${chatId}">
+        <div class="chat-details">
+          <div class="chat-group-name">Chat ID: ${chatId}</div>
+          <div class="chat-last-message">No messages yet</div>
+        </div>
+      </div>
+    `).join('');
+
+    addEventListenersToChatItems();
+
+    for (const { chatId } of chatItems) {
+      if (!chatId) {
+        console.error('Invalid chatId:', chatId);
+        continue;
+      }
+
+      const chatGroupRef = doc(dbdev, `ChatGroup/${chatId}`);
+      const chatGroupDoc = await getDoc(chatGroupRef);
+      if (chatGroupDoc.exists()) {
+        const { chatGroupName } = chatGroupDoc.data();
+        const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"] .chat-group-name`);
+        if (chatItem && chatGroupName) {
+          chatItem.textContent = chatGroupName;
+        }
+      } else {
+        console.error('ChatGroup document does not exist:', chatId);
+      }
+    }
+  } catch (error) {
+    console.error('Error updating chat list:', error);
+    alert('エラーが発生しました。再試行してください: ' + error.message);
+    reloadPage();
   }
 }
-
+/*
 document.addEventListener('DOMContentLoaded', async () => {
  await updateChatList();
-//  updateOtherChatListeners();
+ await updateOtherChatListeners();
 });
+*/
 
+
+
+
+
+/*
 document.getElementById('reload_list').addEventListener('click',() => {
   console.log('update');
   updateChatList();
 });
-/*
 
-window.onload = () => {
-  updateChatList();
+*/
+// JavaScript for handling window appearance
+const createGroupWindow = document.getElementById('create-group-window');
+const statusButton = document.getElementById('status');
+const closeButton = document.getElementById('close-window');
+
+statusButton.addEventListener('click', () => {
+    createGroupWindow.classList.remove('hidden');
+    createGroupWindow.classList.add('show');
+    updateFriendList();
+});
+
+closeButton.addEventListener('click', () => {
+    createGroupWindow.classList.remove('show');
+    createGroupWindow.classList.add('hidden');
+});
+
+window.onload = async () => {
+  await updateChatList();
+  const createGroupButton = document.getElementById('create-group-button');
+  createGroupButton.addEventListener('click', createGroup);
 //  updateOtherChatListeners();
 };
-*/
+
+
+async function updateFriendList() {
+    const friendListContainer = document.getElementById('friend-list');
+    const selectedFriendsContainer = document.getElementById('selected-friends');
+    const selectedFriends = new Set(); // 選択された友達のセット
+    const userDocRef = doc(dbdev, `users/${myuserId}`);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists) {
+        friendListContainer.innerHTML = '<p>No user data found.</p>';
+        return;
+    }
+
+    const userData = userDoc.data();
+    const friends = userData.friendList || [];
+
+    if (friends.length === 0) {
+        friendListContainer.innerHTML = '<p>No friends found.</p>';
+        return;
+    }
+
+    friendListContainer.innerHTML = '';
+    friends.forEach((userId) => {
+        const friendItem = document.createElement('div');
+        friendItem.classList.add('friend-item');
+        friendItem.textContent = userId;
+
+        // イベントリスナーを追加
+        friendItem.addEventListener('click', () => {
+            if (selectedFriends.has(userId)) {
+                // 選択されている場合は削除
+                selectedFriends.delete(userId);
+                const selectedFriendElement = [...selectedFriendsContainer.children].find(child => child.textContent === userId);
+                if (selectedFriendElement) {
+                    selectedFriendsContainer.removeChild(selectedFriendElement);
+                }
+            } else {
+                // 選択されていない場合は追加
+                selectedFriends.add(userId);
+                const selectedFriend = document.createElement('div');
+                selectedFriend.textContent = userId;
+                selectedFriendsContainer.appendChild(selectedFriend);
+            }
+        });
+
+        friendListContainer.appendChild(friendItem);
+    });
+}
+
+
+async function createGroup() {
+  const groupNameInput = document.getElementById('group-name-input');
+  const selectedFriendsContainer = document.getElementById('selected-friends');
+  const groupName = groupNameInput.value;
+  const selectedFriends = [...selectedFriendsContainer.children].map(child => child.textContent);
+
+  if (groupName === '' || selectedFriends.length === 0) {
+    alert('グループ名と友達を選択してください。');
+    return;
+  }
+
+  const chatId = generateRandomId();
+  const allMembers = [myuserId, ...selectedFriends]; // 自分を含めたメンバー
+
+  // グループメンバー全員の chatIdList に追加
+  for (const userId of allMembers) {
+    const userDocRef = doc(dbdev, `users/${userId}`);
+    await updateDoc(userDocRef, {
+      chatIdList: arrayUnion({
+        pinned: false,
+        serverId: "dev",
+        chatId: chatId
+      })
+    });
+  }
+
+  // ChatGroup ドキュメントを作成
+  const chatGroupRef = doc(dbdev, `ChatGroup/${chatId}`);
+  await setDoc(chatGroupRef, {
+    chatGroupName: groupName,
+    messages: [],
+    timestamp: new Date().toISOString(),
+    usernames: allMembers
+  });
+
+  alert('グループが作成されました！');
+
+  // 正常にグループが作成されたら、入力フィールドをクリアし、ウィンドウを閉じる
+  groupNameInput.value = '';
+  selectedFriendsContainer.innerHTML = '';
+  document.getElementById('create-group-window').classList.toggle('visible');
+}
