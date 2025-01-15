@@ -7,6 +7,7 @@
     <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="../menu.css">
+  <link rel="stylesheet" href="group_window.css">
     <script src="//cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();console.log('eruda-index')</script>
 </head>
@@ -19,13 +20,16 @@
                 <!--<button onclick="">更新</button>-->
                 <div id="status">トークグループを作る</div>
             </div>
-            <div id="chat-list">
-                <!-- トーク一覧のアイテムをここに追加 -->
-                <div class="chat-item" data-chat-id="f1">トーク1</div>
-                <div class="chat-item" data-chat-id="f2">トーク2</div>
-                <div class="chat-item" data-chat-id="f3">トーク3</div>
-                <!-- 追加のトークアイテム -->
-            </div>
+          
+<div id="chat-list">
+    <div class="chat-item" data-chat-id="XXXXXXXXXX">
+        <div class="chat-details">
+            <div class="chat-group-name">トークを読み込み中です。</div>
+            <div class="chat-last-message">時間がかかりすぎる場合別タブで開き直してください。</div>
+        </div>
+    </div>
+</div>
+
             <div id="menu-bar">
                 <div class="menu-item" data-page="home">
                     <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOhome.png?v=1736752485769" alt="ホームアイコン">
@@ -55,6 +59,28 @@
             </div>
         </div>
     </div>
+
+<div id="create-group-window" class="hidden">
+    <div id="window-header">
+        <h2>Create Group</h2>
+        <button id="close-window" class="close-button">×</button>
+    </div>
+    <div id="group-settings">
+        <img src="settings-image.jpg" alt="トーク設定画像" id="group-settings-image">
+        <div class="group-name-and-button">
+            <input type="text" id="group-name-input" placeholder="グループ名を入力" required>
+            <button id="create-group-button">作成</button>
+        </div>
+    </div>
+    <div id="selected-friends">
+        <!-- 選択した友達のuserIdが表示される -->
+    </div>
+    <div id="friend-list">
+        <!-- 友達一覧がここに表示される -->
+    </div>
+</div>
+
+
     <script type="module" src="./app.js"></script>
     <script src="../isLogined.js"></script>
     <script src="../menuNavigation.js"></script>
@@ -85,6 +111,7 @@ chatInput.addEventListener('input', function() {
                 console.log('ServiceWorker registration failed: ', error);
             });
     }
+
     </script>
 </body>
 </html>
