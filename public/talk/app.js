@@ -1,6 +1,7 @@
 import { 
   dbdev, collection, doc,addDoc,arrayUnion,reloadPage,updateDoc, setDoc,serverTimestamp,startAfter,onSnapshot, limit,query, orderBy,getDocs,getDoc
 } from '../firebase-setup.js';
+import {addLog} from '../log.js';
 const username = localStorage.getItem('username');
 const myuserId = localStorage.getItem('userID');
 
@@ -53,6 +54,7 @@ sendButton.addEventListener('click', async () => {
   } catch (error) {
     console.error('Error adding document: ', error);
     alert('メッセージ送信中にエラーが発生しました: ' + error.message);
+    addLog('メッセージ送信中にエラーが発生しました: ' + error.message,error);
     reloadPage();
   }
 });
@@ -63,7 +65,6 @@ sendButton.addEventListener('click', async () => {
 
 
 async function loadMessages(chatId) {
-  let previousTimestamp = null;
     if (!chatId) {
         chatBox.innerHTML = '<p>チャットを選択してください。</p>';
         return;
@@ -120,19 +121,30 @@ async function loadMessages(chatId) {
 
             // メッセージのHTMLを生成
             // 前のメッセージのタイムスタンプを記録するための変数
-            
+            let previousTimestamp = null;
+            let icon_html;
+            let username_html;
+            let margin_style = '';
+
+            if (sender === myuserId || (previousTimestamp && (messageTimestamp - previousTimestamp <= 15 * 60 * 1000))) {
+                icon_html = '<img class="icon noicon" src="" alt="">'; // アイコンの余白のみ残す
+                username_html = '';
+                margin_style = 'margin-top: 0;';
+            } else {
+                icon_html = `<img class="icon" src="${userIcon}" alt="${userName}のアイコン">`;
+                username_html = `<div class="username">${userName}</div>`;
+            }
 
             const message_html = `
                 ${dateDivider}
                 <div class="message-item ${sender === myuserId ? 'self' : 'other'}">
-                    ${sender === myuserId || (previousTimestamp && (messageTimestamp - previousTimestamp <= 15 * 60 * 1000)) ? '' : `<img class="icon" src="${userIcon}" alt="${userName}のアイコン">`}
-                    <div class="message-content" style="${sender === myuserId || (previousTimestamp && (messageTimestamp - previousTimestamp <= 15 * 60 * 1000)) ? 'margin-top: 0;' : ''}">
-                        ${sender === myuserId || (previousTimestamp && (messageTimestamp - previousTimestamp <= 15 * 60 * 1000)) ? '' : `<div class="username">${userName}</div>`}
+                    ${icon_html}
+                    <div class="message-content" style="${margin_style}">
+                        ${username_html}
                         <div class="message-bubble">${messageText}</div>
                     </div>
                     <div class="timestamp">${messageTimestamp.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</div>
                 </div>`;
-
             // 現在のメッセージのタイムスタンプを前のメッセージのタイムスタンプとして保存
             previousTimestamp = messageTimestamp;
           return message_html;
@@ -163,14 +175,14 @@ async function updateOtherChatListeners() {
     console.log('res');  // デバッグ用ログ
 
     if (!userDoc.exists()) {
-      alert('User document not found.');
+      addLog('User document not found.',"error");
       return;
     }
 
     const chatIdList = userDoc.data().chatIdList || [];
 
     if (chatIdList.length === 0) {
-      alert('ChatIdListが空です。');
+      addLog('ChatIdListが空です。');
       return;
     }
 
@@ -256,7 +268,7 @@ async function updateChatList() {
     }
     const chatIdList = userDoc.data().chatIdList || [];
     if (chatIdList.length === 0) {
-      alert('ChatIdListが空です。');
+      addLog('ChatIdListが空です。');
       return;
     }
     // debug: chatIdListの内容を確認
@@ -296,7 +308,7 @@ async function updateChatList() {
     }
   } catch (error) {
     console.error('Error updating chat list:', error);
-    alert('エラーが発生しました。再試行してください: ' + error.message);
+    addLog('エラーが発生しました。再試行してください: ' + error.message);
     reloadPage();
   }
 }
@@ -338,7 +350,12 @@ window.onload = async () => {
   await updateChatList();
   const createGroupButton = document.getElementById('create-group-button');
   createGroupButton.addEventListener('click', createGroup);
-//  updateOtherChatListeners();
+  
+  const savedFont = localStorage.getItem('font');
+    if (savedFont) {
+        document.getElementById('chat-box').style.fontFamily = savedFont;
+    }
+  updateOtherChatListeners();
 };
 
 
@@ -426,7 +443,7 @@ async function createGroup() {
     usernames: allMembers
   });
 
-  alert('グループが作成されました！');
+  addLog('グループが作成されました！');
 
   // 正常にグループが作成されたら、入力フィールドをクリアし、ウィンドウを閉じる
   groupNameInput.value = '';
