@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Info</title>
+    <link rel="manifest" href="../manifest.json">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../menu.css">
+    <link rel="stylesheet" href="settings.css">
+    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+</head>
+<body>
+    <div id="container">
+        <div id="left-panel">
+            <!-- Add the button with image and text -->
+            <div id="user-info">
+                <img src="profile-pic.jpg" alt="Profile Picture">
+                <div id="username">ユーザー名</div>
+                <div id="status">ステータス</div>
+            </div>
+            
+            <!-- ここに追加 --> 
+            <div id="settings-list">
+                <div class="settings-item" data-page="profile">プロフィール</div>
+                <div class="settings-item" data-page="privacy-settings">アカウント/プライバシー設定</div>
+                <div class="settings-item" data-page="font">フォント</div>
+                <div class="settings-item" data-page="app-icon">アプリアイコン</div>
+                <div class="settings-item" data-page="notifications">通知</div>
+                <div class="settings-item" data-page="photos-videos">写真と動画</div>
+                <div class="settings-item" data-page="talk-settings">トーク</div>
+                <div class="settings-item" data-page="friends">友達</div>
+                <div class="settings-item" data-page="terms">利用規約</div>
+                <div class="settings-item" data-page="developer">開発陣より</div>
+            </div>
+
+            <!-- 下部のメニューバーを追加 -->
+            <div id="bottom-menu-bar">
+                <div class="menu-item" data-page="home">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOhome.png?v=1736752485769" alt="ホームアイコン">
+                    <div>ホーム</div>
+                </div>
+                <div class="menu-item" data-page="talk">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOTalk.png?v=1736752489537" alt="トークアイコン">
+                    <div>トーク</div>
+                </div>
+                <div class="menu-item" data-page="settings">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOsettings.png?v=1736752493753" alt="設定アイコン">
+                    <div>設定</div>
+                </div>
+            </div>
+        </div>
+        <div id="right-panel">
+            <!-- 設定の名前を表示 -->
+            <div id="settings-content">設定を選択してください</div>
+            
+            <!-- 設定ページを追加 -->
+            <div id="profile" class="settings-page" style="display: none;">
+                <h2>プロフィール</h2>
+                <div id="current-profile-image-container">
+                    <img id="current-profile-image" alt="現在のプロフィール画像">
+                </div>
+                <div class="profile-item">
+                    <label for="username-input">ユーザーネーム:</label>
+                    <input type="text" id="username-input" class="styled-input">
+                    <button id="change-username" class="styled-button">変更</button>
+                </div>
+                <div class="profile-item">
+                    <input type="file" id="profile-image-input" accept="image/*" class="styled-button">
+                    <button id="upload-profile-image" class="styled-button">画像をアップロード</button>
+                </div>
+            </div>
+
+
+            
+            <div id="privacy-settings" class="settings-page" style="display: none;">
+                <h2>アカウント/プライバシー設定</h2>
+                <div class="profile-item">
+                    <button id="signout-button" class="styled-button">サインアウト</button>
+                </div>
+                <!-- プライバシー設定の内容 -->
+            </div>
+
+
+            <div id="font" class="settings-page" style="display: none;">
+                <h2>フォント</h2>
+                <!-- フォント設定の内容 -->
+            </div>
+
+            <div id="app-icon" class="settings-page" style="display: none;">
+                <h2>アプリアイコン</h2>
+                <!-- アプリアイコンの内容 -->
+            </div>
+
+            <div id="notifications" class="settings-page" style="display: none;">
+                <h2>通知</h2>
+                <!-- 通知の内容 -->
+            </div>
+
+            <div id="photos-videos" class="settings-page" style="display: none;">
+                <h2>写真と動画</h2>
+                <!-- 写真と動画の内容 -->
+            </div>
+
+            <div id="talk-settings" class="settings-page" style="display: none;">
+                <h2>トーク</h2>
+                <!-- トーク設定の内容 -->
+            </div>
+
+            <div id="friends" class="settings-page" style="display: none;">
+                <h2>友達</h2>
+                <!-- 友達の内容 -->
+            </div>
+
+            <div id="terms" class="settings-page" style="display: none;">
+                <h2>利用規約</h2>
+                <!-- 利用規約の内容 -->
+            </div>
+
+            <div id="developer" class="settings-page" style="display: none;">
+                <h2>開発陣より</h2>
+                <!-- 開発陣よりの内容 -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="settings.js"></script>
+    <script src="../isLogined.js"></script>
+    <script src="../menuNavigation.js"></script>
+</body>
+</html>
