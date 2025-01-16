@@ -58,44 +58,86 @@ sendButton.addEventListener('click', async () => {
 });
 
 
-function loadMessages(chatId) {
-  if (!chatId) {
-    chatBox.innerHTML = '<p>チャットを選択してください。</p>';
-    return;
-  }
-  if (unsubscribeMessages) {
-    unsubscribeMessages();
-  }
-  selectedChatId = chatId;
-  const chatRef = doc(dbdev, `ChatGroup/${chatId}`);
-  
-  unsubscribeMessages = onSnapshot(chatRef, (doc) => {
-    if (!doc.exists()) {
-      chatBox.innerHTML = '<p>メッセージはまだありません。</p>';
-      return;
+
+
+
+
+async function loadMessages(chatId) {
+    if (!chatId) {
+        chatBox.innerHTML = '<p>チャットを選択してください。</p>';
+        return;
     }
-    const messages = doc.data().messages || [];
-    chatBox.innerHTML = messages.length === 0
-      ? '<p>メッセージはまだありません。</p>'
-      : messages.map((message, index) => {
-          const { timestamp, sender, message: messageText, messageId } = message;
+    if (unsubscribeMessages) {
+        unsubscribeMessages();
+    }
+    selectedChatId = chatId;
+    const chatRef = doc(dbdev, `ChatGroup/${chatId}`);
+    
+    unsubscribeMessages = onSnapshot(chatRef, async (docSnapshot) => {
+        if (!docSnapshot.exists()) {
+            chatBox.innerHTML = '<p>メッセージはまだありません。</p>';
+            return;
+        }
+        const messages = docSnapshot.data().messages || [];
+        if (messages.length === 0) {
+            chatBox.innerHTML = '<p>メッセージはまだありません。</p>';
+            return;
+        }
 
-          // 最後のメッセージIDをローカルストレージに保存
-          if (index === messages.length - 1) {
-            localStorage.setItem(`LastMessageId_${chatId}`, messageId);
-          }
+        let lastDate = '';
+        const messageHtmlArray = await Promise.all(messages.map(async (message, index) => {
+            const { timestamp, sender, message: messageText, messageId } = message;
 
-          return `<div class="message-item ${sender === username ? 'self' : 'other'}">
-            ${sender}: ${messageText}
-          </div>`;
-        }).join('');
-    chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
-  }, (error) => {
-    console.error('Error fetching messages: ', error);
-    alert('メッセージ取得中にエラーが発生しました: ' + error.message);
-  });
-  // 他のチャットに対するリスナーを設定
-  updateOtherChatListeners();
+            // 最後のメッセージIDをローカルストレージに保存
+            if (index === messages.length - 1) {
+                localStorage.setItem(`LastMessageId_${chatId}`, messageId);
+            }
+
+            // ユーザー名とアイコンの取得
+            let userName = 'Unknown';
+            let userIcon = 'default-icon.png';
+            if (sender !== myuserId) {
+                const userRef = doc(dbdev, 'users', sender);
+                const userDoc = await getDoc(userRef);
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    userName = userData.username || 'Unknown';
+                    userIcon = userData.profile_ico || 'default-icon.png';
+                }
+            }
+
+            // タイムスタンプをDateオブジェクトに変換
+            const messageTimestamp = new Date(timestamp);
+            const messageDate = messageTimestamp.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            // 日付が変わったら日付を中央に挿入
+            let dateDivider = '';
+            if (messageDate !== lastDate) {
+                lastDate = messageDate;
+                dateDivider = `<div class="date-divider"><span>${messageDate}</span></div>`;
+            }
+
+            // メッセージのHTMLを生成
+            return `
+                ${dateDivider}
+                <div class="message-item ${sender === myuserId ? 'self' : 'other'}">
+                    ${sender === myuserId ? '' : `<img class="icon" src="${userIcon}" alt="${userName}のアイコン">`}
+                    <div class="message-content">
+                        ${sender === myuserId ? '' : `<div class="username">${userName}</div>`}
+                        <div class="message-bubble">${messageText}</div>
+                    </div>
+                    <div class="timestamp">${messageTimestamp.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</div>
+                </div>`;
+        }));
+        
+        chatBox.innerHTML = messageHtmlArray.join('');
+        chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+    }, (error) => {
+        console.error('メッセージ取得中にエラーが発生しました: ', error);
+        alert('メッセージ取得中にエラーが発生しました: ' + error.message);
+    });
+    // 他のチャットに対するリスナーを設定
+    updateOtherChatListeners();
 }
 
 async function updateOtherChatListeners() {
