@@ -63,6 +63,7 @@ sendButton.addEventListener('click', async () => {
 
 
 async function loadMessages(chatId) {
+  let previousTimestamp = null;
     if (!chatId) {
         chatBox.innerHTML = '<p>チャットを選択してください。</p>';
         return;
@@ -118,16 +119,24 @@ async function loadMessages(chatId) {
             }
 
             // メッセージのHTMLを生成
-            return `
+            // 前のメッセージのタイムスタンプを記録するための変数
+            
+
+            const message_html = `
                 ${dateDivider}
                 <div class="message-item ${sender === myuserId ? 'self' : 'other'}">
-                    ${sender === myuserId ? '' : `<img class="icon" src="${userIcon}" alt="${userName}のアイコン">`}
-                    <div class="message-content">
-                        ${sender === myuserId ? '' : `<div class="username">${userName}</div>`}
+                    ${sender === myuserId || (previousTimestamp && (messageTimestamp - previousTimestamp <= 15 * 60 * 1000)) ? '' : `<img class="icon" src="${userIcon}" alt="${userName}のアイコン">`}
+                    <div class="message-content" style="${sender === myuserId || (previousTimestamp && (messageTimestamp - previousTimestamp <= 15 * 60 * 1000)) ? 'margin-top: 0;' : ''}">
+                        ${sender === myuserId || (previousTimestamp && (messageTimestamp - previousTimestamp <= 15 * 60 * 1000)) ? '' : `<div class="username">${userName}</div>`}
                         <div class="message-bubble">${messageText}</div>
                     </div>
                     <div class="timestamp">${messageTimestamp.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</div>
                 </div>`;
+
+            // 現在のメッセージのタイムスタンプを前のメッセージのタイムスタンプとして保存
+            previousTimestamp = messageTimestamp;
+          return message_html;
+
         }));
         
         chatBox.innerHTML = messageHtmlArray.join('');
