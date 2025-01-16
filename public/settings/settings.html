@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="../menu.css">
     <link rel="stylesheet" href="settings.css">
+  <link rel="stylesheet" href="../log.css">
     <script src="//cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
 </head>
@@ -85,8 +86,43 @@
 
             <div id="font" class="settings-page" style="display: none;">
                 <h2>フォント</h2>
-                <!-- フォント設定の内容 -->
+                <div class="font-item">
+                    <label for="font-select">フォントを選択:</label>
+                  <p>
+                    The quick brown fox jumps over the lazy dog. ,-1234567890 こんにちは世界！ABCDEFGHIJKLMNOPQRSTUVWXYZ &*#@!?。
+                  </p>
+                  <div class="select-container">
+                    <select id="font-select">
+                      <option value="Arial" style="font-family: Arial;">Arial</option>
+                      <option value="Verdana" style="font-family: Verdana;">Verdana</option>
+                      <option value="Tahoma" style="font-family: Tahoma;">Tahoma</option>
+                      <option value="メイリオ" style="font-family: 'メイリオ';">メイリオ</option>
+                      <option value="MS ゴシック" style="font-family: 'MS ゴシック';">MS ゴシック</option>
+                      <option value="MS 明朝" style="font-family: 'MS 明朝';">MS 明朝</option>
+                      <option value="Courier New" style="font-family: 'Courier New';">Courier New</option>
+                      <option value="Georgia" style="font-family: Georgia;">Georgia</option>
+                      <option value="Times New Roman" style="font-family: 'Times New Roman';">Times New Roman</option>
+                      <option value="Comic Sans MS" style="font-family: 'Comic Sans MS';">Comic Sans MS</option>
+                      <option value="Brush Script MT" style="font-family: 'Brush Script MT';">Brush Script MT</option>
+                      <option value="Lucida Handwriting" style="font-family: 'Lucida Handwriting';">Lucida Handwriting</option>
+                      <option value="Palatino Linotype" style="font-family: 'Palatino Linotype';">Palatino Linotype</option>
+                      <option value="Trebuchet MS" style="font-family: 'Trebuchet MS';">Trebuchet MS</option>
+                      <option value="Impact" style="font-family: Impact;">Impact</option>
+                      <option value="Consolas" style="font-family: Consolas;">Consolas</option>
+                      <option value="Garamond" style="font-family: Garamond;">Garamond</option>
+                      <option value="Arial Black" style="font-family: 'Arial Black';">Arial Black</option>
+                      <option value="Helvetica" style="font-family: Helvetica;">Helvetica</option>
+                      <option value="Gill Sans" style="font-family: 'Gill Sans';">Gill Sans</option>
+                      <option value="Yu Gothic" style="font-family: 'Yu Gothic';">Yu Gothic</option>
+                      <option value="Hiragino Kaku Gothic Pro" style="font-family: 'Hiragino Kaku Gothic Pro';">Hiragino Kaku Gothic Pro</option>
+                      <option value="Hiragino Mincho Pro" style="font-family: 'Hiragino Mincho Pro';">Hiragino Mincho Pro</option>
+                      <option value="Noto Sans JP" style="font-family: 'Noto Sans JP';">Noto Sans JP</option>
+                    </select>
+                    </div>
+                    <button id="change-font-button" class="styled-button">変更</button>
+                </div>
             </div>
+
 
             <div id="app-icon" class="settings-page" style="display: none;">
                 <h2>アプリアイコン</h2>
@@ -115,8 +151,10 @@
 
             <div id="terms" class="settings-page" style="display: none;">
                 <h2>利用規約</h2>
+                <iframe src="../policy/terms.html" frameborder="0" style="width: 100%; height: calc(100vh - 50px);"></iframe>
                 <!-- 利用規約の内容 -->
             </div>
+
 
             <div id="developer" class="settings-page" style="display: none;">
                 <h2>開発陣より</h2>
