@@ -35,7 +35,7 @@ sendButton.addEventListener('click', async () => {
     timestamp: timestamp,
     message: formattedMessage,
     messageId: messageId,
-    sender: username
+    sender: myuserId
   };
 
   try {
