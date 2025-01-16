@@ -4,7 +4,7 @@ import {
     collection, addDoc, serverTimestamp, query, reloadPage, orderBy, username, 
     setDoc, doc, getDoc, myuserId 
 } from '../firebase-setup.js';
-
+import {addLog} from '../log.js';
 function settings(){
   const settingsItems = document.querySelectorAll('.settings-item');
     const settingsPages = document.querySelectorAll('.settings-page');
@@ -67,7 +67,7 @@ function compressAndEncodeImage(file, width, height, callback) {
 function saveProfileImageToFirestore(base64Image) {
     setDoc(doc(dbdev, 'users', myuserId), { profile_ico: base64Image }, { merge: true })
         .then(() => {
-            alert('プロフィール画像が更新されました');
+            addLog('プロフィール画像が更新されました',"b");
             loadCurrentProfileImage(); // 更新後に再表示
         })
         .catch(error => {
@@ -92,14 +92,13 @@ document.addEventListener('DOMContentLoaded', () => {
   settings();
     change_username();
     signOut();
+  font();
 });
 
 
 function change_username(){
   const changeUsernameButton = document.getElementById('change-username');
     const usernameInput = document.getElementById('username-input');
-
-  // ユーザーネーム変更ボタンのクリックイベント
     changeUsernameButton.addEventListener('click', async () => {
         const newUsername = usernameInput.value.trim();
         if (!newUsername) {
@@ -129,7 +128,28 @@ function signOut(){
             // ローカルストレージをクリア
             localStorage.clear();
             // ログインページにリダイレクト
-            window.location.href = 'login.html'; // ログインページのURLに変更してください
+            window.location.href = '../login/login.html';
         }
     });
 }
+
+
+function font(){
+    const fontSelect = document.getElementById('font-select');
+    const changeFontButton = document.getElementById('change-font-button');
+    document.getElementById('font-select').addEventListener('change', function() {
+        var selectedFont = this.options[this.selectedIndex].style.fontFamily;
+        document.body.style.fontFamily = selectedFont;
+    });
+    // フォント変更ボタンのクリックイベント
+    changeFontButton.addEventListener('click', () => {
+        const selectedFont = fontSelect.value;
+        // ローカルストレージにフォントを保存
+        localStorage.setItem('font', selectedFont);
+        // メッセージのフォントを変更
+      addLog(`${selectedFont}に変更しました。`);
+        //document.getElementById('chat-box').style.fontFamily = selectedFont;
+    });
+  
+    
+};
