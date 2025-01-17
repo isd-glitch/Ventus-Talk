@@ -1,3 +1,4 @@
+/*
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.0/firebase-app.js";
 import { getFirestore,arrayUnion,updateDoc, collection, addDoc,getDocs,limit, startAfter,serverTimestamp, onSnapshot, query, orderBy,setDoc,doc ,getDoc} 
 from "https://www.gstatic.com/firebasejs/9.17.0/firebase-firestore.js";
@@ -18,15 +19,6 @@ const db2 = getFirestore(app2);
 const dbUsers = getFirestore(appUsers);
 const dbInfo = getFirestore(appInfo);
 // Firestoreのオフライン持続機能を有効にする
-/*
-enableIndexedDbPersistence(dbdev).catch((err) => {
-  if (err.code == 'failed-precondition') {
-    console.log('複数のタブが開かれているため、オフライン持続機能を有効にできません。');
-  } else if (err.code == 'unimplemented') {
-    console.log('このブラウザではオフライン持続機能がサポートされていません。');
-  }
-});
-*/
 
 // DOM要素の取得
 // ローカルストレージからユーザー名の取得
@@ -49,11 +41,22 @@ export {
     collection, addDoc,arrayUnion,updateDoc,reloadPage,serverTimestamp, limit,onSnapshot, query, orderBy, username ,getDocs,setDoc,doc,myuserId,getDoc
 };
 
+*/
 
 /*
+// Firestoreのオフライン持続機能を有効にする
+enableIndexedDbPersistence(dbdev).catch((err) => {
+  if (err.code == 'failed-precondition') {
+    console.log('複数のタブが開かれているため、オフライン持続機能を有効にできません。');
+  } else if (err.code == 'unimplemented') {
+    console.log('このブラウザではオフライン持続機能がサポートされていません。');
+  }
+});
+*/
+
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.0/firebase-app.js";
-import { getFirestore, initializeFirestore, startAfter, collection, addDoc, getDocs, limit, serverTimestamp, onSnapshot, query, orderBy, setDoc, doc, getDoc, enableIndexedDbPersistence, CACHE_SIZE_UNLIMITED } 
+import { getFirestore,arrayUnion,updateDoc, initializeFirestore, startAfter, collection, addDoc, getDocs, limit, serverTimestamp, onSnapshot, query, orderBy, setDoc, doc, getDoc, CACHE_SIZE_UNLIMITED } 
 from "https://www.gstatic.com/firebasejs/9.17.0/firebase-firestore.js";
 import { firebaseConfigDev, firebaseConfig1, firebaseConfig2, firebaseConfigUsers, firebaseConfigInfo } 
 from './firebase_keys.js';
@@ -71,26 +74,21 @@ const db1 = initializeFirestore(app1, { cacheSizeBytes: CACHE_SIZE_UNLIMITED });
 const db2 = initializeFirestore(app2, { cacheSizeBytes: CACHE_SIZE_UNLIMITED });
 const dbUsers = initializeFirestore(appUsers, { cacheSizeBytes: CACHE_SIZE_UNLIMITED });
 const dbInfo = initializeFirestore(appInfo, { cacheSizeBytes: CACHE_SIZE_UNLIMITED });
-
-// Firestoreのオフライン持続機能を有効にする
-enableIndexedDbPersistence(dbdev).catch((err) => {
-  if (err.code == 'failed-precondition') {
-    console.log('複数のタブが開かれているため、オフライン持続機能を有効にできません。');
-  } else if (err.code == 'unimplemented') {
-    console.log('このブラウザではオフライン持続機能がサポートされていません。');
-  }
-});
-
 // DOM要素の取得
 // ローカルストレージからユーザー名の取得
 const username = localStorage.getItem('username');
 const myuserId = localStorage.getItem('userID');
+function reloadPage() {
+  caches.keys().then(function(names) {
+    for (let name of names) caches.delete(name);
+  });
+  window.location.reload(true);
+}
 
 // 必要なものをエクスポート
 export { 
     appd, app1, app2, appUsers, appInfo,
-    dbdev, db1, db2, dbUsers, dbInfo, 
-    collection, addDoc, startAfter, serverTimestamp, limit, onSnapshot, query, orderBy, username, getDocs, setDoc, doc, myuserId, getDoc
+    dbdev, db1, db2, dbUsers, dbInfo, startAfter,
+    collection, addDoc,arrayUnion,updateDoc,reloadPage,serverTimestamp, limit,onSnapshot, query, orderBy, username ,getDocs,setDoc,doc,myuserId,getDoc
 };
 
-*/
