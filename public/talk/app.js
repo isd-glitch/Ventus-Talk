@@ -1,5 +1,5 @@
 import { 
-  dbdev, collection, doc,addDoc,arrayUnion,reloadPage,updateDoc, setDoc,serverTimestamp,startAfter,onSnapshot, limit,query, orderBy,getDocs,getDoc
+  dbdev, onMessage,collection,messaging,getToken, doc,addDoc,arrayUnion,reloadPage,updateDoc, setDoc,serverTimestamp,startAfter,onSnapshot, limit,query, orderBy,getDocs,getDoc
 } from '../firebase-setup.js';
 import {addLog} from '../log.js';
 const username = localStorage.getItem('username');
@@ -9,11 +9,42 @@ const chatBox = document.getElementById('chat-box');
 const chatInput = document.getElementById('chat-input');
 const sendButton = document.getElementById('send-button');
 let selectedChatId = null;
+/*
+console.log('notification auth');
+if (Notification.permission === "default") {
+  Notification.requestPermission().then(permission => {
+    if (permission === "granted") {
+      console.log("通知が許可されました");
+      saveuserToken();
+    } else {
+      console.log("通知が拒否されました");
+    }
+  });
+}
+*/
+
+onMessage(messaging, (payload) => {
+  console.log('フォアグラウンドメッセージ受信:', payload);
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
+    body: payload.notification.body,
+  };
+
+  // 特定のページを開いている場合のみ通知を表示しない
+  if (!document.location.href.includes('talk.html')) {
+    new Notification(notificationTitle, notificationOptions);
+  }
+});
 chatInput.addEventListener('keydown', function(event) {
   if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
     sendButton.click();
   }
 });
+
+
+
+
+
 
 let unsubscribeMessages = null; // 現在のチャットのスナップショットリスナーを解除するための関数
 let otherChatListeners = {}; // その他のチャットのスナップショットリスナーを保持するオブジェクト
@@ -126,11 +157,15 @@ async function loadMessages(chatId) {
             let username_html;
             let margin_style = '';
 
-            if (sender === myuserId || (previousTimestamp && (messageTimestamp - previousTimestamp <= 15 * 60 * 1000))) {
-                icon_html = '<img class="icon noicon" src="" alt="">'; // アイコンの余白のみ残す
+            if (sender === myuserId) {
+                icon_html = ''; // アイコンの余白のみ残す<img class="icon noicon" src="" alt="" style="border:none">
                 username_html = '';
                 margin_style = 'margin-top: 0;';
-            } else {
+            } else if (previousTimestamp && (messageTimestamp - previousTimestamp <= 15 * 60 * 1000)) {
+                icon_html = '<img class="icon noicon" alt="" style="border:none">'; // アイコンの余白のみ残す<img class="icon noicon" src="" alt="" style="border:none">
+                username_html = '';
+                margin_style = 'margin-top: 0;';
+            }else {
                 icon_html = `<img class="icon" src="${userIcon}" alt="${userName}のアイコン">`;
                 username_html = `<div class="username">${userName}</div>`;
             }
@@ -164,50 +199,36 @@ async function loadMessages(chatId) {
 async function updateOtherChatListeners() {
   console.log('update chat list');
   const userDocRef = doc(dbdev, 'users', myuserId);
-  
   try {
-    // タイムアウトを設定
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Firestore request timed out')), 8000)
     );
-
     const userDoc = await Promise.race([getDoc(userDocRef), timeoutPromise]);
-    console.log('res');  // デバッグ用ログ
-
     if (!userDoc.exists()) {
-      addLog('User document not found.',"error");
+      console.error('User document not found.');
       return;
     }
-
     const chatIdList = userDoc.data().chatIdList || [];
-
     if (chatIdList.length === 0) {
-      addLog('ChatIdListが空です。');
+      console.log('ChatIdListが空です。');
       return;
     }
 
-    // 現在のチャットを除外したその他のチャットに対してリスナーを設定
     chatIdList.forEach(({ chatId }) => {
-      console.log(chatId, 'chatgroup');  // デバッグ用ログ
-
       if (chatId !== selectedChatId && !otherChatListeners[chatId]) {
         const chatRef = doc(dbdev, `ChatGroup/${chatId}`);
-        
         otherChatListeners[chatId] = onSnapshot(chatRef, (doc) => {
-          console.log('onSnapshot called for chatId:', chatId);  // デバッグ用ログ
-
           if (doc.exists()) {
-            console.log('Document exists for chatId:', chatId);  // デバッグ用ログ
             const messages = doc.data().messages || [];
-
             if (messages.length > 0) {
-              const newMessage = messages[messages.length - 1]; // 最新のメッセージを取得
+              const newMessage = messages[messages.length - 1];
               const { messageId, sender, message: messageText } = newMessage;
               const lastSeenMessageId = localStorage.getItem(`LastMessageId_${chatId}`);
 
               if (messageId !== lastSeenMessageId && selectedChatId !== chatId) {
                 console.log(`New message in chat ${chatId}:`, messageText, `from ${sender}`);
-
+                localStorage.setItem(`LastMessageId_${chatId}`, messageId);
+                
                 const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
                 if (chatItem && !chatItem.classList.contains('new-message')) {
                   chatItem.classList.add('new-message');
@@ -216,10 +237,36 @@ async function updateOtherChatListeners() {
                   newMark.textContent = 'New!';
                   chatItem.appendChild(newMark);
                 }
+                /*
+                // Push通知を表示
+                if (Notification.permission === 'granted') {
+                  navigator.serviceWorker.ready.then((registration) => {
+                    registration.showNotification(`新規メッセージ - ${sender}`, {
+                      body: messageText,
+                      icon: '/path/to/icon.png', // 通知アイコン
+                      tag: `chat-${chatId}`, // 同一チャットの通知をまとめる
+                      data: { chatId },
+                    });
+                  });
+                } else if (Notification.permission !== 'denied') {
+                  // ユーザーに通知の許可をリクエスト
+                  
+                  Notification.requestPermission().then((permission) => {
+                    if (permission === 'granted') {
+                      navigator.serviceWorker.ready.then((registration) => {
+                        registration.showNotification(`新規メッセージ - ${sender}`, {
+                          body: messageText,
+                          icon: '/path/to/icon.png',
+                          tag: `chat-${chatId}`,
+                          data: { chatId },
+                        });
+                      });
+                    }
+                  });
+                }
+                */
               }
             }
-          } else {
-            console.log('No document exists for chatId:', chatId);  // デバッグ用ログ
           }
         }, (error) => {
           console.error(`Error fetching messages for chat ${chatId}:`, error);
@@ -229,7 +276,6 @@ async function updateOtherChatListeners() {
   } catch (error) {
     console.error('Error updating chat list:', error);
     alert('エラーが発生しました。再試行してください: ' + error.message);
-    reloadPage();
   }
 }
 
@@ -273,9 +319,23 @@ async function updateChatList() {
     }
     // debug: chatIdListの内容を確認
     console.log('chatIdList:', chatIdList);
-    const chatItems = chatIdList.map(({ chatId, pinned, serverId }) => ({ chatId, pinned, serverId }));
-    // debug: chatItemsの内容を確認
+    console.log('chatIdList:', chatIdList);
+    const chatItems = chatIdList.map(({ chatId, pinned, serverId, timestamp }) => ({ chatId, pinned, serverId, timestamp }));
+
+    // ソート: pinnedがtrueなら優先、その後timestampで新しい順に並び替え
+    chatItems.sort((a, b) => {
+      if (a.pinned && !b.pinned) {
+        return -1;
+      } else if (!a.pinned && b.pinned) {
+        return 1;
+      } else {
+        return b.timestamp - a.timestamp;
+      }
+    });
+
+    // debug: 並び替えたchatItemsの内容を確認
     console.log('chatItems:', chatItems);
+
     // チャットリストの表示更新
     chatList.innerHTML = chatItems.map(({ chatId }) => `
       <div class="chat-item" data-chat-id="${chatId}">
@@ -285,6 +345,7 @@ async function updateChatList() {
         </div>
       </div>
     `).join('');
+
 
     addEventListenersToChatItems();
 
@@ -347,6 +408,7 @@ closeButton.addEventListener('click', () => {
 });
 
 window.onload = async () => {
+  await saveuserToken();
   await updateChatList();
   const createGroupButton = document.getElementById('create-group-button');
   createGroupButton.addEventListener('click', createGroup);
@@ -450,3 +512,52 @@ async function createGroup() {
   selectedFriendsContainer.innerHTML = '';
   document.getElementById('create-group-window').classList.toggle('visible');
 }
+
+
+
+
+async function saveuserToken() {
+  try {
+    const token = await getToken(messaging, { vapidKey: 'BKUDfUUeYgn8uWaWW1_d94Xyt03iBIHoLvyu1MNGPPrc72J2m5E3ckzxLqwHrsCQ9uJ5m-VhuHEjxquWqyKzTGE' });
+    console.log(token);
+    if (token) {
+      await setDoc(doc(dbdev, 'users', myuserId), { token }, { merge: true });
+      console.log('通知トークンが保存されました:', token);
+    } else {
+      console.warn('通知トークンを取得できませんでした');
+    }
+  } catch (error) {
+    console.error('通知トークン保存中にエラーが発生しました:', error);
+  }
+}
+
+
+function goOffline() {
+  setTimeout(async () => {
+    await setDoc(doc(dbdev, 'users', myuserId), { status: 'offline' }, { merge: true });
+    console.log('オフライン状態をFirestoreに書き込みました');
+  }, 3000); // 3秒の遅延
+}
+
+// オンライン状態の書き込み関数
+function goOnline() {
+  (async () => {
+    await setDoc(doc(dbdev, 'users', myuserId), { status: 'online' }, { merge: true });
+    console.log('オンライン状態をFirestoreに書き込みました');
+  })();
+}
+
+// visibilitychangeイベントのリスナーを設定
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    goOffline();
+  } else if (document.visibilityState === 'visible') {
+    goOnline();
+  }
+});
+
+// 初期ロード時にオンライン状態を設定
+document.addEventListener('DOMContentLoaded', goOnline);
+
+// ウィンドウが閉じられる前にオフライン状態を設定
+window.addEventListener('beforeunload', goOffline);
