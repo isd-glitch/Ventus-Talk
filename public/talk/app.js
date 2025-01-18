@@ -75,8 +75,14 @@ sendButton.addEventListener('click', async () => {
     const chatDoc = await getDoc(chatRef);
 
     if (chatDoc.exists()) {
-      const messages = chatDoc.data().messages || [];
+      let messages = chatDoc.data().messages || [];
       messages.push(newMessage);
+
+      // メッセージの数が100を超えた場合、古いメッセージを削除する
+      if (messages.length > 100) {
+        messages = messages.slice(-100);
+      }
+
       await setDoc(chatRef, { messages }, { merge: true });
     } else {
       await setDoc(chatRef, { messages: [newMessage] });
@@ -91,6 +97,11 @@ sendButton.addEventListener('click', async () => {
 });
 
 
+// `marked`ライブラリの読み込み（事前にインストールが必要）
+
+
+
+
 
 
 
@@ -100,12 +111,9 @@ async function loadMessages(chatId) {
         chatBox.innerHTML = '<p>チャットを選択してください。</p>';
         return;
     }
-    if (unsubscribeMessages) {
-        unsubscribeMessages();
-    }
+    if (unsubscribeMessages) {unsubscribeMessages();}
     selectedChatId = chatId;
     const chatRef = doc(dbdev, `ChatGroup/${chatId}`);
-    
     unsubscribeMessages = onSnapshot(chatRef, async (docSnapshot) => {
         if (!docSnapshot.exists()) {
             chatBox.innerHTML = '<p>メッセージはまだありません。</p>';
@@ -116,17 +124,12 @@ async function loadMessages(chatId) {
             chatBox.innerHTML = '<p>メッセージはまだありません。</p>';
             return;
         }
-
         let lastDate = '';
         const messageHtmlArray = await Promise.all(messages.map(async (message, index) => {
             const { timestamp, sender, message: messageText, messageId } = message;
-
-            // 最後のメッセージIDをローカルストレージに保存
             if (index === messages.length - 1) {
                 localStorage.setItem(`LastMessageId_${chatId}`, messageId);
             }
-
-            // ユーザー名とアイコンの取得
             let userName = 'Unknown';
             let userIcon = 'default-icon.png';
             if (sender !== myuserId) {
@@ -138,62 +141,97 @@ async function loadMessages(chatId) {
                     userIcon = userData.profile_ico || 'default-icon.png';
                 }
             }
-
-            // タイムスタンプをDateオブジェクトに変換
             const messageTimestamp = new Date(timestamp);
             const messageDate = messageTimestamp.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
-
-            // 日付が変わったら日付を中央に挿入
             let dateDivider = '';
             if (messageDate !== lastDate) {
                 lastDate = messageDate;
                 dateDivider = `<div class="date-divider"><span>${messageDate}</span></div>`;
             }
-
-            // メッセージのHTMLを生成
-            // 前のメッセージのタイムスタンプを記録するための変数
             let previousTimestamp = null;
             let icon_html;
             let username_html;
             let margin_style = '';
-
             if (sender === myuserId) {
-                icon_html = ''; // アイコンの余白のみ残す<img class="icon noicon" src="" alt="" style="border:none">
+                icon_html = '';
                 username_html = '';
                 margin_style = 'margin-top: 0;';
             } else if (previousTimestamp && (messageTimestamp - previousTimestamp <= 15 * 60 * 1000)) {
-                icon_html = '<img class="icon noicon" alt="" style="border:none">'; // アイコンの余白のみ残す<img class="icon noicon" src="" alt="" style="border:none">
+                icon_html = '<img class="icon noicon" alt="" style="border:none">';
                 username_html = '';
                 margin_style = 'margin-top: 0;';
-            }else {
+            } else {
                 icon_html = `<img class="icon" src="${userIcon}" alt="${userName}のアイコン">`;
                 username_html = `<div class="username">${userName}</div>`;
             }
-
+            const escapedMessageText = escapeHtml(messageText);
+            const linkedMessageText = linkify(escapedMessageText);
             const message_html = `
                 ${dateDivider}
                 <div class="message-item ${sender === myuserId ? 'self' : 'other'}">
                     ${icon_html}
                     <div class="message-content" style="${margin_style}">
                         ${username_html}
-                        <div class="message-bubble">${messageText}</div>
+                        <div class="message-bubble">${linkedMessageText}</div>
                     </div>
                     <div class="timestamp">${messageTimestamp.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</div>
                 </div>`;
-            // 現在のメッセージのタイムスタンプを前のメッセージのタイムスタンプとして保存
-            previousTimestamp = messageTimestamp;
-          return message_html;
+            
+            const youtubeEmbed = extractYoutubeEmbedUrl(linkedMessageText);
+            if (youtubeEmbed) {
+                return message_html + `<div class="youtube-embed"><iframe width="560" height="315" src="${youtubeEmbed}" frameborder="0" allowfullscreen></iframe></div>`;
+            } else {
+                return message_html;
+            }
 
+            previousTimestamp = messageTimestamp;
         }));
-        
         chatBox.innerHTML = messageHtmlArray.join('');
         chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
     }, (error) => {
         console.error('メッセージ取得中にエラーが発生しました: ', error);
-        alert('メッセージ取得中にエラーが発生しました: ' + error.message);
+        addLog(`メッセージ取得中にエラーが発生しました:${error.message}`,"error");
     });
-    // 他のチャットに対するリスナーを設定
     updateOtherChatListeners();
+}
+
+function escapeHtml(text) {
+    return text.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function linkify(text) {
+    const urlPattern = /((https?|ftp):\/\/[^\s/$.?#].[^\s]*)/g;
+    return text.replace(urlPattern, (match) => {
+        const decodedUrl = decodeURIComponent(match);
+        let modifiedUrl = decodedUrl;
+        if (decodedUrl.includes('youtube.com') || decodedUrl.includes('youtu.be')) {
+            modifiedUrl = extractYoutubeEmbedUrl(decodedUrl);
+        }
+        if (!decodedUrl.includes('youtube.com') && !decodedUrl.includes('youtu.be')) {
+            return `<a href="${modifiedUrl}" target="_blank">${splitLongUrl(modifiedUrl)}</a><br><br><br><a href="https://edu-open-4step.glitch.me." target="_blank">規制回避用url</a><br>`;
+        } else {
+            return `<a href="${modifiedUrl}" target="_blank">${splitLongUrl(modifiedUrl)}</a>`;
+        }
+    });
+}
+
+function splitLongUrl(url, maxLength = 30) {
+    const parts = url.match(new RegExp('.{1,' + maxLength + '}', 'g'));
+    return parts.join('<wbr>'); // <wbr>タグを使用して適切な位置で改行
+}
+
+// YouTubeの埋め込みリンクを抽出する関数
+function extractYoutubeEmbedUrl(text) {
+    const youtubePattern = /https?:\/\/(www\.)?(youtube-nocookie\.com|youtube\.com|youtu\.be)\/(watch\?v=|embed\/)?([^\s&]+)/;
+    const match = text.match(youtubePattern);
+    if (match) {
+        return `https://www.youtube-nocookie.com/embed/${match[4]}`;
+    }
+    return null;
 }
 
 async function updateOtherChatListeners() {
@@ -518,11 +556,23 @@ async function createGroup() {
 
 async function saveuserToken() {
   try {
+    // 現在の日付を取得
+    const currentDate = new Date();
+    // ローカルストレージから前回の更新日を取得
+    const lastUpdate = localStorage.getItem('TokenLastUpdate');
+    // 前回の更新日が存在し、かつ1ヶ月以内なら更新しない
+    if (lastUpdate && (currentDate - new Date(lastUpdate)) <= 30 * 24 * 60 * 60 * 1000) {
+      console.log('トークンはまだ有効です。更新は不要です。');
+      return;
+    }
+
     const token = await getToken(messaging, { vapidKey: 'BKUDfUUeYgn8uWaWW1_d94Xyt03iBIHoLvyu1MNGPPrc72J2m5E3ckzxLqwHrsCQ9uJ5m-VhuHEjxquWqyKzTGE' });
     console.log(token);
     if (token) {
       await setDoc(doc(dbdev, 'users', myuserId), { token }, { merge: true });
       console.log('通知トークンが保存されました:', token);
+      // ローカルストレージに現在の日付を保存
+      localStorage.setItem('TokenLastUpdate', currentDate.toISOString());
     } else {
       console.warn('通知トークンを取得できませんでした');
     }
@@ -531,6 +581,8 @@ async function saveuserToken() {
   }
 }
 
+
+/*
 
 function goOffline() {
   setTimeout(async () => {
@@ -561,3 +613,4 @@ document.addEventListener('DOMContentLoaded', goOnline);
 
 // ウィンドウが閉じられる前にオフライン状態を設定
 window.addEventListener('beforeunload', goOffline);
+*/
