@@ -1,8 +1,8 @@
 import { 
-    appd, app1, app2, appUsers, appInfo, 
-    dbdev, db1, db2, dbUsers, dbInfo, 
-    collection, addDoc, serverTimestamp, query, reloadPage, orderBy, username, 
-    setDoc, doc, getDoc, myuserId 
+    appd, app1, app2, appUsers, appInfo, getToken,
+    dbdev, db1, db2, dbUsers, dbInfo, updateDoc,messaging,
+    addDoc, serverTimestamp, query, reloadPage, orderBy, username, 
+    setDoc, doc, getDoc, myuserId
 } from '../firebase-setup.js';
 import {addLog} from '../log.js';
 function settings(){
@@ -90,9 +90,10 @@ function loadCurrentProfileImage() {
 
 document.addEventListener('DOMContentLoaded', () => {
   settings();
-    change_username();
-    signOut();
+  change_username();
+  signOut();
   font();
+  notification_auth();
 });
 
 
@@ -117,6 +118,44 @@ function change_username(){
         }
     });
 }
+
+
+
+function notification_auth() {
+  const notification = document.getElementById('notification');
+  notification.addEventListener('click', () => {
+    console.log('notification auth');
+    if (Notification.permission === "default") {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          console.log("通知が許可されました");
+          saveuserToken();
+        } else {
+          console.log("通知が拒否されました");
+        }
+      });
+    }
+  });
+}
+
+async function saveuserToken() {
+  try {
+    const token = await getToken(messaging, { vapidKey: 'BKUDfUUeYgn8uWaWW1_d94Xyt03iBIHoLvyu1MNGPPrc72J2m5E3ckzxLqwHrsCQ9uJ5m-VhuHEjxquWqyKzTGE' });
+    console.log(token);
+    if (token) {
+      await setDoc(doc(dbdev, 'users', myuserId), { token }, { merge: true });
+      addLog('通知トークンが保存されました:', "info");
+    } else {
+      console.warn('通知トークンを取得できませんでした');
+    }
+  } catch (error) {
+    console.error('通知トークン保存中にエラーが発生しました:', error);
+  }
+}
+
+// ページが読み込まれた際の初期化
+//document.addEventListener('DOMContentLoaded', notification_auth);
+
 
 function signOut(){
   const signoutButton = document.getElementById('signout-button');
