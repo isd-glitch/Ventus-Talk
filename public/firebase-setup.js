@@ -53,7 +53,7 @@ enableIndexedDbPersistence(dbdev).catch((err) => {
   }
 });
 */
-
+import { getMessaging,onMessage, getToken } from "https://www.gstatic.com/firebasejs/9.17.0/firebase-messaging.js";
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.0/firebase-app.js";
 import { getFirestore,arrayUnion,updateDoc, initializeFirestore, startAfter, collection, addDoc, getDocs, limit, serverTimestamp, onSnapshot, query, orderBy, setDoc, doc, getDoc, CACHE_SIZE_UNLIMITED } 
@@ -69,11 +69,14 @@ const appUsers = initializeApp(firebaseConfigUsers, "appUsers");
 const appInfo = initializeApp(firebaseConfigInfo, "appInfo");
 
 // 各Firestoreインスタンスを取得し、キャッシュの設定を適用
+// 各Firestoreインスタンスを取得し、キャッシュの設定を適用
 const dbdev = initializeFirestore(appd, { cacheSizeBytes: CACHE_SIZE_UNLIMITED });
 const db1 = initializeFirestore(app1, { cacheSizeBytes: CACHE_SIZE_UNLIMITED });
 const db2 = initializeFirestore(app2, { cacheSizeBytes: CACHE_SIZE_UNLIMITED });
 const dbUsers = initializeFirestore(appUsers, { cacheSizeBytes: CACHE_SIZE_UNLIMITED });
 const dbInfo = initializeFirestore(appInfo, { cacheSizeBytes: CACHE_SIZE_UNLIMITED });
+
+const messaging = getMessaging(appd);  // 変更
 // DOM要素の取得
 // ローカルストレージからユーザー名の取得
 const username = localStorage.getItem('username');
@@ -87,8 +90,8 @@ function reloadPage() {
 
 // 必要なものをエクスポート
 export { 
-    appd, app1, app2, appUsers, appInfo,
-    dbdev, db1, db2, dbUsers, dbInfo, startAfter,
+    appd, app1, app2, appUsers, appInfo,getToken,onMessage,
+    dbdev, db1, db2, dbUsers, dbInfo, startAfter,messaging,
     collection, addDoc,arrayUnion,updateDoc,reloadPage,serverTimestamp, limit,onSnapshot, query, orderBy, username ,getDocs,setDoc,doc,myuserId,getDoc
 };
 
