@@ -31,6 +31,7 @@
   "start_url": "/loading.html",
   "background_color": "#ffffff",
   "display": "standalone",
+  "gcm_sender_id":"103953800507",
   "theme_color": "#000000",
   "scope": "/",
   "description": "Ventus-Talkはリアルタイムチャットアプリケーションです。",
