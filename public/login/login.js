@@ -1,44 +1,80 @@
 import { 
     appd, app1, app2, appUsers, appInfo, 
-    dbdev, db1, db2, dbUsers, dbInfo, 
-    collection, addDoc, serverTimestamp, query, orderBy, username, doc, setDoc, getDoc
+    dbdev, db1, db2, dbUsers, dbInfo,collection, addDoc, serverTimestamp, query, orderBy, username, doc, setDoc, getDoc
 } from '../firebase-setup.js';
-
+import {addLog} from '../log.js';
 const usernameInput = document.getElementById('username');
 const usernameCheck = document.getElementById('username-check');
 const loadingSpinner = document.getElementById('loading-spinner');
 const submitButton = document.getElementById('submit-button');
 const termsCheckbox = document.getElementById('terms-checkbox');
 let usernameTimeout;
+if (username) {
+    window.location.href = '../talk/index.html';
+}
+
+
 
 // Function to check username availability
 async function checkUsernameAvailability() {
-    const username = usernameInput.value;
-    if (username === '') {
-        usernameCheck.textContent = '';
-        submitButton.className = 'disabled';
-        submitButton.disabled = true;
-        return;
-    }
+  const username = usernameInput.value;
 
-    const usernameDoc = await getDoc(doc(dbdev, 'users', username));
+  // 日本語（ひらがな、カタカナ、漢字）・英数字のみを許可する正規表現
+  const validUsernamePattern = /^[\u3040-\u30FF\u4E00-\u9FFFa-zA-Z0-9]+$/;
+  if (!validUsernamePattern.test(username)) {
+    usernameCheck.textContent = 'ユーザーネームは日本語（ひらがな、カタカナ、漢字）・英数字のみ使用できます。';
+    submitButton.className = 'disabled';
+    submitButton.disabled = true;
+    return;
+  }
+
+  // ユーザーネームが空の場合のチェック
+  if (username === '') {
+    usernameCheck.textContent = '';
+    submitButton.className = 'disabled';
+    submitButton.disabled = true;
+    return;
+  }
+
+
+  try {
+    console.log('req'); // ここでログを追加
+    loadingSpinner.style.display = 'block';
+
+    const usernameDocRef = doc(dbdev, 'users', username);
+
+    // タイムアウトを設定
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Firestore request timed out')), 8000)
+    );
+
+    const usernameDoc = await Promise.race([getDoc(usernameDocRef), timeoutPromise]);
+
+    console.log('res'); // ここでログを追加
     loadingSpinner.style.display = 'none';
 
     if (usernameDoc.exists()) {
-        usernameCheck.className = 'username-check-error';
-        usernameCheck.textContent = '！重複しています';
-        submitButton.className = 'disabled';
-        submitButton.disabled = true;
+      usernameCheck.className = 'username-check-error';
+      usernameCheck.textContent = '！重複しています';
+      submitButton.className = 'disabled';
+      submitButton.disabled = true;
     } else {
-        usernameCheck.className = 'username-check-available';
-        usernameCheck.textContent = 'Available';
-        if (termsCheckbox.checked) {
-            submitButton.className = 'enabled';
-            submitButton.disabled = false;
-        }
+      usernameCheck.className = 'username-check-available';
+      usernameCheck.textContent = 'Available';
+      if (termsCheckbox.checked) {
+        submitButton.className = 'enabled';
+        submitButton.disabled = false;
+      }
     }
+  } catch (error) {
+    loadingSpinner.style.display = 'none';
+    console.error('Error checking username availability:', error);
+    usernameCheck.className = 'username-check-error';
+    usernameCheck.textContent = 'エラーが発生しました。再試行してください。';
+    submitButton.className = 'disabled';
+    submitButton.disabled = true;
+  }
 }
-
 // Show loading spinner immediately and check username after 2 seconds of inactivity
 usernameInput.addEventListener('input', () => {
     clearTimeout(usernameTimeout);
@@ -68,17 +104,22 @@ termsCheckbox.addEventListener('change', () => {
 // サインイン関数の追加
 document.getElementById('login-form').addEventListener('submit', async function(event) {
     event.preventDefault();
+  localStorage.clear();
+  addLog('サインイン');
     const userId = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
+    const hash_psw = await hash(password);
 
     try {
         const userDoc = await getDoc(doc(dbdev, 'users', userId));
         if (userDoc.exists()) {
             const userData = userDoc.data();
-            if (userData.password === password) {
-              localStorage.setItem('username', userData.username);
-              localStorage.setItem('password', password);
-              localStorage.setItem('userID', userId);
+            if (userData.password === hash_psw) {
+              await localStorage.setItem('username', userData.username);
+              await localStorage.setItem('password', hash_psw);
+              await localStorage.setItem('userID', userId);
+              console.log('open');
+              
               window.location.href = '../talk/index.html';
             } else {
                 alert('ユーザーIDまたはパスワードが違います。');
@@ -98,16 +139,17 @@ document.getElementById('register-form').addEventListener('submit', async functi
     const password = document.getElementById('password').value;
 
     // パスワードのハッシュ化
-    const hashedPassword = password; //CryptoJS.SHA256(password).toString();
+    const hashedPassword = await hash(password);
     const userId = username;
+  localStorage.clear();
     // ローカルストレージにログイン情報を保存
-    localStorage.setItem('username', username);
-    localStorage.setItem('password', hashedPassword);
-    localStorage.setItem('userID', userId);
+    await localStorage.setItem('username', username);
+    await localStorage.setItem('password', hashedPassword);
+    await localStorage.setItem('userID', userId);
     // ユーザー情報をFirestoreに保存
     
     try {
-        await setDoc(doc(dbdev, 'users', userId), {
+        await setDoc(doc(dbdev, 'users', userId), { 
             username: username,
             password: hashedPassword,
             timestamp: serverTimestamp()
@@ -164,3 +206,28 @@ showRegisterText.addEventListener('click', () => {
 });
 
 
+async function hash(password) {
+    if (!password) {
+        alert('パスワードを入力してください');
+        return;
+    }
+
+    try {
+        // SHA-256を使ってパスワードをハッシュ化
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+
+        // ハッシュ値を16進数に変換して返す
+        const hashedPassword = Array.from(new Uint8Array(hashBuffer))
+            .map(byte => byte.toString(16).padStart(2, '0'))
+            .join('');
+
+        console.log(hashedPassword);
+        return hashedPassword;  // 毎回同じパスワードなら同じ結果を返す
+    } catch (error) {
+        console.error('エラー:', error);
+      addLog(`${error}`)
+        alert('エラーが発生しました');
+    }
+}
