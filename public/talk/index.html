@@ -7,7 +7,8 @@
     <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="../menu.css">
-  <link rel="stylesheet" href="group_window.css">
+    <link rel="stylesheet" href="group_window.css">
+    <link rel="stylesheet" href="../log.css">
     <script src="//cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();console.log('eruda-index')</script>
 </head>
@@ -19,7 +20,10 @@
                 <div id="username">ユーザー名</div>
                 <!--<button onclick="">更新</button>-->
                 <div id="status">トークグループを作る</div>
-            </div>
+              <button id="testButton">
+                テストボタン
+              </button>
+          </div>
           
 <div id="chat-list">
     <div class="chat-item" data-chat-id="XXXXXXXXXX">
@@ -47,15 +51,24 @@
         </div>
         <div id="right-panel">
             <div id="menu-bar-top">
-                <!-- メニューバーの内容をここに追加 -->
-                <button id="menu-button">Menu</button>
+                <span id="chat-group-name">Chat Group Name</span>
+                <button id="menu-button">≡</button>
             </div>
             <div id="chat-box">
-              <img id="logo" src="ロゴ画像のURL" alt="ロゴ" style="width: 100%; height: auto;">
+                <img id="logo" src="ロゴ画像のURL" alt="ロゴ">
             </div>
             <div id="tool-bar">
                 <textarea id="chat-input" placeholder="Type a message..." required></textarea>
                 <button id="send-button">Send</button>
+            </div>
+            <div id="chat-menu" class="hidden">
+                <button id="close-menu-button">＜</button>
+                <ul>
+                    <li>プロフィール設定</li>
+                    <li>通知設定</li>
+                    <li>チャット履歴</li>
+                    <li>その他の設定</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -83,6 +96,7 @@
 
     <script type="module" src="./app.js"></script>
     <script src="../isLogined.js"></script>
+    <script src="./decorate.js"></script>
     <script src="../menuNavigation.js"></script>
     <script>
     // Adjust textarea height automatically
@@ -102,16 +116,47 @@ chatInput.addEventListener('input', function() {
         chatInput.style.overflowY = 'hidden'; // Hide scroll otherwise
     }
 });
+document.getElementById('testButton').addEventListener('click', () => {
+  console.log('test');
+  if ('serviceWorker' in navigator && 'PushManager' in window) {
+    navigator.serviceWorker.ready.then(registration => {
+      registration.showNotification('テスト通知', {
+        body: 'これはテスト通知です。',
+        icon: 'icon.png',
+        badge: 'badge.png'
+      });
+    });
+  }
+});
+      
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('../service-worker.js')
-            .then(registration => {
-                console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            })
-            .catch(error => {
-                console.log('ServiceWorker registration failed: ', error);
-            });
-    }
+      navigator.serviceWorker.ready.then((registration) => {
+        // ページが開かれたことを通知
+        registration.active.postMessage({ type: 'PAGE_STATUS', status: 'open' });
 
+        window.addEventListener('beforeunload', () => {
+          // ページが閉じられる前に通知
+          registration.active.postMessage({ type: 'PAGE_STATUS', status: 'closed' });
+        });
+      });
+    }
+  /*
+      if ('serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .register('../firebase-messaging-sw.js')
+    .then((registration) => {
+      console.log('Service Worker registered with scope:', registration.scope);
+    })
+    .catch((error) => {
+      console.error('Service Worker registration failed:', error);
+    });
+}
+*/
+  
+/*
+if ('Notification' in window && 'serviceWorker' in navigator) {
+  Notification.requestPermission(status => {console.log('Notification permission status:', status);});
+};*/
     </script>
 </body>
 </html>
