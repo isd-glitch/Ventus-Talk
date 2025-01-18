@@ -60,47 +60,7 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Push通知の受信
-self.addEventListener('push', event => {
-  console.log('Push event received:', event);
-
-  // ペイロードの取得
-  const data = event.data ? event.data.json() : {};
-  const title = data.title || '新規メッセージ';
-  const body = data.body || 'メッセージがあります。';
-  const icon = data.icon || '/default-icon.png';
-  const url = data.url || '/';
-
-  // 通知を表示
-  event.waitUntil(
-    self.registration.showNotification(title, {
-      body: body,
-      icon: icon,
-      data: { url: url },
-      tag: data.tag || 'general-notification',
-    })
-  );
-});
-
-// 通知クリック時の処理
-// 通知クリック時の処理
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  const targetUrl = event.notification.data.url || '/';
-
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      for (let client of clientList) {
-        if (client.url === targetUrl && 'focus' in client) {
-          return client.focus();
-        }
-      }
-      if (self.clients.openWindow) {
-        return self.clients.openWindow(targetUrl);
-      }
-    })
-  );
-});/*
+/*
 
 
 self.addEventListener('fetch', event => {
