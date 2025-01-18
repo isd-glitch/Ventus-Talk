@@ -1,0 +1,37 @@
+/* log.css */
+#log-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 350px; /* 幅を少し大きく */
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 10000; /* 最前面に表示 */
+    pointer-events: none; /* 他の要素と干渉しないようにする */
+}
+
+.log-item {
+    background-color: rgba(0, 0, 0, 0.8); /* デフォルトの背景色 */
+    color: white;
+    padding: 15px; /* パディングを大きく */
+    margin-bottom: 10px;
+    border-radius: 25px; /* カプセル型の背景 */
+    font-family: Arial, sans-serif;
+    font-size: 16px; /* フォントサイズを大きく */
+    opacity: 1;
+    transition: opacity 0.5s;
+}
+
+/* タイプに応じたスタイル */
+.log-item.error {
+    background-color: rgba(255, 0, 0, 0.8); /* エラーの場合の背景色 */
+}
+
+.log-item.success {
+    background-color: rgba(0, 255, 0, 0.8); /* 成功の場合の背景色 */
+  color: black;
+}
+
+.log-item.info {
+    background-color: rgba(0, 0, 255, 0.8); /* 情報の場合の背景色 */
+}
