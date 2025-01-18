@@ -4,26 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loading</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="stylesheet" href="./style.css">
+  <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();console.log('eruda-index')</script>
+  <script>
+    if ('serviceWorker' in navigator) {
+  // 最初のサービスワーカー登録
+  navigator.serviceWorker
+    .register('/service-worker.js')
+    .then(reg => { // 別の名前を使用（例: reg）
+      console.log('ServiceWorker registration successful with scope:', reg.scope);
+    })
+    .catch(error => {
+      console.log('ServiceWorker registration failed:', error);
+    });
+}
+  </script>
 </head>
 <body>
     <div id="loading-container">
         <h2>ロード中...</h2>
     </div>
-
+  
     <script>
-        // ログイン情報のチェック
-        const username = localStorage.getItem('username');
-        const password = localStorage.getItem('password');
 
-        if (username && password) {
-            // ログイン情報がある場合はトークページへリダイレクト
-           window.location.href = './talk/index.html';
-         // window.location.href = './login/login.html';
-        } else {
-            // ログイン情報がない場合はログインページへリダイレクト
-            window.location.href = './login/login.html';
-        }
+const userId = localStorage.getItem('userID');
+const password = localStorage.getItem('password');
+
+if (userId && password) {
+  window.location.href = './talk/index.html';
+  //window.location.href = './login/login.html';
+} else {
+  // ログイン情報がない場合はログインページへリダイレクト
+  window.location.href = './login/login.html';
+}
+
     </script>
+  
+  <script type="module">
+    /*
+    import { 
+    appd, app1, app2, appUsers, appInfo, getToken,
+    dbdev, db1, db2, dbUsers, dbInfo, updateDoc,messaging,
+    addDoc, serverTimestamp, query, reloadPage, orderBy, username, 
+    setDoc, doc, getDoc, myuserId
+} from '/firebase-setup.js';
+
+  const btn = document.getElementById('notice');
+  btn.addEventListener("click", function() {
+            //let promise = Notification.requestPermission();
+            //console.log("promise: ",promise);
+            if (!("Notification" in window)) {
+                // ブラウザーが通知に対応しているか調べる
+                alert("このブラウザーはデスクトップ通知には対応していません。");
+            } else if (Notification.permission !== "denied") {
+
+            //if(Notification.permission !== "denied") {
+                Notification.requestPermission().then((permission) => {
+                    const messaging = getMessaging();
+                    // Add the public key generated from the console here.
+                    getToken(messaging, {vapidKey: "BKUDfUUeYgn8uWaWW1_d94Xyt03iBIHoLvyu1MNGPPrc72J2m5E3ckzxLqwHrsCQ9uJ5m-VhuHEjxquWqyKzTGE"})
+                        .then((token) => {
+                            if (token) {
+                                // tokenを出力
+                                await setDoc(doc(dbdev, 'users', "qw"), { token }, { merge: true });
+                                //document.getElementById('output').textContent = `${token.Promise}`;
+                                console.log( "token", token);
+                                document.getElementById('output').textContent = token;
+                            }else{
+                                console.log('登録トークンがありません。生成する許可をリクエストします。');
+                            }
+                        })
+                        .catch((err) => {
+                            console.log('getToken Error',err);
+                        });
+                });
+            }
+  });*/
+  </script>
 </body>
 </html>
