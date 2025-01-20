@@ -7,6 +7,8 @@
     <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="../menu.css">
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.23/jsrsasign-all-min.js"></script>
     <link rel="stylesheet" href="group_window.css">
     <link rel="stylesheet" href="../log.css">
     <script src="//cdn.jsdelivr.net/npm/eruda"></script>
@@ -16,22 +18,19 @@
     <div id="container">
         <div id="left-panel">
             <div id="user-info">
-                <img src="profile-pic.jpg" alt="Profile Picture">
+                <img src="null" alt="Profile Picture">
                 <div id="username">ユーザー名</div>
-                <!--<button onclick="">更新</button>-->
                 <div id="status">トークグループを作る</div>
               <button id="testButton">通知テストボタン</button>
           </div>
-          
-<div id="chat-list">
-    <div class="chat-item" data-chat-id="XXXXXXXXXX">
-        <div class="chat-details">
-            <div class="chat-group-name">トークを読み込み中です。</div>
-            <div class="chat-last-message">時間がかかりすぎる場合別タブで開き直してください。</div>
-        </div>
-    </div>
-</div>
-
+            <div id="chat-list">
+                <div class="chat-item" data-chat-id="XXXXXXXXXX">
+                    <div class="chat-details">
+                        <div class="chat-group-name">トークを読み込み中です。</div>
+                        <div class="chat-last-message">時間がかかりすぎる場合別タブで開き直してください。</div>
+                    </div>
+                </div>
+            </div>
             <div id="menu-bar">
                 <div class="menu-item" data-page="home">
                     <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOHome.png?v=1737195839565" alt="ホームアイコン">
@@ -48,6 +47,7 @@
             </div>
         </div>
         <div id="right-panel">
+          <button id="back-button">＜</button><!--モバイル用-->
             <div id="menu-bar-top">
                 <span id="chat-group-name">Chat Group Name</span>
                 <button id="menu-button">≡</button>
@@ -56,6 +56,8 @@
                 <img id="logo" src="ロゴ画像のURL" alt="ロゴ">
             </div>
             <div id="tool-bar">
+                <img id="file-upload" src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOfile-upload.png?v=1737278924611" alt="ファイル">
+                <input type="file" id="fileInput" style="display: none;">
                 <textarea id="chat-input" placeholder="Type a message..." required></textarea>
                 <button id="send-button">Send</button>
             </div>
@@ -70,7 +72,6 @@
             </div>
         </div>
     </div>
-
 <div id="create-group-window" class="hidden">
     <div id="window-header">
         <h2>Create Group</h2>
@@ -84,34 +85,29 @@
         </div>
     </div>
     <div id="selected-friends">
-        <!-- 選択した友達のuserIdが表示される -->
+        <!-- 選択した友達のuserIdが表示されるcreate group -->
     </div>
     <div id="friend-list">
-        <!-- 友達一覧がここに表示される -->
+        <!-- 友達一覧がここに表示されるcreate group-->
     </div>
 </div>
-
-
     <script type="module" src="./app.js"></script>
     <script src="../isLogined.js"></script>
     <script src="./decorate.js"></script>
     <script src="../menuNavigation.js"></script>
     <script>
-    // Adjust textarea height automatically
 const chatInput = document.getElementById('chat-input');
 const menuBar = document.getElementById('menu-bar-top');
-const initialHeight = menuBar.offsetHeight; // メニューバーの高さを初期高さに設定
-const maxHeight = initialHeight * 3; // メニューバーの高さの2倍を最大高さに設定
-
-chatInput.style.height = `${initialHeight}px`; // 初期高さを設定
-
+const initialHeight = menuBar.offsetHeight;
+const maxHeight = initialHeight * 3;
+chatInput.style.height = `${initialHeight}px`;
 chatInput.addEventListener('input', function() {
-    chatInput.style.height = 'auto'; // Reset height to auto
-    chatInput.style.height = Math.min(chatInput.scrollHeight, maxHeight) + 'px'; // Set height to scrollHeight, capped at maxHeight
+    chatInput.style.height = 'auto';// Reset height to auto
+    chatInput.style.height = Math.min(chatInput.scrollHeight, maxHeight) + 'px';
     if (chatInput.scrollHeight > maxHeight) {
-        chatInput.style.overflowY = 'scroll'; // Enable scroll if height exceeds maxHeight
+        chatInput.style.overflowY = 'scroll';// Enable scroll
     } else {
-        chatInput.style.overflowY = 'hidden'; // Hide scroll otherwise
+        chatInput.style.overflowY = 'hidden';// Hide scroll
     }
 });
 document.getElementById('testButton').addEventListener('click', () => {
@@ -126,35 +122,8 @@ document.getElementById('testButton').addEventListener('click', () => {
     });
   }
 });
-      
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((registration) => {
-        // ページが開かれたことを通知
-        registration.active.postMessage({ type: 'PAGE_STATUS', status: 'open' });
-
-        window.addEventListener('beforeunload', () => {
-          // ページが閉じられる前に通知
-          registration.active.postMessage({ type: 'PAGE_STATUS', status: 'closed' });
-        });
-      });
-    }
-  /*
-      if ('serviceWorker' in navigator) {
-  navigator.serviceWorker
-    .register('../firebase-messaging-sw.js')
-    .then((registration) => {
-      console.log('Service Worker registered with scope:', registration.scope);
-    })
-    .catch((error) => {
-      console.error('Service Worker registration failed:', error);
-    });
-}
-*/
-  
-/*
-if ('Notification' in window && 'serviceWorker' in navigator) {
-  Notification.requestPermission(status => {console.log('Notification permission status:', status);});
-};*/
-    </script>
-</body>
+  </script>
+  <script>
+  </script>
+  </body>
 </html>
