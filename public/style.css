@@ -18,6 +18,13 @@ body {
     display: flex;
     flex-direction: column;
 }
+#right-panel {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+}
+
 
 #user-info {
     padding: 20px;
@@ -94,12 +101,6 @@ body {
     background-color: #f5f5f5;
 }
 
-#right-panel {
-    width: 70%;
-    display: flex;
-    flex-direction: column;
-    background-color: #ffffff;
-}
 /*
 #menu-bar-top {
     padding: 20px;
@@ -141,7 +142,7 @@ body {
     border-color: #4CAF50; /* Change border color on focus */
 }
 
-#send-button {
+#send-button{
     padding: 15px 20px;
     background-color: #007bff;
     color: white;
@@ -149,6 +150,12 @@ body {
     border-radius: 5px;
     cursor: pointer;
     margin-left: 10px;
+}
+
+#file-upload {
+  width: auto;
+  height: 40px;
+  margin-top:-3px;
 }
 
 #send-button:hover {
@@ -302,3 +309,94 @@ body {
     cursor: pointer;
     margin: 10px;
 }
+/* ベーススタイル */
+#back-button {
+  display: none;
+}
+/* スマホの縦画面向き用スタイル */
+@media (max-width: 768px) {
+    #container {
+      display: flex;
+      height: 100vh;  /* ページ全体の高さを10px減らす */
+      overflow: hidden;  /* コンテナのスクロールを無効にする */
+    }
+
+
+    #left-panel {
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        z-index: 1;
+        background-color: rgba(0, 0, 0,0);
+        
+    }
+
+    #right-panel.open {
+        transform: translateX(0);
+    }
+  
+
+    #right-panel {
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        background-color: #ffffff;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+    }
+  
+
+    #back-button {
+      display:block;
+        position: absolute;
+        top: 10px;
+        left: -10px;
+        font-size: 24px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        z-index: 3;
+    }
+    #menu-bar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background-color: #f8f8f8;
+      border-bottom: 1px solid #dddddd;
+    }
+  
+  
+    #chat-group-name {
+        margin-left: 50px;  /* 左から30px右にずらす */
+    }
+    .message-item .timestamp {
+        font-size: 9px; /* フォントサイズを小さくする */
+    }
+    .youtube-embed {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .youtube-embed iframe {
+        width: 90%;
+        height: auto; /* アスペクト比を維持する */
+        max-width: 560px; /* 元の最大幅を維持する */
+    }
+    .message-item .message-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        max-width: 80%;
+    }
+    .message-item .message-bubble {
+        max-width: 100%; /* メッセージバブルの最大幅を90%に設定 */
+        padding: 8px; /* パディングを少し小さくする */
+        font-size: 14px; /* フォントサイズを小さくする */
+    }
+}
+
