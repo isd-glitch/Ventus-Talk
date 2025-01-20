@@ -5,7 +5,8 @@ const admin = require('firebase-admin');
 const bodyParser = require('body-parser');
 const { google } = require('googleapis');
 const https = require('https');
-
+const cors = require('cors');
+app.use(cors());
 // 公開フォルダを設定
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -18,6 +19,33 @@ app.listen(3000, () => {
 });
 
 app.use(bodyParser.json());
+
+const keys = require('./ventus-talk-dev-1d6a05c348be.json');
+
+const client = new google.auth.JWT(
+    keys.client_email,
+    null,
+    keys.private_key,
+    ['https://www.googleapis.com/auth/drive']
+);
+
+async function DRIVEgetAccessToken() {
+    await client.authorize();
+    return client.credentials.access_token;
+}
+
+app.get('/get-token', async (req, res) => {
+    const token = await DRIVEgetAccessToken();
+    res.json({ token });
+});
+
+
+
+
+
+
+
+
 
 const serviceAccount = require('./ventus-talk-dev-firebase-adminsdk-1iv00-9d4ecb0874.json');
 
@@ -51,8 +79,8 @@ const sendPushNotification = (accessToken, token, message, chatId) => {
     message: {
       token: token,
       notification: {
-        title: '新しいメッセージ',
-        body: `${message.sender}: ${message.message}`
+        title: `新しいメッセージ-${message.sender}`,
+        body: message.message
       },
       data: {
         chatId: chatId,
