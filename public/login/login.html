@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login/Register</title>
     <link rel="stylesheet" href="login.css">
+  <link rel="stylesheet" href="../log.css">
+  <link rel="manifest" href="../manifest.json">
     <script src="//cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
 </head>
@@ -14,8 +16,8 @@
             <div id="login-container" class="form-section active">
                 <h2>サインイン</h2>
                 <form id="login-form">
-                    <input type="text" id="login-username" placeholder="ユーザー名" required>
-                    <input type="password" id="login-password" placeholder="パスワード" required>
+                    <input type="text" id="login-username" autocomplete="username" placeholder="ユーザーID" required>
+                    <input type="password" id="login-password" autocomplete="current-password" placeholder="パスワード" required>
                     <button type="submit">サインイン</button>
                 </form>
                 <p class="toggle-text" id="show-register">新規登録はこちら</p>
@@ -23,9 +25,11 @@
             <div id="register-container" class="form-section">
                 <h2>新規登録</h2>
                 <form id="register-form">
-                    <input type="text" id="username" placeholder="ユーザー名" required>
+                    <input type="text" id="username" placeholder="ユーザーID" required>
+                    <p>これはuserIDで、変更されることはありません。ユーザー名は設定ページで後から変更できます。<br>パスワードはSHA256ハッシュ化によって厳重に保存されています。</p>
                     <small id="username-check"><span id="loading-spinner" style="display:none;">⏳ チェック中...</span></small>
                     <input type="password" id="password" placeholder="パスワード" required>
+                    <a href="../policy/terms.html" target="_blank">利用規約ページ</a>
                     <label>
                         <input type="checkbox" id="terms-checkbox"> 利用規約に同意します
                     </label>

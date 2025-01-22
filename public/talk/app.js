@@ -1,9 +1,10 @@
 import { 
   dbdev, onMessage,collection,messaging,getToken, doc,addDoc,arrayUnion,
-  reloadPage,updateDoc, setDoc,serverTimestamp,startAfter,onSnapshot,
+  reloadPage,updateDoc, dbUsers,setDoc,serverTimestamp,startAfter,onSnapshot,
   limit,query, orderBy,getDocs,getDoc
 } from '../firebase-setup.js';
 import {addLog} from '../log.js';
+import {setProfileImageFromLocalStorage} from '../log.js';
 const username = localStorage.getItem('username');
 const myuserId = localStorage.getItem('userID');
 
@@ -11,19 +12,6 @@ const chatBox = document.getElementById('chat-box');
 const chatInput = document.getElementById('chat-input');
 const sendButton = document.getElementById('send-button');
 let selectedChatId = null;
-/*
-console.log('notification auth');
-if (Notification.permission === "default") {
-  Notification.requestPermission().then(permission => {
-    if (permission === "granted") {
-      console.log("通知が許可されました");
-      saveuserToken();
-    } else {
-      console.log("通知が拒否されました");
-    }
-  });
-}
-*/
 
 onMessage(messaging, (payload) => {
   console.log('フォアグラウンドメッセージ受信:', payload);
@@ -31,7 +19,6 @@ onMessage(messaging, (payload) => {
   const notificationOptions = {
     body: payload.notification.body,
   };
-  // 特定のページを開いている場合のみ通知を表示しない
   if (!document.location.href.includes('talk.html')) {
     new Notification(notificationTitle, notificationOptions);
   }
@@ -87,13 +74,13 @@ sendButton.addEventListener('click', async () => {
 });
 
 async function loadMessages(chatId) {
-    if (!chatId) {
-        chatBox.innerHTML = '<p>チャットを選択してください。</p>';
-        return;
-    }
-    if (unsubscribeMessages) {unsubscribeMessages();}
+    chatBox.innerHTML = '';
+    if (!chatId) {chatBox.innerHTML = '<p>チャットを選択してください。</p>';return;}
+    if (unsubscribeMessages) { unsubscribeMessages(); }
     selectedChatId = chatId;
+    let added_message_id = [];
     const chatRef = doc(dbdev, `ChatGroup/${chatId}`);
+    let lastDate = '';
     unsubscribeMessages = onSnapshot(chatRef, async (docSnapshot) => {
         if (!docSnapshot.exists()) {
             chatBox.innerHTML = '<p>メッセージはまだありません。</p>';
@@ -104,16 +91,16 @@ async function loadMessages(chatId) {
             chatBox.innerHTML = '<p>メッセージはまだありません。</p>';
             return;
         }
-        let lastDate = '';
         const messageHtmlArray = await Promise.all(messages.map(async (message, index) => {
-            const { timestamp, sender, message: messageText, messageId } = message;
+            const { timestamp, sender, message: messageText, messageId, filename,resourceFileId,extension } = message;
             if (index === messages.length - 1) {
                 localStorage.setItem(`LastMessageId_${chatId}`, messageId);
             }
+            if (added_message_id.includes(messageId)) {return '';} else {added_message_id.push(messageId);}
             let userName = 'Unknown';
             let userIcon = 'default-icon.png';
             if (sender !== myuserId) {
-                const userRef = doc(dbdev, 'users', sender);
+                const userRef = doc(dbUsers, 'users', sender);
                 const userDoc = await getDoc(userRef);
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
@@ -124,6 +111,7 @@ async function loadMessages(chatId) {
             const messageTimestamp = new Date(timestamp);
             const messageDate = messageTimestamp.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
             let dateDivider = '';
+            //console.log(messageDate,lastDate,"Date check divider")
             if (messageDate !== lastDate) {
                 lastDate = messageDate;
                 dateDivider = `<div class="date-divider"><span>${messageDate}</span></div>`;
@@ -144,45 +132,74 @@ async function loadMessages(chatId) {
                 icon_html = `<img class="icon" src="${userIcon}" alt="${userName}のアイコン">`;
                 username_html = `<div class="username">${userName}</div>`;
             }
-            const escapedMessageText = escapeHtml(messageText);
-            const linkedMessageText = linkify(escapedMessageText);
-            const message_html = `
+
+            let message_html = `
                 ${dateDivider}
                 <div class="message-item ${sender === myuserId ? 'self' : 'other'}">
                     ${icon_html}
                     <div class="message-content" style="${margin_style}">
-                        ${username_html}
-                        <div class="message-bubble">${linkedMessageText}</div>
+                        ${username_html}`;
+            if (resourceFileId) {
+                const fileType = getFileType(extension);
+                if (fileType === 'image') {//https://drive.usercontent.google.com/download?id=${resourceFileId}&authuser=0
+                    message_html += `<a href="https://drive.google.com/uc?id=${resourceFileId}"><img src="https://drive.google.com/thumbnail?id=${resourceFileId}" alt="画像" class="message-bubble"></a>`;
+                } else if (fileType === 'video') {
+                  message_html += `
+                    <iframe src="https://drive.google.com/file/d/${resourceFileId}/preview?controls=0" class="message-bubble" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    <div class="message-bubble">
+                      <a href="https://drive.google.com/file/d/${resourceFileId}/view?usp=drivesdk" target="_blank">ビデオを見る 動画は再生できるまでに時間がかかることがあります。</a>
                     </div>
-                    <div class="timestamp">${messageTimestamp.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</div>
-                </div>`;
-            
-            const youtubeEmbed = extractYoutubeEmbedUrl(linkedMessageText);
-            if (youtubeEmbed) {
-                return message_html + `<div class="youtube-embed"><iframe width="560" height="315" src="${youtubeEmbed}" frameborder="0" allowfullscreen></iframe></div>`;
+                  `;
+                } else {
+                    message_html += `<a href="https://drive.google.com/file/d/${resourceFileId}" class="message-bubble">${filename}ファイルを開く</a>`;
+                }
             } else {
-                return message_html;
+                const escapedMessageText = escapeHtml(messageText);
+                const formattedMessageText = insertWbrEvery100Chars(escapedMessageText);
+                const linkedMessageText = linkify(formattedMessageText);
+                message_html += `<div class="message-bubble">${linkedMessageText}</div>`;
             }
-
+            message_html += `</div><div class="timestamp">${messageTimestamp.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</div></div>`;
+            const youtubeEmbed = extractYoutubeEmbedUrl(linkify(messageText));
+            if (youtubeEmbed) {
+                message_html += `<div class="youtube-embed" ><iframe width="560" height="315" src="${youtubeEmbed}" frameborder="0" allowfullscreen></iframe></div>`;
+            }//alt="再生する直前までは4Gに。"
             previousTimestamp = messageTimestamp;
+            return message_html;
         }));
-        chatBox.innerHTML = messageHtmlArray.join('');
+        chatBox.innerHTML += messageHtmlArray.join('');
         chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
     }, (error) => {
         console.error('メッセージ取得中にエラーが発生しました: ', error);
-        addLog(`メッセージ取得中にエラーが発生しました:${error.message}`,"error");
+        addLog(`メッセージ取得中にエラーが発生しました:${error.message}`, "error");
     });
     updateOtherChatListeners();
 }
 
+function getFileType(extension) {
+  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+  const videoExtensions = ['mp4', 'webm'];
+  if (imageExtensions.includes(extension)) {
+    return 'image';
+  } else if (videoExtensions.includes(extension)) {
+    return 'video';
+  } else {
+    return 'file';
+  }
+}
+
 function escapeHtml(text) {
-    return text.replace(/<br\s*\/?>/gi, '__BR__') // <br>タグを一時的に置き換え
+  if(text){
+    return text.replace(/<br\s*\/?>/gi, '__BR__')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;')
-        .replace(/__BR__/g, '<br>'); // <br>タグを元に戻す
+        .replace(/__BR__/g, '<br>');
+  }else{
+    return text
+  }
 }
 
 function linkify(text) {
@@ -216,9 +233,14 @@ function extractYoutubeEmbedUrl(text) {
     return null;
 }
 
+// 開業位置を調整する関数
+function insertWbrEvery100Chars(text) {
+    return text.replace(/(.{100})/g, '$1<wbr>');
+}
+
 async function updateOtherChatListeners() {
-  console.log('update chat list');
-  const userDocRef = doc(dbdev, 'users', myuserId);
+  console.log('update other chat list');
+  const userDocRef = doc(dbUsers, 'users', myuserId);
   try {
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Firestore request timed out')), 8000)
@@ -233,7 +255,6 @@ async function updateOtherChatListeners() {
       console.log('ChatIdListが空です。');
       return;
     }
-
     chatIdList.forEach(({ chatId }) => {
       if (chatId !== selectedChatId && !otherChatListeners[chatId]) {
         const chatRef = doc(dbdev, `ChatGroup/${chatId}`);
@@ -244,11 +265,9 @@ async function updateOtherChatListeners() {
               const newMessage = messages[messages.length - 1];
               const { messageId, sender, message: messageText } = newMessage;
               const lastSeenMessageId = localStorage.getItem(`LastMessageId_${chatId}`);
-
               if (messageId !== lastSeenMessageId && selectedChatId !== chatId) {
                 console.log(`New message in chat ${chatId}:`, messageText, `from ${sender}`);
                 localStorage.setItem(`LastMessageId_${chatId}`, messageId);
-                
                 const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
                 if (chatItem && !chatItem.classList.contains('new-message')) {
                   chatItem.classList.add('new-message');
@@ -257,34 +276,6 @@ async function updateOtherChatListeners() {
                   newMark.textContent = 'New!';
                   chatItem.appendChild(newMark);
                 }
-                /*
-                // Push通知を表示
-                if (Notification.permission === 'granted') {
-                  navigator.serviceWorker.ready.then((registration) => {
-                    registration.showNotification(`新規メッセージ - ${sender}`, {
-                      body: messageText,
-                      icon: '/path/to/icon.png', // 通知アイコン
-                      tag: `chat-${chatId}`, // 同一チャットの通知をまとめる
-                      data: { chatId },
-                    });
-                  });
-                } else if (Notification.permission !== 'denied') {
-                  // ユーザーに通知の許可をリクエスト
-                  
-                  Notification.requestPermission().then((permission) => {
-                    if (permission === 'granted') {
-                      navigator.serviceWorker.ready.then((registration) => {
-                        registration.showNotification(`新規メッセージ - ${sender}`, {
-                          body: messageText,
-                          icon: '/path/to/icon.png',
-                          tag: `chat-${chatId}`,
-                          data: { chatId },
-                        });
-                      });
-                    }
-                  });
-                }
-                */
               }
             }
           }
@@ -298,23 +289,27 @@ async function updateOtherChatListeners() {
     alert('エラーが発生しました。再試行してください: ' + error.message);
   }
 }
-import {setProfileImageFromLocalStorage} from '../log.js';
+
+
 document.addEventListener("DOMContentLoaded", function() {
     setProfileImageFromLocalStorage();
+    ini_fileUpload();
     const rightPanel = document.getElementById("right-panel");
     const backButton = document.getElementById("back-button");
     backButton.addEventListener("click", function() {
         rightPanel.classList.remove("open");
+        selectedChatId="";
+        updateOtherChatListeners();
     });
-    ini_fileUpload();
 });
-
+// Object to store chat IDs and their corresponding group names
+const chatGroupNameMap = {};
 
 function addEventListenersToChatItems() {
   document.querySelectorAll('.chat-item').forEach((chatItem) => {
     chatItem.addEventListener('click', () => {
       const chatId = chatItem.getAttribute('data-chat-id');
-      // チャットを選択した際に「New!」マークを削除
+      // チャットを選択した際にNew!マーク削除
       if (chatItem.classList.contains('new-message')) {
         chatItem.classList.remove('new-message');
         const newMark = chatItem.querySelector('.new-mark');
@@ -324,35 +319,31 @@ function addEventListenersToChatItems() {
       }
       const rightPanel = document.getElementById("right-panel");
       rightPanel.classList.toggle("open");
-      loadMessages(chatId);
+      
+      // Update the chat group name span tag
+      const chatGroupName = chatGroupNameMap[chatId] || 'Chat Group Name';
+      document.getElementById('chat-group-name').textContent = chatGroupName;
+      if (selectedChatId == chatId) {return;}else{loadMessages(chatId);}
     });
   });
 }
 
 async function updateChatList() {
-  console.log('updatechat list');
   const chatList = document.getElementById('chat-list');
-  const userDocRef = doc(dbdev, 'users', myuserId);
-
+  const userDocRef = doc(dbUsers, 'users', myuserId);
   try {
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Firestore request timed out')), 8000)
     );
     const userDoc = await Promise.race([getDoc(userDocRef), timeoutPromise]);
-    if (!userDoc.exists()) {
-      alert('User document not found。');
-      return;
-    }
+    if (!userDoc.exists()) {alert('User document not found。');return;}
     const chatIdList = userDoc.data().chatIdList || [];
     if (chatIdList.length === 0) {
       addLog('ChatIdListが空です。');
       return;
     }
-    // debug: chatIdListの内容を確認
-    console.log('chatIdList:', chatIdList);
     console.log('chatIdList:', chatIdList);
     const chatItems = chatIdList.map(({ chatId, pinned, serverId, timestamp }) => ({ chatId, pinned, serverId, timestamp }));
-
     // ソート: pinnedがtrueなら優先、その後timestampで新しい順に並び替え
     chatItems.sort((a, b) => {
       if (a.pinned && !b.pinned) {
@@ -363,11 +354,6 @@ async function updateChatList() {
         return b.timestamp - a.timestamp;
       }
     });
-
-    // debug: 並び替えたchatItemsの内容を確認
-    console.log('chatItems:', chatItems);
-
-    // チャットリストの表示更新
     chatList.innerHTML = chatItems.map(({ chatId }) => `
       <div class="chat-item" data-chat-id="${chatId}">
         <div class="chat-details">
@@ -376,20 +362,15 @@ async function updateChatList() {
         </div>
       </div>
     `).join('');
-
-
     addEventListenersToChatItems();
-
     for (const { chatId } of chatItems) {
-      if (!chatId) {
-        console.error('Invalid chatId:', chatId);
-        continue;
-      }
-
+      if (!chatId) {console.error('Invalid chatId:', chatId);continue;}
       const chatGroupRef = doc(dbdev, `ChatGroup/${chatId}`);
       const chatGroupDoc = await getDoc(chatGroupRef);
       if (chatGroupDoc.exists()) {
         const { chatGroupName } = chatGroupDoc.data();
+        // Store the chat group name in the map
+        chatGroupNameMap[chatId] = chatGroupName;
         const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"] .chat-group-name`);
         if (chatItem && chatGroupName) {
           chatItem.textContent = chatGroupName;
@@ -400,29 +381,11 @@ async function updateChatList() {
     }
   } catch (error) {
     console.error('Error updating chat list:', error);
-    addLog('エラーが発生しました。再試行してください: ' + error.message);
-    reloadPage();
+    addLog('エラーが発生しました。アプリを開き直してください: ' + error.message);
+    //reloadPage();
   }
 }
-/*
-document.addEventListener('DOMContentLoaded', async () => {
- await updateChatList();
- await updateOtherChatListeners();
-});
-*/
 
-
-
-
-
-/*
-document.getElementById('reload_list').addEventListener('click',() => {
-  console.log('update');
-  updateChatList();
-});
-
-*/
-// JavaScript for handling window appearance
 const createGroupWindow = document.getElementById('create-group-window');
 const statusButton = document.getElementById('status');
 const closeButton = document.getElementById('close-window');
@@ -443,7 +406,6 @@ window.onload = async () => {
   await updateChatList();
   const createGroupButton = document.getElementById('create-group-button');
   createGroupButton.addEventListener('click', createGroup);
-  
   const savedFont = localStorage.getItem('font');
     if (savedFont) {
         document.getElementById('chat-box').style.fontFamily = savedFont;
@@ -456,7 +418,7 @@ async function updateFriendList() {
     const friendListContainer = document.getElementById('friend-list');
     const selectedFriendsContainer = document.getElementById('selected-friends');
     const selectedFriends = new Set(); // 選択された友達のセット
-    const userDocRef = doc(dbdev, `users/${myuserId}`);
+    const userDocRef = doc(dbUsers, `users/${myuserId}`);
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists) {
@@ -495,7 +457,6 @@ async function updateFriendList() {
                 selectedFriendsContainer.appendChild(selectedFriend);
             }
         });
-
         friendListContainer.appendChild(friendItem);
     });
 }
@@ -511,11 +472,9 @@ async function createGroup() {
     return;
   }
   const chatId = generateRandomId();
-  const allMembers = [myuserId, ...selectedFriends]; // 自分を含めたメンバー
-
-  // グループメンバー全員の chatIdList に追加
+  const allMembers = [myuserId, ...selectedFriends];
   for (const userId of allMembers) {
-    const userDocRef = doc(dbdev, `users/${userId}`);
+    const userDocRef = doc(dbUsers, `users/${userId}`);
     await updateDoc(userDocRef, {
       chatIdList: arrayUnion({
         pinned: false,
@@ -524,7 +483,6 @@ async function createGroup() {
       })
     });
   }
-  // ChatGroup ドキュメントを作成
   const chatGroupRef = doc(dbdev, `ChatGroup/${chatId}`);
   await setDoc(chatGroupRef, {
     chatGroupName: groupName,
@@ -539,26 +497,19 @@ async function createGroup() {
 }
 
 
-
-
 async function saveuserToken() {
   try {
-    // 現在の日付を取得
     const currentDate = new Date();
-    // ローカルストレージから前回の更新日を取得
     const lastUpdate = localStorage.getItem('TokenLastUpdate');
-    // 前回の更新日が存在し、かつ1ヶ月以内なら更新しない
     if (lastUpdate && (currentDate - new Date(lastUpdate)) <= 30 * 24 * 60 * 60 * 1000) {
       console.log('トークンはまだ有効です。更新は不要です。');
       return;
     }
-
     const token = await getToken(messaging, { vapidKey: 'BKUDfUUeYgn8uWaWW1_d94Xyt03iBIHoLvyu1MNGPPrc72J2m5E3ckzxLqwHrsCQ9uJ5m-VhuHEjxquWqyKzTGE' });
     console.log(token);
     if (token) {
-      //await setDoc(doc(dbdev, 'users', myuserId), { token }, { merge: true });
+      await setDoc(doc(dbUsers, 'users', myuserId), { token }, { merge: true });
       console.log('通知トークンが保存されました:', token);
-      // ローカルストレージに現在の日付を保存
       localStorage.setItem('TokenLastUpdate', currentDate.toISOString());
     } else {
       console.warn('通知トークンを取得できませんでした');
@@ -568,38 +519,187 @@ async function saveuserToken() {
   }
 }
 
-
 async function getAccessToken() {
   const response = await fetch('/get-token');
   const data = await response.json();
   return data.token;
 }
 
-async function uploadFile(file) {
+async function createFolderIfNotExists(folderName, parentId) {
   const accessToken = await getAccessToken();
-  const metadata = {
-    name: file.name,
-    parents: ["1QsqLlsAp5MUSHbn7Cibh9WQ8DG-oKdzl"]
-  };
-  const form = new FormData();
-  form.append(
-    "metadata",
-    new Blob([JSON.stringify(metadata)], { type: "application/json" })
-  );
-  form.append("file", file);
-  const response = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
-    method: "POST",
+  const query = `name='${folderName}' and '${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+  const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`, {
     headers: {
       Authorization: `Bearer ${accessToken}`
-    },
-    body: form
+    }
   });
-  if (!response.ok) {throw new Error(`アップロードに失敗しました: ${response.status}`);}
+
   const json = await response.json();
+  if (json.files.length > 0) {
+    return json.files[0].id;
+  }
+
+  const metadata = {
+    name: folderName,
+    mimeType: 'application/vnd.google-apps.folder',
+    parents: [parentId]
+  };
+
+  const createResponse = await fetch("https://www.googleapis.com/drive/v3/files", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(metadata)
+  });
+
+  if (!createResponse.ok) {
+    throw new Error(`フォルダの作成に失敗しました: ${createResponse.status}`);
+  }
+
+  const createJson = await createResponse.json();
+  return createJson.id;
+}
+
+function updateProgressBar(percentage) {
+  const progressBar = document.getElementById("progress-bar");
+  progressBar.style.width = percentage + "%";
+  console.log(percentage,"progress bar check")
+  progressBar.textContent = Math.round(percentage) + "%";
+}
+
+function showProgressBar() {
+  document.getElementById("progress-container").style.display = "block";
+}
+
+function hideProgressBar() {
+  document.getElementById("progress-container").style.display = "none";
+}
+
+async function uploadFile(file) {
+  const accessToken = await getAccessToken();
+  const parentFolderId = "1QsqLlsAp5MUSHbn7Cibh9WQ8DG-oKdzl";
+  const folderId = await createFolderIfNotExists(selectedChatId, parentFolderId);
+  let fileData;
+  
+  if (file.size > 5 * 1024 * 1024) { // 5MB以上の場合
+    fileData = await resumableUpload(file, accessToken, folderId);
+  } else { // 5MB未満の場合
+    fileData = await simpleUpload(file, accessToken, folderId);
+  }
+  
+  console.log(fileData); // ここでfileDataの内容を確認
+  return fileData;
+}
+
+async function simpleUpload(file, accessToken, folderId) {
+  const metadata = {
+    name: file.name,
+    parents: [folderId]
+  };
+  const form = new FormData();
+  form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+  form.append("file", file);
+  
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", true);
+  xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+  
+  xhr.upload.onprogress = function(event) {
+    if (event.lengthComputable) {
+      const percentComplete = (event.loaded / event.total) * 100;
+      updateProgressBar(percentComplete);
+    }
+  };
+  
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      console.log("アップロードに成功しました");
+      updateProgressBar(100); // 完了時にプログレスバーを100%にする
+    } else {
+      console.error("アップロードに失敗しました: " + xhr.status);
+    }
+  };
+  
+  xhr.send(form);
+  const response = await new Promise((resolve, reject) => {
+    xhr.onload = () => resolve(xhr.responseText);
+    xhr.onerror = () => reject(xhr.statusText);
+  });
+  
+  return JSON.parse(response);
+}
+
+async function resumableUpload(file, accessToken, folderId) {
+  const metadata = {
+    name: file.name,
+    parents: [folderId]
+  };
+  const init = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(metadata)
+  });
+  
+  if (!init.ok) { throw new Error(`アップロードの初期化に失敗しました: ${init.status}`); }
+  
+  const uploadUrl = init.headers.get("Location");
+  const CHUNK_SIZE = 256 * 1024; // 256KB
+  let start = 0;
+  const fileSize = file.size;
+  let response;
+  
+  while (start < fileSize) {
+    const end = Math.min(start + CHUNK_SIZE, fileSize);
+    const chunk = file.slice(start, end);
+    
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", uploadUrl, true);
+    xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+    xhr.setRequestHeader("Content-Range", `bytes ${start}-${end-1}/${fileSize}`);
+    
+    xhr.upload.onprogress = function(event) {
+      if (event.lengthComputable) {
+        const percentComplete = ((start + event.loaded) / fileSize) * 100;
+        updateProgressBar(percentComplete);
+      }
+    };
+    
+    xhr.onload = function() {
+      if (xhr.status === 200 || xhr.status === 308) {
+        start = end;
+      } else {
+        console.error("アップロードに失敗しました: " + xhr.status);
+      }
+    };
+    
+    xhr.send(chunk);
+    response = await new Promise((resolve, reject) => {
+      xhr.onload = () => resolve(xhr.responseText);
+      xhr.onerror = () => reject(xhr.statusText);
+    });
+  }
+  
+  const finalResponse = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Range": `bytes */${fileSize}`
+    }
+  });
+  
+  if (!finalResponse.ok) { throw new Error(`アップロードに失敗しました: ${finalResponse.status}`); }
+  
+  const json = await finalResponse.json();
+  updateProgressBar(100); // 完了時にプログレスバーを100%にする
   return json;
 }
 
-function ini_fileUpload(){
+function ini_fileUpload() {
   const fileUploadImage = document.getElementById('file-upload');
   const fileInput = document.getElementById('fileInput');
   const result = document.getElementById("chat-box");
@@ -607,81 +707,61 @@ function ini_fileUpload(){
   fileInput.addEventListener("change", async () => {
     console.log('upload start');
     if (fileInput.files.length === 0) return;
-    const file = fileInput.files[0];
+
+    showProgressBar();
+    const files = Array.from(fileInput.files); // 複数ファイル対応
     try {
-      addLog("アップロード中","b");
-      const fileData = await uploadFile(file);
-      const fileLink = `https://drive.google.com/file/d/${fileData.id}/view`;
-      addLog("アップロード成功","info");
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileExtension = file.name.split('.').pop();
+        addLog(`アップロード中: ${file.name}`, "b");
+        const fileData = await uploadFile(file);
+        console.log(fileData); // ここでfileDataの内容を確認
+
+        const timestamp = new Date().toISOString();
+        const messageId = generateRandomId();
+        const newMessage = {
+          timestamp: timestamp,
+          message: `${myuserId}から新規ファイル`,
+          extension: fileExtension,
+          filename:file.name,
+          resourceFileId: fileData.id,
+          messageId: messageId,
+          sender: myuserId
+        };
+        const docRef = doc(dbdev, "ChatGroup", selectedChatId);
+        await updateDoc(docRef, {
+          messages: arrayUnion(newMessage)
+        });
+        addLog(`アップロード成功: ${file.name}`, "info");
+        const messageItem = document.createElement("div");
+        messageItem.className = "message-item";
+        console.log(fileData.id);
+      }
     } catch (error) {
-      addLog(`エラー: ${error.message}`,"error");
+      addLog(`エラー: ${error.message}`, "error");
     } finally {
       fileInput.value = "";
+      updateProgressBar(0); // 完了後にプログレスバーをリセットする
+      hideProgressBar();
     }
   });
-};
+}
 
 /*
-function goOffline() {
-  setTimeout(async () => {
-    await setDoc(doc(dbdev, 'users', myuserId), { status: 'offline' }, { merge: true });
-    console.log('オフライン状態をFirestoreに書き込みました');
-  }, 3000); // 3秒の遅延
+const scrollToBottomButton = document.getElementById('scroll-to-bottom');
+
+// スクロール位置を監視する関数
+function checkScrollPosition() {
+    const isAtBottom = chatBox.scrollHeight - chatBox.scrollTop === chatBox.clientHeight;
+    if (isAtBottom) {scrollToBottomButton.style.display = 'none';} else {
+        scrollToBottomButton.style.display = 'block';}
 }
 
-// オンライン状態の書き込み関数
-function goOnline() {
-  (async () => {
-    await setDoc(doc(dbdev, 'users', myuserId), { status: 'online' }, { merge: true });
-    console.log('オンライン状態をFirestoreに書き込みました');
-  })();
-}
+// ボタンをクリックした時に一番下にスクロールする関数
+function scrollToBottom() {chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });}
 
-// visibilitychangeイベントのリスナーを設定
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') {
-    goOffline();
-  } else if (document.visibilityState === 'visible') {
-    goOnline();
-  }
-});
-
-// 初期ロード時にオンライン状態を設定
-document.addEventListener('DOMContentLoaded', goOnline);
-
-// ウィンドウが閉じられる前にオフライン状態を設定
-window.addEventListener('beforeunload', goOffline);
+chatBox.addEventListener('scroll', checkScrollPosition);
+scrollToBottomButton.addEventListener('click', scrollToBottom);
+checkScrollPosition();
 */
-
-
-      /*offline
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((registration) => {
-        // ページが開かれたことを通知
-        registration.active.postMessage({ type: 'PAGE_STATUS', status: 'open' });
-
-        window.addEventListener('beforeunload', () => {
-          // ページが閉じられる前に通知
-          registration.active.postMessage({ type: 'PAGE_STATUS', status: 'closed' });
-        });
-      });
-    }
-    
-    */
-  /*
-      if ('serviceWorker' in navigator) {
-  navigator.serviceWorker
-    .register('../firebase-messaging-sw.js')
-    .then((registration) => {
-      console.log('Service Worker registered with scope:', registration.scope);
-    })
-    .catch((error) => {
-      console.error('Service Worker registration failed:', error);
-    });
-}
-*/
-  
-/*
-if ('Notification' in window && 'serviceWorker' in navigator) {
-  Notification.requestPermission(status => {console.log('Notification permission status:', status);});
-};*/

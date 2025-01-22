@@ -1,8 +1,9 @@
 import { 
     appd, app1, app2, appUsers, appInfo, 
-    dbdev, db1, db2, dbUsers, dbInfo,collection, addDoc, serverTimestamp, query, orderBy, username, doc, setDoc, getDoc
+    dbdev, db1, db2, dbUsers, dbInfo,collection, addDoc, myuserId,serverTimestamp, query, orderBy, username, doc, setDoc, getDoc
 } from '../firebase-setup.js';
 import {addLog} from '../log.js';
+import {setProfileImageFromLocalStorage} from '../log.js';
 const usernameInput = document.getElementById('username');
 const usernameCheck = document.getElementById('username-check');
 const loadingSpinner = document.getElementById('loading-spinner');
@@ -41,7 +42,7 @@ async function checkUsernameAvailability() {
     console.log('req'); // ここでログを追加
     loadingSpinner.style.display = 'block';
 
-    const usernameDocRef = doc(dbdev, 'users', username);
+    const usernameDocRef = doc(dbUsers, 'users', username);
 
     // タイムアウトを設定
     const timeoutPromise = new Promise((_, reject) =>
@@ -105,13 +106,13 @@ termsCheckbox.addEventListener('change', () => {
 document.getElementById('login-form').addEventListener('submit', async function(event) {
     event.preventDefault();
   localStorage.clear();
-  addLog('サインイン');
+  addLog('サインイン処理中');
     const userId = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
     const hash_psw = await hash(password);
 
     try {
-        const userDoc = await getDoc(doc(dbdev, 'users', userId));
+        const userDoc = await getDoc(doc(dbUsers, 'users', userId));
         if (userDoc.exists()) {
             const userData = userDoc.data();
             if (userData.password === hash_psw) {
@@ -137,6 +138,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
     event.preventDefault();
     const username = usernameInput.value;
     const password = document.getElementById('password').value;
+  addLog('登録処理中です',"info");
 
     // パスワードのハッシュ化
     const hashedPassword = await hash(password);
@@ -149,7 +151,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
     // ユーザー情報をFirestoreに保存
     
     try {
-        await setDoc(doc(dbdev, 'users', userId), { 
+        await setDoc(doc(dbUsers, 'users', userId), { 
             username: username,
             password: hashedPassword,
             timestamp: serverTimestamp()
@@ -230,4 +232,23 @@ async function hash(password) {
       addLog(`${error}`)
         alert('エラーが発生しました');
     }
+}
+
+
+const condition = localStorage.getItem('condition');
+if (!condition ||condition==='init'||condition==='perfect_init') {
+    loadCurrentProfileImage();
+}
+function loadCurrentProfileImage() {
+    getDoc(doc(dbUsers, 'users', myuserId)).then(docSnap => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            const profileImage = data.profile_ico || '';
+            localStorage.setItem('profileImage', profileImage);
+            localStorage.setItem('condition',"did");
+          setProfileImageFromLocalStorage();
+        }
+    }).catch(error => {
+      addLog('プロフィール画像の読み込みに失敗しました: ', "error");
+    });
 }

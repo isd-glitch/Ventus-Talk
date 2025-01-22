@@ -50,11 +50,15 @@ input[type="text"], input[type="password"] {
     font-size: 16px;
     margin-bottom: 10px;
     width: 90%;
-  float: center;
+    float: center;
     /*display: block; Ensures the input is a block-level element */
     margin-left: auto; /* Centers the input */
     margin-right: auto; /* Centers the input */
 }
+input:focus {
+    outline: 2px solid blue;
+}
+
 button[type="submit"] {
     padding: 10px;
     border: none;
@@ -103,4 +107,3 @@ button[type="submit"]:hover.enabled {
     cursor: pointer;
     text-decoration: underline;
 }
-

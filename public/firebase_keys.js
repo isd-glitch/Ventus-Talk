@@ -32,12 +32,12 @@ const firebaseConfig2 = {
 // 他のFirebase設定も同様に追加します...
 
 const firebaseConfigUsers = {
-    apiKey: "YOUR_API_KEY_USERS",
-    authDomain: "YOUR_AUTH_DOMAIN_USERS",
-    projectId: "Ventus-Talk-Users",
-    storageBucket: "YOUR_STORAGE_BUCKET_USERS",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID_USERS",
-    appId: "YOUR_APP_ID_USERS"
+  apiKey: "AIzaSyBd6wgayUivfrQFK9g7ng1yzyHWoCo2mVA",
+  authDomain: "ventus-talk-users.firebaseapp.com",
+  projectId: "ventus-talk-users",
+  storageBucket: "ventus-talk-users.firebasestorage.app",
+  messagingSenderId: "758129062195",
+  appId: "1:758129062195:web:8126517d546fb1f92c8e46"
 };
 
 const firebaseConfigInfo = {

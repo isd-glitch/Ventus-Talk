@@ -206,3 +206,71 @@ iframe {
     display: none;
 }
 
+#back-button {
+  display:none;
+}
+
+
+/* スマホの縦画面向き用スタイル */
+@media (max-width: 768px) {
+    #container {
+      display: flex;
+      height: 100vh;  /* ページ全体の高さを10px減らす */
+      overflow: hidden;  /* コンテナのスクロールを無効にする */
+    }
+
+
+    #left-panel {
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        z-index: 1;
+        background-color: rgba(0, 0, 0,0);
+        
+    }
+
+    #right-panel.open {
+        transform: translateX(0);
+    }
+  
+
+    #right-panel {
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        background-color: #ffffff;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+    }
+  
+
+    #back-button {
+      display:block;
+        position: absolute;
+        top: 10px;
+        left: -10px;
+        font-size: 24px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        z-index: 3;
+    }
+    .profile-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .styled-button {
+        width: 100%;
+        padding: 10px 0;
+        margin: 5px 0;
+    }
+
+    .styled-input {
+        width: 90%;
+        margin: 0 auto 10px auto; /* 上下の余白を設定し、左右を自動で中央に揃えます */
+    }
+
+}

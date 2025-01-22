@@ -28,9 +28,18 @@ function createLogContainer() {
     return logContainer;
 }
 
-export { addLog };
+function setProfileImageFromLocalStorage() {
+    const base64Image = localStorage.getItem('profileImage');
+    if (base64Image) {
+        const profileImageElement = document.querySelector('#user-info img');
+        profileImageElement.src = base64Image;
+        console.log('プロフィール画像がローカルストレージから設定されました');
+    } else {
+        console.log('ローカルストレージにプロフィール画像が見つかりませんでした');
+    }
+}
 
-
+export { addLog, setProfileImageFromLocalStorage};
 
 /*
 
@@ -41,3 +50,27 @@ success green
 addLog('??',other) black
 
 */
+
+
+
+function applyThemeToAllElements(theme) {
+    const elements = document.querySelectorAll('body, #left-panel, #right-panel, #user-info, #chat-box, .message-item .message-bubble, #send-button,#menu-bar');
+    elements.forEach(element => {
+        const currentClasses = element.className.split(' ');
+        const newClasses = currentClasses.filter(className => !className.endsWith('-mode') && !className.startsWith('summer-') && !className.startsWith('gradient-') && !className.startsWith('forest-'));
+        if (theme !== 'default') {newClasses.push(theme);}
+        element.className = newClasses.join(' ');
+    });
+}
+
+// 初期テーマを適用
+const savedTheme = localStorage.getItem('theme') || 'default';
+applyThemeToAllElements(savedTheme);
+try{document.getElementById('theme-select').value = savedTheme;}catch(_){}
+
+// テーマ変更時の処理
+try{document.getElementById('theme-select').addEventListener('change', (event) => {
+    const selectedTheme = event.target.value;
+    applyThemeToAllElements(selectedTheme);
+    localStorage.setItem('theme', selectedTheme);
+});}catch(_){}

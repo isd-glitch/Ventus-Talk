@@ -7,12 +7,27 @@
     <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="../menu.css">
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.23/jsrsasign-all-min.js"></script>
     <link rel="stylesheet" href="group_window.css">
     <link rel="stylesheet" href="../log.css">
     <script src="//cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();console.log('eruda-index')</script>
+  
+  <!-- Favicon -->
+<link rel="icon" type="image/png" sizes="16x16" href="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/f16.png?v=1737434521141">
+<link rel="icon" type="image/png" sizes="48x48" href="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/f48.png?v=1737434517565">
+<link rel="icon" type="image/png" sizes="144x144" href="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/f144.png?v=1737434514145">
+<link rel="icon" type="image/png" sizes="192x192" href="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/f192.png?v=1737434510763">
+<link rel="icon" type="image/png" sizes="512x512" href="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/f512.png?v=1737434504548">
+<!-- Apple Touch Icon -->
+<link rel="apple-touch-icon" sizes="180x180" href="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/f180.png?v=1737434524832">
+<link rel="shortcut icon" href="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ico64.ico?v=1737435085854" type="image/x-icon">
+<!-- Android -->
+<link rel="manifest" href="path/to/manifest.json">
+<!-- Microsoft Tiles -->
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="path/to/mstile-144x144.png">
+<meta name="msapplication-config" content="path/to/browserconfig.xml">
+  
 </head>
 <body>
     <div id="container">
@@ -47,17 +62,20 @@
             </div>
         </div>
         <div id="right-panel">
+          <div id="progress-container"><div id="progress-bar"></div></div>
+          
           <button id="back-button">＜</button><!--モバイル用-->
             <div id="menu-bar-top">
                 <span id="chat-group-name">Chat Group Name</span>
                 <button id="menu-button">≡</button>
             </div>
             <div id="chat-box">
-                <img id="logo" src="ロゴ画像のURL" alt="ロゴ">
+                <img id="logo" src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICO_clear.png?v=1737435556229" alt="ロゴ">
             </div>
+       　   <button id="scroll-to-bottom" style="display: none; position: fixed; bottom: 10px; right: 10px;">↓</button>
             <div id="tool-bar">
                 <img id="file-upload" src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOfile-upload.png?v=1737278924611" alt="ファイル">
-                <input type="file" id="fileInput" style="display: none;">
+                <input type="file" id="fileInput" style="display: none;" multiple>
                 <textarea id="chat-input" placeholder="Type a message..." required></textarea>
                 <button id="send-button">Send</button>
             </div>
@@ -96,6 +114,8 @@
     <script src="./decorate.js"></script>
     <script src="../menuNavigation.js"></script>
     <script>
+      
+
 const chatInput = document.getElementById('chat-input');
 const menuBar = document.getElementById('menu-bar-top');
 const initialHeight = menuBar.offsetHeight;

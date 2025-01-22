@@ -1,0 +1,1 @@
+## updateOtherChat(app.js)の最適化（server.jsとの兼ね合い）

@@ -88,9 +88,17 @@ function reloadPage() {
   window.location.reload(true);
 }
 
+
+
+let FOLDER_ID = '1QsqLlsAp5MUSHbn7Cibh9WQ8DG-oKdzl';//ventus-talk-dev
+
+
+
+
+
 // 必要なものをエクスポート
 export { 
-    appd, app1, app2, appUsers, appInfo,getToken,onMessage,
+    appd, app1, app2, appUsers, appInfo,getToken,onMessage,FOLDER_ID,
     dbdev, db1, db2, dbUsers, dbInfo, startAfter,messaging,
     collection, addDoc,arrayUnion,updateDoc,reloadPage,serverTimestamp, limit,onSnapshot, query, orderBy, username ,getDocs,setDoc,doc,myuserId,getDoc
 };

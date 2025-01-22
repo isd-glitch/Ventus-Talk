@@ -18,10 +18,10 @@ const urlsToCache = [
   '/firebase-setup.js',
   '/manifest.json',
   '/menuNavigation.js',
-  'https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOhome.png?v=1736752485769',
-  'https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOTalk.png?v=1736752489537',
-  'https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOsettings.png?v=1736752493753',
-  'https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOaddFriend.png?v=1736769966865'
+  'https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/IMG_3305.PNG?v=1737195730742',
+  'https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOHome.png?v=1737195839565',
+  'https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOTalk.png?v=1737195832005',
+  'https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOSetting.png?v=1737195842738'
 ];
 
 // キャッシュのインストール
@@ -38,7 +38,9 @@ self.addEventListener('install', event => {
   );
 });
 
+
 // フェッチ処理 (開発モード)
+
 self.addEventListener('fetch', event => {
   console.log('Development mode: Fetch event for ', event.request.url);
   event.respondWith(
@@ -60,9 +62,9 @@ self.addEventListener('fetch', event => {
   );
 });
 
+
+
 /*
-
-
 self.addEventListener('fetch', event => {
   console.log('Fetch event for ', event.request.url);
   event.respondWith(
@@ -93,8 +95,8 @@ self.addEventListener('fetch', event => {
       })
   );
 });
-*/
 
+*/
 /*
 self.addEventListener('fetch', event => {
     console.log('Fetch event for ', event.request.url);

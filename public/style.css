@@ -101,13 +101,6 @@ body {
     background-color: #f5f5f5;
 }
 
-/*
-#menu-bar-top {
-    padding: 20px;
-    border-bottom: 1px solid #dddddd;
-    background-color: #fafafa;
-}
-*/
 #chat-box {
     flex-grow: 1;
     padding: 20px;
@@ -115,7 +108,6 @@ body {
     border-bottom: 1px solid #dddddd;
     background-color: #f9f9f9;
 }
-
 #tool-bar {
     padding: 10px;
     display: flex;
@@ -279,10 +271,13 @@ body {
     cursor: pointer;
 }
 
-
 #logo {
-    width: 512px;
-    height: 512px;
+    display: block;
+  width:512px;
+  height:512px;
+    margin-left: auto;
+    margin-right: auto;
+  padding-top:30px;
 }
 
 #chat-menu {
@@ -313,6 +308,31 @@ body {
 #back-button {
   display: none;
 }
+
+
+#progress-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000; /* 高い値を設定して、他の要素の上に表示 */
+  background-color: rgba(255, 255, 255, 0); /* 完全に透明にする */
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: none; /* 初期状態では非表示 */
+}
+
+#progress-bar {
+  height: 20px;
+  width: 100px;
+  background-color: #4caf50;
+  text-align: center;
+  line-height: 20px;
+  color: white;
+  transition: width 0.4s ease;
+}
+
 /* スマホの縦画面向き用スタイル */
 @media (max-width: 768px) {
     #container {
@@ -400,3 +420,166 @@ body {
     }
 }
 
+
+
+
+
+/* ===== テーマ1: ダークモード ===== */
+body.dark-mode {
+    background-color: #2e2e2e;
+    color: #ffffff; /* テキストの色を白に */
+}
+#left-panel.dark-mode,
+#right-panel.dark-mode {
+    background-color: #3b3b3b;
+    color: #ffffff; /* テキストの色を白に */
+}
+#user-info.dark-mode {
+    background-color: #444444;
+    color: #ffffff; /* テキストの色を白に */
+}
+#chat-box.dark-mode {
+    background-color: #3b3b3b;
+    color: #ffffff; /* テキストの色を白に */
+}
+.message-item.self .message-bubble.dark-mode {
+    background-color: #4a7c4a;
+    color: #ffffff; /* テキストの色を白に */
+}
+.message-item.other .message-bubble.dark-mode {
+    background-color: #6e4e38;
+    color: #ffffff; /* テキストの色を白に */
+}
+#send-button.dark-mode {
+    background-color: #444444;
+    color: #ffffff; /* テキストの色を白に */
+}
+#send-button.dark-mode:hover {
+    background-color: #5a5a5a;
+    color: #ffffff; /* テキストの色を白に */
+}
+
+/* ===== テーマ2: サマーブルー ===== */
+body.summer-blue {
+    background-color: #dceeff;
+}
+#left-panel.summer-blue,
+#right-panel.summer-blue {
+    background-color: #e7f3ff;
+}
+#user-info.summer-blue {
+    background-color: #b0d8ff;
+}
+#chat-box.summer-blue {
+    background-color: #e7f3ff;
+}
+.message-item.self .message-bubble.summer-blue {
+    background-color: #a2c2ff;
+}
+.message-item.other .message-bubble.summer-blue {
+    background-color: #c2d4ff;
+}
+#send-button.summer-blue {
+    background-color: #007bff;
+}
+#send-button.summer-blue:hover {
+    background-color: #0056b3;
+}
+
+/* ===== テーマ3: グラデーションピンク ===== */
+body.gradient-pink {
+    background: linear-gradient(to right, #ffafbd, #ffc3a0);
+}
+#left-panel.gradient-pink,
+#right-panel.gradient-pink {
+    background: linear-gradient(to right, #ffafbd, #ffc3a0);
+}
+#user-info.gradient-pink {
+    background: linear-gradient(to right, #ffafbd, #ffc3a0);
+}
+#chat-box.gradient-pink {
+    background: linear-gradient(to right, #ffafbd, #ffc3a0);
+}
+.message-item.self .message-bubble.gradient-pink {
+    background-color: #ff9a9e;
+}
+.message-item.other .message-bubble.gradient-pink {
+    background-color: #fecfef;
+}
+#send-button.gradient-pink {
+    background-color: #ff9a9e;
+}
+#send-button.gradient-pink:hover {
+    background-color: #f77062;
+}
+
+/* ===== テーマ4: フォレストグリーン ===== */
+body.forest-green {
+    background-color: #e5efe5;
+}
+#left-panel.forest-green,
+#right-panel.forest-green {
+    background-color: #f0f9f0;
+}
+#user-info.forest-green {
+    background-color: #c8e6c9;
+}
+#chat-box.forest-green {
+    background-color: #f0f9f0;
+}
+.message-item.self .message-bubble.forest-green {
+    background-color: #a5d6a7;
+}
+.message-item.other .message-bubble.forest-green {
+    background-color: #c5e1a5;
+}
+#send-button.forest-green {
+    background-color: #66bb6a;
+}
+#send-button.forest-green:hover {
+    background-color: #4caf50;
+}
+/* ===== テーマ5: ブラック＆ピンクグラデーション ===== */
+body.gradient-black-pink {
+    background: linear-gradient(to right, #000000, #ff69b4);
+    color: #ffffff; /* テキストの色を白に */
+}
+#left-panel.gradient-black-pink,
+#right-panel.gradient-black-pink {
+    background: none;
+    color: #ffffff; /* テキストの色を白に */
+}
+#user-info.gradient-black-pink {
+    background: none;
+    color: #ffffff; /* テキストの色を白に */
+}
+#chat-box.gradient-black-pink {
+    background: none;
+    color: #ffffff; /* テキストの色を白に */
+}
+.message-item.self .message-bubble.gradient-black-pink {
+    background-color: #ff1493; /* 濃いピンク色 */
+    color: #000000; /* テキストの色を白に */
+}
+.message-item.other .message-bubble.gradient-black-pink {
+    background-color: #ff69b4; /* ピンク色 */
+    color: #ffffff; /* テキストの色を白に */
+}
+#send-button.gradient-black-pink {
+    background-color: #ff69b4; /* ピンク色 */
+    color: #ffffff; /* テキストの色を白に */
+}
+#send-button.gradient-black-pink:hover {
+    background-color: #ff1493; /* 濃いピンク色 */
+    color: #ffffff; /* テキストの色を白に */
+}
+
+/* メニューバーにグラデーションを適用 */
+#menu-bar.gradient-black-pink {
+    background: none;
+    color: #ffffff; /* テキストの色を白に */
+}
+.menu-item.gradient-black-pink:hover {
+    background-color: rgba(255, 20, 147, 0.5); /* 濃いピンク色の半透明 */
+    border-radius: 5px;
+}

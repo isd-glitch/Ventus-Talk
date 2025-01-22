@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="../menu.css">
     <link rel="stylesheet" href="home.css">
+  <link rel="stylesheet" href="../log.css">
   <script src="//cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
 </head>
@@ -15,9 +16,9 @@
     <div id="container">
         <div id="left-panel">
             <!-- Add the button with image and text -->
-            <div id="add-friend">
-                <img src="add-friend-icon.png" alt="友達追加アイコン">
-                <div class="add-friend-text">友達追加</div>
+            <div id="add-friend" style="display: flex; align-items: center;">
+                <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/IMG_3305.PNG?v=1737195730742" alt="友達追加" style="width:32px;height:32px;margin-right: 8px;">
+                <p style="margin: 0;">友達追加</p>
             </div>
             <div id="user-info">
                 <img src="profile-pic.jpg" alt="Profile Picture">
@@ -29,15 +30,15 @@
             </div>
             <div id="menu-bar">
                 <div class="menu-item" data-page="home">
-                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOhome.png?v=1736752485769" alt="ホームアイコン">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOHome.png?v=1737195839565" alt="ホームアイコン">
                     <div>ホーム</div>
                 </div>
                 <div class="menu-item" data-page="talk">
-                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOTalk.png?v=1736752489537" alt="トークアイコン">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOTalk.png?v=1737195832005" alt="トークアイコン">
                     <div>トーク</div>
                 </div>
                 <div class="menu-item" data-page="settings">
-                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOsettings.png?v=1736752493753" alt="設定アイコン">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOSetting.png?v=1737195842738" alt="設定アイコン">
                     <div>設定</div>
                 </div>
             </div>
@@ -51,8 +52,8 @@
                 <span id="user-id-display">ユーザーID: --Loading--</span>
               <label onclick="copyUserIdToClipboard()">UserIDをクリップボードにコピー</label>
                 <img id="qr-code" src="qr-code-placeholder.png" alt="QRコード">
-                <label for="user-id">友達をUser IDで登録：</label>
-                <input type="text" id="user-id" name="user-id">
+                <label for="friend">友達をUser IDで登録：</label>
+                <input type="text" id="friend" name="friend" autocomplete="off">
                 <button id="register-button" >登録</button>
             </div>
         </div>

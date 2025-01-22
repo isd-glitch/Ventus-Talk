@@ -18,6 +18,13 @@ app.listen(3000, () => {
   console.log('Server started on http://localhost:3000');
 });
 
+const corsOptions = {
+  origin: 'https://ventus-talk.glitch.me',
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
+
+
 app.use(bodyParser.json());
 
 const keys = require('./ventus-talk-dev-1d6a05c348be.json');
@@ -43,23 +50,36 @@ app.get('/get-token', async (req, res) => {
 
 
 
+// FCMサーバーの初期化
+const serviceAccountFCM = require('./ventus-talk-dev-firebase-adminsdk-1iv00-9d4ecb0874.json');
+const appFCM = admin.initializeApp({
+  credential: admin.credential.cert(serviceAccountFCM),
+  databaseURL: 'https://ventus-talk-dev.firebaseio.com'
+}, 'appFCM');
+const dbFCM = appFCM.firestore();
 
-
-
-
-const serviceAccount = require('./ventus-talk-dev-firebase-adminsdk-1iv00-9d4ecb0874.json');
-
+// Usersサーバーの初期化
+const serviceAccountUsers = require('./ventus-talk-users-firebase-adminsdk-fbsvc-3577d8e162.json');
+const appUsers = admin.initializeApp({
+  credential: admin.credential.cert(serviceAccountUsers),
+  databaseURL: 'https://ventus-talk-users.firebaseio.com'
+}, 'appUsers');
+const dbUsers = appUsers.firestore();
+/*
+// ChatGroupサーバーの初期化
+const serviceAccountChatGroup = require('./ventus-talk-chatgroup-firebase-adminsdk-1iv00-9d4ecb0874.json');
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.cert(serviceAccountChatGroup),
+  databaseURL: 'https://<your-firebase-project-id>.firebaseio.com' // ChatGroup用のデータベースURL
 });
-const db = admin.firestore();
-
+const dbChatGroup = admin.firestore();
+*/
 const getAccessToken = () => {
   return new Promise((resolve, reject) => {
     const jwtClient = new google.auth.JWT(
-      serviceAccount.client_email,
+      serviceAccountFCM.client_email,
       null,
-      serviceAccount.private_key,
+      serviceAccountFCM.private_key,
       ['https://www.googleapis.com/auth/firebase.messaging'],
       null
     );
@@ -118,7 +138,7 @@ const sendPushNotification = (accessToken, token, message, chatId) => {
 };
 
 const startMonitoringMessages = () => {
-  db.collection('ChatGroup').onSnapshot(snapshot => {
+  dbFCM.collection('ChatGroup').onSnapshot(snapshot => {
     snapshot.docChanges().forEach(change => {
       if (change.type === 'modified') {
         const chatId = change.doc.id;
@@ -135,7 +155,7 @@ const startMonitoringMessages = () => {
 };
 
 const notifyUsers = async (chatId, lastMessage) => {
-  const chatGroupDoc = await db.collection('ChatGroup').doc(chatId).get();
+  const chatGroupDoc = await dbFCM.collection('ChatGroup').doc(chatId).get();
   if (!chatGroupDoc.exists) return;
 
   const senderId = lastMessage.sender; // 送信者のIDを取得
@@ -144,7 +164,7 @@ const notifyUsers = async (chatId, lastMessage) => {
   usernames.forEach(async (userId) => {
     if (userId === senderId) return; // 送信者には通知を送らない
 
-    const userDoc = await db.collection('users').doc(userId).get();
+    const userDoc = await dbUsers.collection('users').doc(userId).get();
     if (!userDoc.exists) return;
 
     const userToken = userDoc.data().token;
@@ -160,12 +180,12 @@ const notifyUsers = async (chatId, lastMessage) => {
     const accessToken = await getAccessToken();
     sendPushNotification(accessToken, userToken, lastMessage, chatId);
 
-    await db.collection('users').doc(userId).update({
+    await dbUsers.collection('users').doc(userId).update({
       chatIdList: updatedChatIdList
     });
   });
 };
-
+startMonitoringMessages();
 
 /*
 const notifyUsers = async (chatId, lastMessage) => {
@@ -201,8 +221,8 @@ const notifyUsers = async (chatId, lastMessage) => {
 };
 */
 
-startMonitoringMessages();
 
+/*
 app.get('/push', async (req, res) => {
   try {
     const accessToken = await getAccessToken();
@@ -217,3 +237,4 @@ app.get('/push', async (req, res) => {
     res.json({ status: `${error}` });
   }
 });
+*/

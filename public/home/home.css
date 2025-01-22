@@ -33,7 +33,7 @@
     text-align: center;
 }
 
-#user-id-display {
+#friend-id-display {
     font-weight: bold;
     margin-bottom: 10px;
 }
@@ -77,4 +77,17 @@ button {
 
 button:hover {
     background-color: #45a049;
+}
+
+
+
+/* スマホ向けのスタイル調整 */
+@media (max-width: 768px) {
+    #add-friend-window {
+      top: 20%;
+      z-index:10000;
+    }
+    #add-friend-window.visible {
+      bottom:0;
+    }
 }

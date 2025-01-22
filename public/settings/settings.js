@@ -65,10 +65,12 @@ function compressAndEncodeImage(file, width, height, callback) {
 }
 
 function saveProfileImageToFirestore(base64Image) {
-    setDoc(doc(dbdev, 'users', myuserId), { profile_ico: base64Image }, { merge: true })
+    setDoc(doc(dbUsers, 'users', myuserId), { profile_ico: base64Image }, { merge: true })
         .then(() => {
             addLog('プロフィール画像が更新されました',"b");
+            localStorage.setItem('profileImage', base64Image);
             loadCurrentProfileImage(); // 更新後に再表示
+            setProfileImageFromLocalStorage();
         })
         .catch(error => {
             alert('プロフィール画像の更新に失敗しました: ', error);
@@ -76,7 +78,7 @@ function saveProfileImageToFirestore(base64Image) {
 }
 
 function loadCurrentProfileImage() {
-    getDoc(doc(dbdev, 'users', myuserId)).then(docSnap => {
+    getDoc(doc(dbUsers, 'users', myuserId)).then(docSnap => {
         if (docSnap.exists()) {
             const data = docSnap.data();
             const profileImage = data.profile_ico || '';
@@ -94,13 +96,48 @@ document.addEventListener('DOMContentLoaded', () => {
   signOut();
   font();
   notification_auth();
+  setProfileImageFromLocalStorage();
+  init_thema()
+  setProfileImageFromLocalStorage();
+  const rightPanel = document.getElementById("right-panel");
+  const backButton = document.getElementById("back-button");
+  
+  backButton.addEventListener("click", function() {
+    rightPanel.classList.remove("open");
+  });
+  /*
+  rightPanel.addEventListener('click', (event) => {
+    // クリックされた要素が<div>タグであることを確認
+    if (event.target && event.target.tagName === 'DIV') {
+      console.log(`${event.target.id}がクリックされました`);
+      rightPanel.classList.remove("open");
+    }
+  });
+  */
+  
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    // すべての settings-item クラスの div 要素を取得
+    const settingsItems = document.querySelectorAll('#settings-list .settings-item');
+    // 各 settings-item 要素にタッチイベントリスナーを追加
+    settingsItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const clickedElement = item;
+            // クリックされた要素に対して何かを実行（例えば、コンソールに表示）
+            console.log('Touched on:', clickedElement.dataset.page);
+          const rightPanel = document.getElementById("right-panel");
+          rightPanel.classList.toggle("open");
+        });
+    });
+});
 
 function change_username(){
   const changeUsernameButton = document.getElementById('change-username');
     const usernameInput = document.getElementById('username-input');
     changeUsernameButton.addEventListener('click', async () => {
+      
+      console.log('username');
         const newUsername = usernameInput.value.trim();
         if (!newUsername) {
             alert('ユーザーネームを入力してください。');
@@ -109,9 +146,9 @@ function change_username(){
 
         try {
             // FirestoreのusersコレクションのmyuserIdドキュメントを更新
-            await setDoc(doc(dbdev, 'users', myuserId), { username: newUsername }, { merge: true });
+            await setDoc(doc(dbUsers, 'users', myuserId), { username: newUsername }, { merge: true });
             await localStorage.setItem('username', newUsername);
-            alert('ユーザーネームが変更されました。');
+            addLog('ユーザーネームが変更されました。',"info");
         } catch (error) {
             console.error('ユーザーネームの変更中にエラーが発生しました: ', error);
             alert('ユーザーネームの変更中にエラーが発生しました: ' + error.message);
@@ -119,8 +156,9 @@ function change_username(){
     });
 }
 
+import {setProfileImageFromLocalStorage} from '../log.js';
 
-
+document.getElementById('renotice').addEventListener('click', () => saveuserToken());
 function notification_auth() {
   const notification = document.getElementById('notification');
   notification.addEventListener('click', () => {
@@ -140,11 +178,14 @@ function notification_auth() {
 
 async function saveuserToken() {
   try {
+    addLog('通知設定を登録中です画面を切り替えないでください。',"info")
     const token = await getToken(messaging, { vapidKey: 'BKUDfUUeYgn8uWaWW1_d94Xyt03iBIHoLvyu1MNGPPrc72J2m5E3ckzxLqwHrsCQ9uJ5m-VhuHEjxquWqyKzTGE' });
     console.log(token);
     if (token) {
-      await setDoc(doc(dbdev, 'users', myuserId), { token }, { merge: true });
-      addLog('通知トークンが保存されました:', "info");
+      await setDoc(doc(dbUsers, 'users', myuserId), { token }, { merge: true });
+      const currentDate = new Date();
+      localStorage.setItem('TokenLastUpdate', currentDate.toISOString());
+      addLog('設定完了', "info");
     } else {
       console.warn('通知トークンを取得できませんでした');
     }
@@ -166,6 +207,7 @@ function signOut(){
         if (confirmation) {
             // ローカルストレージをクリア
             localStorage.clear();
+            localStorage.setItem('condition',"init");
             // ログインページにリダイレクト
             window.location.href = '../login/login.html';
         }
@@ -192,3 +234,26 @@ function font(){
   
     
 };
+
+
+
+// テーマの適用関数
+function applyTheme(theme) {
+    document.body.className = ''; // 既存のクラスをクリア
+    if (theme !== 'default') {
+        document.body.classList.add(theme);
+    }
+}
+function init_thema(){
+  // 初期テーマを適用
+  const savedTheme = localStorage.getItem('theme') || 'default';
+  applyTheme(savedTheme);
+  document.getElementById('theme-select').value = savedTheme;
+
+  // テーマ変更時の処理
+  document.getElementById('theme-select').addEventListener('change', (event) => {
+      const selectedTheme = event.target.value;
+      applyTheme(selectedTheme);
+      localStorage.setItem('theme', selectedTheme);
+  });
+}

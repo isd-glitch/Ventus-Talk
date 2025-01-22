@@ -29,7 +29,6 @@
                 <div class="settings-item" data-page="privacy-settings">アカウント/プライバシー設定</div>
                 <div class="settings-item" data-page="font">フォント</div>
                 <div class="settings-item" data-page="app-icon">アプリアイコン</div>
-                <div class="settings-item" data-page="notifications">通知</div>
                 <div class="settings-item" data-page="photos-videos">写真と動画</div>
                 <div class="settings-item" data-page="talk-settings">トーク</div>
                 <div class="settings-item" data-page="friends">友達</div>
@@ -40,23 +39,23 @@
             <!-- 下部のメニューバーを追加 -->
             <div id="bottom-menu-bar">
                 <div class="menu-item" data-page="home">
-                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOhome.png?v=1736752485769" alt="ホームアイコン">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOHome.png?v=1737195839565" alt="ホームアイコン">
                     <div>ホーム</div>
                 </div>
                 <div class="menu-item" data-page="talk">
-                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOTalk.png?v=1736752489537" alt="トークアイコン">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOTalk.png?v=1737195832005" alt="トークアイコン">
                     <div>トーク</div>
                 </div>
                 <div class="menu-item" data-page="settings">
-                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOsettings.png?v=1736752493753" alt="設定アイコン">
+                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOSetting.png?v=1737195842738" alt="設定アイコン">
                     <div>設定</div>
                 </div>
             </div>
         </div>
         <div id="right-panel">
+          <button id="back-button">＜</button><!--モバイル用-->
             <!-- 設定の名前を表示 -->
-            <div id="settings-content">設定を選択してください</div>
-            
+            <div id="settings-content">設定を選択してください</div>            
             <!-- 設定ページを追加 -->
             <div id="profile" class="settings-page" style="display: none;">
                 <h2>プロフィール</h2>
@@ -73,15 +72,11 @@
                     <button id="upload-profile-image" class="styled-button">画像をアップロード</button>
                 </div>
             </div>
-
-
-            
             <div id="privacy-settings" class="settings-page" style="display: none;">
                 <h2>アカウント/プライバシー設定</h2>
                 <div class="profile-item">
-                  <button id="notification" class="styled-button">
-                    通知
-                  </button>
+                  <button id="notification" class="styled-button">通知を許可する</button>
+                  <button id="renotice" class="styled-button">通知が来ない場合</button>
                     <button id="signout-button" class="styled-button">サインアウト</button>
                 </div>
                 <!-- プライバシー設定の内容 -->
@@ -133,11 +128,6 @@
                 <!-- アプリアイコンの内容 -->
             </div>
 
-            <div id="notifications" class="settings-page" style="display: none;">
-                <h2>通知</h2>
-                <!-- 通知の内容 -->
-            </div>
-
             <div id="photos-videos" class="settings-page" style="display: none;">
                 <h2>写真と動画</h2>
                 <!-- 写真と動画の内容 -->
@@ -145,8 +135,17 @@
 
             <div id="talk-settings" class="settings-page" style="display: none;">
                 <h2>トーク</h2>
-                <!-- トーク設定の内容 -->
+                <label for="theme-select">テーマカラーを選択:</label>
+                <select id="theme-select">
+                    <option value="default">デフォルト</option>
+                    <option value="dark-mode">ダークモード</option>
+                    <option value="summer-blue">サマーブルー</option>
+                    <option value="gradient-pink">グラデーションピンク</option>
+                    <option value="forest-green">フォレストグリーン</option>
+                    <option value="gradient-black-pink">ブラック＆ピンクグラデーション</option>
+                </select>
             </div>
+
 
             <div id="friends" class="settings-page" style="display: none;">
                 <h2>友達</h2>
@@ -161,7 +160,7 @@
 
 
             <div id="developer" class="settings-page" style="display: none;">
-                <h2>開発陣より</h2>
+                <h2>開発者より</h2>
                 <!-- 開発陣よりの内容 -->
             </div>
         </div>
