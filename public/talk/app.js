@@ -1,7 +1,7 @@
 import {
   dbdev,onMessage,collection,messaging,getToken,doc,addDoc,arrayUnion,reloadPage,
   updateDoc,dbUsers,setDoc,serverTimestamp,startAfter,onSnapshot,limit,
-  query,orderBy,getDocs,getDoc,
+  query,orderBy,getDocs,getDoc,dbInfo
 } from "../firebase-setup.js";
 import { addLog } from "../log.js";
 import { setProfileImageFromLocalStorage } from "../log.js";
@@ -77,7 +77,7 @@ sendButton.addEventListener("click", async () => {
     reloadPage();
   }
 });
-
+let senderCache = {};
 async function loadMessages(chatId) {
   chatBox.innerHTML = "";
   if (!chatId) {
@@ -92,7 +92,6 @@ async function loadMessages(chatId) {
   const chatRef = doc(dbdev, `ChatGroup/${chatId}`);
   let lastDate = "";
   let isinit = true;
-  let senderCache = {};
   unsubscribeMessages = onSnapshot(
     chatRef,
     async (docSnapshot) => {
@@ -117,21 +116,17 @@ async function loadMessages(chatId) {
           resourceFileId,
           extension,
         } = message;
-
         console.log(`Processing message from sender: ${sender}`);
-
         if (added_message_id.includes(messageId)) {
           continue;
         } else {
           added_message_id.push(messageId);
         }
-
         if (!senderCache[sender]) {
           console.log(`Sender ${sender} not found in cache`);
-
           if (sender !== myuserId) {
             console.log("Fetching user data from database");
-            const userRef = doc(dbUsers, "users", sender);
+            const userRef = doc(dbInfo, "users", sender);
             const userDoc = await getDoc(userRef);
             //if (sender===myuserId && !userDoc){localStorage.clear()}
             if (userDoc.exists()) {
@@ -152,7 +147,6 @@ async function loadMessages(chatId) {
         } else {
           console.log("Found cache for sender");
         }
-
         if (senderCache[sender]) {
           const { userName, userIcon } = senderCache[sender];
           const messageTimestamp = new Date(timestamp);
@@ -185,12 +179,11 @@ async function loadMessages(chatId) {
             icon_html = `<img class="icon" src="${userIcon}" alt="${userName}のアイコン">`;
             username_html = `<div class="username">${userName}</div>`;
           }
-
           let message_html = `
                     ${dateDivider}
                     <div class="message-item ${
                       sender === myuserId ? "self" : "other"
-                    }">
+                    } draggable="true" >
                         ${icon_html}
                         <div class="message-content" style="${margin_style}">
                             ${username_html}`;
@@ -285,11 +278,9 @@ function linkify(text) {
     ) {
       return `<a href="${modifiedUrl}" target="_blank">${splitLongUrl(
         modifiedUrl
-      )}</a><br><br><br><a href="https://edu-open-4step.glitch.me." target="_blank">規制回避用url</a><br>`;
+      )}</a><br><a href="https://edu-open-4step.glitch.me." target="_blank">規制回避用url</a><br><br><br>`;
     } else {
-      return `<a href="${modifiedUrl}" target="_blank">${splitLongUrl(
-        modifiedUrl
-      )}</a>`;
+      return `<a href="${modifiedUrl}" target="_blank">${splitLongUrl(modifiedUrl)}</a>`;
     }
   });
 }
@@ -312,13 +303,14 @@ function extractYoutubeEmbedUrl(text) {
 
 // 開業位置を調整する関数
 function insertWbrEvery100Chars(text) {
-  return text.replace(/(.{50})/g, "$1<wbr>");
+  return text.replace(/(.{90})/g, "$1<wbr>");
 }
 
 async function updateOtherChatListeners() {
   console.log("update other chat list");
-  const userDocRef = doc(dbUsers, "users", myuserId);
+  //const userDocRef = doc(dbUser s, "users", myuserId);
   try {
+    /*
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("Firestore request timed out")), 8000)
     );
@@ -328,6 +320,7 @@ async function updateOtherChatListeners() {
       return;
     }
     const chatIdList = userDoc.data().chatIdList || [];
+    */
     if (chatIdList.length === 0) {
       console.log("ChatIdListが空です。");
       return;
@@ -383,9 +376,8 @@ async function updateOtherChatListeners() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  setProfileImageFromLocalStorage();
   ini_fileUpload();
-  init_profile_ico();
+  //init_profile_ico();
   const rightPanel = document.getElementById("right-panel");
   const backButton = document.getElementById("back-button");
   backButton.addEventListener("click", function () {
@@ -428,6 +420,28 @@ function writeChatId(chatId) {
   var chatInfoButton = document.getElementById("chat-info");
   chatInfoButton.innerHTML = " (ID: " + chatId + ")";
 }
+
+
+async function profileIcon() {
+  const userInfoDocRef = doc(dbInfo, "users",myuserId);
+  try{
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Firestore request timed out")), 8000)
+    );
+    const userDoc = await Promise.race([getDoc(userInfoDocRef), timeoutPromise]);
+    if (!userDoc.exists()) {
+      addLog('not foundICON',"b");
+      return;
+    }
+    localStorage.setItem("profileImage", userDoc.data().profile_ico);
+    setProfileImageFromLocalStorage();
+  }catch(error){
+    addLog(error,"error")
+  }
+}
+
+let chatIdList = [];
+let friendList = [];
 async function updateChatList() {
   const chatList = document.getElementById("chat-list");
   const userDocRef = doc(dbUsers, "users", myuserId);
@@ -442,7 +456,9 @@ async function updateChatList() {
       window.location.href = "/login/login.html";
       return;
     }
-    const chatIdList = userDoc.data().chatIdList || [];
+    chatIdList = userDoc.data().chatIdList || [];
+    friendList = userDoc.data().friendList || [];
+    
     if (chatIdList.length === 0) {
       addLog("ChatIdListが空です。");
       return;
@@ -533,6 +549,7 @@ window.onload = async () => {
   if (savedFont) {
     document.getElementById("chat-box").style.fontFamily = savedFont;
   }
+  profileIcon()
   updateOtherChatListeners();
 };
 
@@ -540,24 +557,24 @@ async function updateFriendList() {
   const friendListContainer = document.getElementById("friend-list");
   const selectedFriendsContainer = document.getElementById("selected-friends");
   const selectedFriends = new Set(); // 選択された友達のセット
-  const userDocRef = doc(dbUsers, `users/${myuserId}`);
-  const userDoc = await getDoc(userDocRef);
+  //const userDocRef = doc(dbUser s, `users/${myuserId}`);
+  //const userDoc = await getDoc(userDocRef);
 
-  if (!userDoc.exists) {
+  if (!friendList) {
     friendListContainer.innerHTML = "<p>No user data found.</p>";
     return;
   }
 
-  const userData = userDoc.data();
-  const friends = userData.friendList || [];
+  //const userData = userDoc.data();
+  //const friends = userData.friendList || [];
 
-  if (friends.length === 0) {
+  if (friendList.length === 0) {
     friendListContainer.innerHTML = "<p>No friends found.</p>";
     return;
   }
 
   friendListContainer.innerHTML = "";
-  friends.forEach((userId) => {
+  friendList.forEach((userId) => {
     const friendItem = document.createElement("div");
     friendItem.classList.add("friend-item");
     friendItem.textContent = userId;
@@ -638,7 +655,7 @@ async function saveuserToken() {
     });
     console.log(token);
     if (token) {
-      await setDoc(doc(dbUsers, "users", myuserId), { token }, { merge: true });
+      await setDoc(doc(dbInfo, "users", myuserId), { token }, { merge: true });
       console.log("通知トークンが保存されました:", token);
       localStorage.setItem("TokenLastUpdate", currentDate.toISOString());
     } else {
@@ -904,11 +921,11 @@ function ini_fileUpload() {
     }
   });
 }
-
+/*
 // プロファイル画像を取得してローカルストレージに保存する関数
 const saveProfileImageToLocalStorage = async (myUserId) => {
   try {
-    const userDocRef = doc(dbUsers, `users/${myUserId}/profile_ico`);
+    const userDocRef = doc(dbUser s, `users/${myUserId}/profile_ico`);
     const userDocSnap = await getDoc(userDocRef);
 
     if (userDocSnap.exists()) {
@@ -924,12 +941,13 @@ const saveProfileImageToLocalStorage = async (myUserId) => {
     console.error("Error getting document:", error);
   }
 };
+
 function init_profile_ico() {
   if (localStorage.getItem("profileImage") === "init") {
     saveProfileImageToLocalStorage();
   }
 }
-
+*/
 /*
 window.addEventListener('scroll', function() {
   console.log('scroll');
