@@ -3,8 +3,7 @@ import {
   updateDoc,dbUsers,setDoc,serverTimestamp,startAfter,onSnapshot,limit,
   query,orderBy,getDocs,getDoc,dbInfo
 } from "../firebase-setup.js";
-import { addLog } from "../log.js";
-import { setProfileImageFromLocalStorage } from "../log.js";
+import { addLog,setProfileImageFromLocalStorage } from "../helper.js";
 const username = localStorage.getItem("username");
 const myuserId = localStorage.getItem("userID");
 
@@ -24,11 +23,18 @@ onMessage(messaging, (payload) => {
   }
 });
 
+
+
+
+
 chatInput.addEventListener("keydown", function (event) {
-  if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+  if (((event.metaKey || event.ctrlKey) && event.key === "Enter") && chatInput.value) {
     sendButton.click();
+    //event.preventDefault();  // デフォルトのアクションを防止
   }
 });
+
+
 
 let unsubscribeMessages = null; // 現在のチャットのスナップショットリスナーを解除するための関数
 let otherChatListeners = {}; // その他のチャットのスナップショットリスナーを保持するオブジェクト
@@ -39,14 +45,19 @@ function generateRandomId() {
 sendButton.addEventListener("click", async () => {
   const message = chatInput.value.trim();
   if (!message || !selectedChatId) {
-    alert(
-      !selectedChatId
-        ? "チャットが選択されていません。"
-        : "メッセージが空です。"
-    );
+    if (!selectedChatId){addLog("チャットが選択されていません。","b");}
     return;
   }
+  chatInput.value = "";
+  const sendChatId = selectedChatId
   const formattedMessage = message.replace(/\n/g, "<br>");
+  const MAX_SIZE = 80000; // 80KB
+  const messageSize = new Blob([formattedMessage]).size;
+  if (messageSize > MAX_SIZE) {
+      console.error("エラーログ: メッセージのデータサイズが80KBを超えています。");
+      alert("警告: メッセージのデータサイズが80KBを超えています。BANするぞ、テメェ。");
+      return;
+  }
   const timestamp = new Date().toISOString();
   const messageId = generateRandomId();
   const newMessage = {
@@ -56,25 +67,32 @@ sendButton.addEventListener("click", async () => {
     sender: myuserId,
   };
   try {
-    const chatRef = doc(dbdev, `ChatGroup/${selectedChatId}`);
+    const chatRef = doc(dbdev, `ChatGroup/${sendChatId}`);
     const chatDoc = await getDoc(chatRef);
     if (chatDoc.exists()) {
       let messages = chatDoc.data().messages || [];
       messages.push(newMessage);
       // メッセージの数が100を超えた場合、古いメッセージを削除する
-      if (messages.length > 100) {
-        messages = messages.slice(-100);
+      if (messages.length > 100) {messages = messages.slice(-100);}
+      let totalSize = new TextEncoder().encode(JSON.stringify(messages)).length;
+      const maxSize = 1048576;//1MB
+      while (totalSize > maxSize) {
+        messages.shift();
+        totalSize = new TextEncoder().encode(JSON.stringify(messages)).length;
       }
       await setDoc(chatRef, { messages }, { merge: true });
     } else {
       await setDoc(chatRef, { messages: [newMessage] });
     }
-    chatInput.value = "";
+    
+    await setDoc(doc(dbInfo,`ChatGroup/${sendChatId}`),{message:formattedMessage.substring(0,30),lastMessageId: messageId,sender:myuserId},{merge:true});
+    //完了したことをユーザーに知らせる
   } catch (error) {
     console.error("Error adding document: ", error);
     alert("メッセージ送信中にエラーが発生しました: " + error.message);
     addLog("メッセージ送信中にエラーが発生しました: " + error.message, error);
-    reloadPage();
+    chatInput.value = message
+    //reloadPage();
   }
 });
 let senderCache = {};
@@ -85,6 +103,7 @@ async function loadMessages(chatId) {
     return;
   }
   if (unsubscribeMessages) {
+    console.log(unsubscribeMessages)
     unsubscribeMessages();
   }
   selectedChatId = chatId;
@@ -92,9 +111,7 @@ async function loadMessages(chatId) {
   const chatRef = doc(dbdev, `ChatGroup/${chatId}`);
   let lastDate = "";
   let isinit = true;
-  unsubscribeMessages = onSnapshot(
-    chatRef,
-    async (docSnapshot) => {
+  unsubscribeMessages = onSnapshot(chatRef,async (docSnapshot) => {
       if (!docSnapshot.exists()) {
         chatBox.innerHTML = "<p>メッセージはまだありません。</p>";
         return;
@@ -116,19 +133,18 @@ async function loadMessages(chatId) {
           resourceFileId,
           extension,
         } = message;
-        console.log(`Processing message from sender: ${sender}`);
+        //console.log(`Processing message from sender: ${sender}`);
         if (added_message_id.includes(messageId)) {
           continue;
         } else {
           added_message_id.push(messageId);
         }
         if (!senderCache[sender]) {
-          console.log(`Sender ${sender} not found in cache`);
+          //console.log(`Sender ${sender} not found in cache`);
           if (sender !== myuserId) {
             console.log("Fetching user data from database");
             const userRef = doc(dbInfo, "users", sender);
             const userDoc = await getDoc(userRef);
-            //if (sender===myuserId && !userDoc){localStorage.clear()}
             if (userDoc.exists()) {
               const userData = userDoc.data();
               senderCache[sender] = {
@@ -144,9 +160,9 @@ async function loadMessages(chatId) {
               userIcon: "null",
             };
           }
-        } else {
+        }/* else {
           console.log("Found cache for sender");
-        }
+        }*/
         if (senderCache[sender]) {
           const { userName, userIcon } = senderCache[sender];
           const messageTimestamp = new Date(timestamp);
@@ -343,11 +359,7 @@ async function updateOtherChatListeners() {
                   messageId !== lastSeenMessageId &&
                   selectedChatId !== chatId
                 ) {
-                  console.log(
-                    `New message in chat ${chatId}:`,
-                    messageText,
-                    `from ${sender}`
-                  );
+                  //console.log(`New message in chat ${chatId}:`,messageText,`from ${sender}`);
                   localStorage.setItem(`LastMessageId_${chatId}`, messageId);
                   const chatItem = document.querySelector(
                     `.chat-item[data-chat-id="${chatId}"]`
@@ -357,6 +369,8 @@ async function updateOtherChatListeners() {
                     const newMark = document.createElement("span");
                     newMark.classList.add("new-mark");
                     newMark.textContent = "New!";
+                    document.getElementById('reply-target').style.display = 'none';
+                    document.getElementById('reply-content').innerText = '';
                     chatItem.appendChild(newMark);
                   }
                 }
@@ -434,7 +448,10 @@ async function profileIcon() {
       return;
     }
     localStorage.setItem("profileImage", userDoc.data().profile_ico);
+    const username = userDoc.data().username
+    localStorage.setItem("username", username);
     setProfileImageFromLocalStorage();
+    document.getElementById("username").textContent = username;
   }catch(error){
     addLog(error,"error")
   }
@@ -442,6 +459,7 @@ async function profileIcon() {
 
 let chatIdList = [];
 let friendList = [];
+
 async function updateChatList() {
   const chatList = document.getElementById("chat-list");
   const userDocRef = doc(dbUsers, "users", myuserId);
@@ -451,7 +469,7 @@ async function updateChatList() {
     );
     const userDoc = await Promise.race([getDoc(userDocRef), timeoutPromise]);
     if (!userDoc.exists()) {
-      alert("User document not found");
+      addLog("あなたのアカウントはクラウドに存在しません","error");
       localStorage.clear();
       window.location.href = "/login/login.html";
       return;
@@ -466,10 +484,7 @@ async function updateChatList() {
     console.log("chatIdList:", chatIdList);
     const chatItems = chatIdList.map(
       ({ chatId, pinned, serverId, timestamp }) => ({
-        chatId,
-        pinned,
-        serverId,
-        timestamp,
+        chatId,pinned,serverId,timestamp,
       })
     );
     // ソート: pinnedがtrueなら優先、その後timestampで新しい順に並び替え
@@ -483,9 +498,8 @@ async function updateChatList() {
       }
     });
     chatList.innerHTML = chatItems
-      .map(
-        ({ chatId }) => `
-      <div class="chat-item" data-chat-id="${chatId}">
+      .map(({ chatId,serverId }) => `
+      <div class="chat-item" data-chat-id="${chatId}" server="${serverId}">
         <div class="chat-details">
           <div class="chat-group-name">Chat ID: ${chatId}</div>
           <div class="chat-last-message">No messages yet</div>
@@ -500,17 +514,25 @@ async function updateChatList() {
         console.error("Invalid chatId:", chatId);
         continue;
       }
-      const chatGroupRef = doc(dbdev, `ChatGroup/${chatId}`);
+      const chatGroupRef = doc(dbInfo, `ChatGroup/${chatId}`);
       const chatGroupDoc = await getDoc(chatGroupRef);
       if (chatGroupDoc.exists()) {
-        const { chatGroupName, mantwo } = chatGroupDoc.data();
-        // Store the chat group name in the map
-        chatGroupNameMap[chatId] = chatGroupName;
-        const chatItem = document.querySelector(
-          `.chat-item[data-chat-id="${chatId}"] .chat-group-name`
-        );
-        if (chatItem && chatGroupName) {
-          chatItem.textContent = chatGroupName;
+        const { chatGroupName, mantwo, Icon, usernames } = chatGroupDoc.data();
+        const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
+        const chatGroupNameElement = chatItem.querySelector('.chat-group-name');
+        if (chatGroupNameElement && chatGroupName) {
+          chatGroupNameElement.textContent = chatGroupName;
+        }
+        if (!mantwo) {
+          console.log(Icon);
+          chatItem.classList.add('icon-base64');
+          chatItem.style.setProperty('--base64-icon', `url(${Icon})`);
+        } else {
+          const otherUserId = usernames.find((id) => id !== myuserId);
+          console.log(otherUserId)
+          const otherUserProfileIco = await getDoc(doc(dbInfo, `users/${otherUserId}`));
+          chatItem.classList.add('icon-base64');
+          chatItem.style.setProperty('--base64-icon', `url(${otherUserProfileIco.data().profile_ico})`);
         }
       } else {
         console.error("ChatGroup document does not exist:", chatId);
@@ -559,15 +581,12 @@ async function updateFriendList() {
   const selectedFriends = new Set(); // 選択された友達のセット
   //const userDocRef = doc(dbUser s, `users/${myuserId}`);
   //const userDoc = await getDoc(userDocRef);
-
   if (!friendList) {
     friendListContainer.innerHTML = "<p>No user data found.</p>";
     return;
   }
-
   //const userData = userDoc.data();
   //const friends = userData.friendList || [];
-
   if (friendList.length === 0) {
     friendListContainer.innerHTML = "<p>No friends found.</p>";
     return;
@@ -609,10 +628,11 @@ async function createGroup() {
   const selectedFriends = [...selectedFriendsContainer.children].map(
     (child) => child.textContent
   );
-  if (groupName === "" || selectedFriends.length === 0) {
+  if (groupName.trim() === "" || selectedFriends.length === 0) {
     alert("グループ名と友達を選択してください。");
     return;
   }
+  if (groupName.length >= 40){addLog("40文字以内で入力してください。","error");return;}
   const chatId = generateRandomId();
   const allMembers = [myuserId, ...selectedFriends];
   for (const userId of allMembers) {
@@ -625,18 +645,36 @@ async function createGroup() {
       }),
     });
   }
-  const chatGroupRef = doc(dbdev, `ChatGroup/${chatId}`);
+  const base64Image = document.getElementById("group-settings-image").src
+  const chatGroupRef = doc(dbInfo, `ChatGroup/${chatId}`);
   await setDoc(chatGroupRef, {
     chatGroupName: groupName,
-    messages: [],
-    timestamp: new Date().toISOString(),
     usernames: allMembers,
+    Icon:base64Image
   });
+  document.getElementById("group-settings-image").src = null
   addLog("グループが作成されました！");
   groupNameInput.value = "";
   selectedFriendsContainer.innerHTML = "";
   document.getElementById("create-group-window").classList.toggle("visible");
+  const chatList = document.getElementById("chat-list");
+  const serverId = "dev"
+  chatList.innerHTML += `
+      <div class="chat-item" data-chat-id="${chatId}" server="${serverId}">
+        <div class="chat-details">
+          <div class="chat-group-name">Chat ID: ${chatId}</div>
+          <div class="chat-last-message">No messages yet</div>
+        </div>
+      </div>
+    `;
+  chatItem.querySelector('.chat-group-name').textContent = groupName;
+  const chatItem = document.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
+  chatItem.classList.add('icon-base64');
+  chatItem.style.setProperty('--base64-icon', `url(${base64Image})`);
 }
+
+
+
 
 async function saveuserToken() {
   try {
@@ -881,7 +919,6 @@ function ini_fileUpload() {
   fileInput.addEventListener("change", async () => {
     console.log("upload start");
     if (fileInput.files.length === 0) return;
-
     showProgressBar();
     const files = Array.from(fileInput.files); // 複数ファイル対応
     try {
@@ -891,7 +928,6 @@ function ini_fileUpload() {
         addLog(`アップロード中: ${file.name}`, "b");
         const fileData = await uploadFile(file);
         console.log(fileData); // ここでfileDataの内容を確認
-
         const timestamp = new Date().toISOString();
         const messageId = generateRandomId();
         const newMessage = {
@@ -921,6 +957,9 @@ function ini_fileUpload() {
     }
   });
 }
+
+
+
 /*
 // プロファイル画像を取得してローカルストレージに保存する関数
 const saveProfileImageToLocalStorage = async (myUserId) => {
