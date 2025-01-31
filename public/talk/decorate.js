@@ -1,21 +1,215 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const menuButton = document.getElementById('menu-button');
-    const chatMenu = document.getElementById('chat-menu');
-    const closeMenuButton = document.getElementById('close-menu-button');
-
-    // メニューアイコンのクリックイベント
-    menuButton.addEventListener('click', () => {
-      console.log('chat menu open')
-        chatMenu.classList.add('open');
-    });
-
-    // 閉じるボタンのクリックイベント
-    closeMenuButton.addEventListener('click', () => {
-        chatMenu.classList.remove('open');
-    });
+window.addEventListener('message', (event) => {
+    if (event.data === 'closeIframe') {
+        document.getElementById('callPipContainer').style.display = 'none';
+    }
 });
 
 
+document.addEventListener("DOMContentLoaded", () => {
+  const menuButton = document.getElementById("menu-button");
+  const chatMenu = document.getElementById("chat-menu");
+  const closeMenuButton = document.getElementById("close-menu-button");
+  initSlide();
+
+  // メニューアイコンのクリックイベント
+  menuButton.addEventListener("click", () => {
+    console.log("chat menu open");
+    chatMenu.classList.remove("hidden");
+    chatMenu.classList.add("open");
+  });
+
+  // 閉じるボタンのクリックイベント
+  closeMenuButton.addEventListener("click", () => {
+    chatMenu.classList.remove("open");
+    chatMenu.classList.add("hidden");
+  });
+});
+function addSwipeListener(item) {
+  let isDragging = false;
+  let startX = 0;
+  let offsetX = 0;
+  const dragThreshold = 150;
+  const resistanceFactor = 0.3; // 抵抗の増加率
+  const arrow = document.createElement("div");
+  arrow.innerText = "↩︎";
+  arrow.style.position = "absolute";
+  arrow.style.right = "-35px";
+  arrow.style.top = "50%";
+  arrow.style.transform = "translateY(-50%)";
+  arrow.style.fontSize = "30px";
+  arrow.style.transition = "opacity 0.2s";
+  arrow.style.opacity = "0";
+  item.appendChild(arrow);
+
+  item.addEventListener("touchstart", (e) => {
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    item.classList.add("dragging");
+    arrow.style.opacity = "1";
+  });
+
+  item.addEventListener("touchmove", (e) => {
+    if (isDragging) {
+      offsetX = e.touches[0].clientX - startX;
+      // 閾値を超えると抵抗が増加する
+      if (offsetX < 0) {
+        let adjustedOffsetX = offsetX;
+        if (offsetX <= -dragThreshold) {
+          const excess = offsetX + dragThreshold; // 閾値を超えた分
+          adjustedOffsetX = -dragThreshold + excess * resistanceFactor;
+        }
+        item.style.transform = `translateX(${adjustedOffsetX}px)`;
+      }
+    }
+  });
+
+  item.addEventListener("touchend", () => {
+    if (isDragging) {
+      if (offsetX <= -dragThreshold) {
+        const showReplyTarget = function (replyContent) {
+          const messageId = item
+            .querySelector(".message-bubble")
+            .getAttribute("messageId");
+          const replyTarget = document.getElementById("reply-target");
+          const replyContentElement = document.getElementById("reply-content");
+          replyContentElement.innerText = replyContent; // Show only message-bubble content
+          replyContentElement.setAttribute("messageId", messageId); // Save the messageId
+          replyTarget.style.display = "block"; // Show the reply target
+        };
+        const messageBubble = item.querySelector(".message-bubble");
+        let replyContent = "";
+        if (messageBubble) {
+          const tempDiv = document.createElement("div");
+          tempDiv.innerHTML = messageBubble.innerHTML;
+          const replyContentDiv = tempDiv.querySelector(
+            ".message-reply-content"
+          );
+          if (replyContentDiv) {
+            replyContentDiv.remove();
+          }
+          replyContent = tempDiv.textContent || tempDiv.innerText;
+          showReplyTarget(replyContent);
+        }
+      }
+      item.style.transform = "";
+      arrow.style.opacity = "0";
+      item.classList.remove("dragging");
+      isDragging = false;
+      offsetX = 0;
+    }
+  });
+
+  item.addEventListener("touchcancel", () => {
+    if (isDragging) {
+      item.style.transform = "";
+      arrow.style.opacity = "0";
+      item.classList.remove("dragging");
+      isDragging = false;
+      offsetX = 0;
+    }
+  });
+}
+
+// バツボタンのイベントリスナーを追加
+document.getElementById("close-reply").addEventListener("click", () => {
+  document.getElementById("reply-target").style.display = "none";
+  const replyContentElement = document.getElementById("reply-content");
+  replyContentElement.innerText = "";
+  replyContentElement.setAttribute("messageId", ""); // Save the messageId
+});
+
+// メッセージの追加を監視するMutationObserverの設定
+const chatBox = document.getElementById("chat-box");
+
+// MutationObserverを使って新しいメッセージが追加されたときにリスナーを追加
+const observer = new MutationObserver(() => {
+  convertReplyContent();
+  const newMessages = chatBox.querySelectorAll(".message-item");
+  newMessages.forEach((item) => {
+    // 既にイベントリスナーが設定されていない場合のみ設定
+    if (!item.hasAttribute("data-listener-attached")) {
+      addSwipeListener(item); // 新しいメッセージにスワイプリスナーを追加
+      item.setAttribute("data-listener-attached", "true"); // イベントリスナーが追加されたことをマーク
+    }
+  });
+});
+
+// Observerの設定
+observer.observe(chatBox, {
+  childList: true, // 子要素の追加を監視
+  subtree: true, // サブツリーも監視
+});
+
+// 初期のメッセージにもリスナーを設定
+document.querySelectorAll(".message-item").forEach((item) => {
+  addSwipeListener(item); // 最初に表示されているメッセージにもリスナーを追加
+  item.setAttribute("data-listener-attached", "true"); // 初期メッセージにもマークを設定
+});
+
+function convertReplyContent() {
+  const messages = document.querySelectorAll(".message-item");
+
+  messages.forEach((message) => {
+    const replyContent = message.querySelector(".message-reply-content");
+
+    if (replyContent && replyContent.getAttribute("convert") === "false") {
+      const replyId = replyContent.textContent.trim();
+      const replyElement = document.querySelector(
+        `.message-bubble[messageid="${replyId}"]`
+      );
+
+      if (replyElement) {
+        const replyText = replyElement.innerHTML;
+
+        // Remove div tags from replyText, specifically removing those with class "message-reply-content"
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = replyText;
+        const targetDiv = tempDiv.querySelector(".message-reply-content");
+        console.log(tempDiv);
+
+        // If there is a targetDiv, remove it
+        if (targetDiv) {
+          targetDiv.remove();
+        }
+        const textContent = tempDiv.textContent || tempDiv.innerText || "";
+        replyContent.textContent = textContent.trim();
+        replyContent.setAttribute("convert", "true");
+      }
+    }
+  });
+}
+
+function closeNotification() {
+  var modal = document.getElementById("callNotification");
+  modal.style.display = "none";
+}
+
+// スライドノブをタッチで動かす関数
+function initSlide() {
+  console.log("knob click");
+  var container = document.querySelector(".slide-container");
+  var knob = document.querySelector(".slide-knob");
+
+  knob.addEventListener("click", function () {
+    console.log("knob clicked");
+    var containerWidth = container.offsetWidth;
+    var knobWidth = knob.offsetWidth;
+    var newLeft = containerWidth - knobWidth; // Move to the right edge
+
+    knob.style.left = newLeft + "px";
+    // Close the notification after the transition is complete (300ms in this case)
+    setTimeout(function () {
+      var iframe = document.createElement("iframe");
+      localStorage.setItem("CallTo")
+      iframe.src = "../call/call.html";
+      iframe.id = 'callPipContainer';
+      iframe.className = "pip";
+      document.body.appendChild(iframe);
+      knob.style.left = 0;
+      closeNotification();
+    }, 300);
+  });
+}
 
 /*
 function goOffline() {
@@ -49,8 +243,7 @@ document.addEventListener('DOMContentLoaded', goOnline);
 window.addEventListener('beforeunload', goOffline);
 */
 
-
-      /*offline
+/*offline
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then((registration) => {
         // ページが開かれたことを通知
@@ -64,7 +257,7 @@ window.addEventListener('beforeunload', goOffline);
     }
     
     */
-  /*
+/*
       if ('serviceWorker' in navigator) {
   navigator.serviceWorker
     .register('../firebase-messaging-sw.js')
@@ -76,7 +269,7 @@ window.addEventListener('beforeunload', goOffline);
     });
 }
 */
-  
+
 /*
 if ('Notification' in window && 'serviceWorker' in navigator) {
   Notification.requestPermission(status => {console.log('Notification permission status:', status);});

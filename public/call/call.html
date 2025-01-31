@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="call.css">
+    <title>通話画面</title>
+</head>
+<body>
+    <div class="container">
+        <div class="user-icon">
+            <img src="../images/user-icon.png" alt="User Icon">
+        </div>
+        <div class="pip-container" id="videoPipContainer">
+            <p>通話画面</p>
+        </div>
+        <div class="menu">
+            <button id="audio-toggle">🎙️ 音声オンオフ</button>
+            <button id="video-toggle">📹 ビデオオンオフ</button>
+            <button id="end-call">❌ 終了</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.webrtc.ecl.ntt.com/skyway-4.4.2.js"></script>
+    <script src="./pip.js"></script>
+</body>
+</html>

@@ -5,46 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loading</title>
     <link rel="manifest" href="../manifest.json">
-    <link rel="stylesheet" href="./style.css">
   <script src="//cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();console.log('eruda-index')</script>
-  <script>
-    if ('serviceWorker' in navigator) {
-  // 最初のサービスワーカー登録
+    <style>
+    /* HTML: <div class="loader"></div> */
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.loader {
+  width: fit-content;
+  font-size: 60px;
+  font-family: system-ui, sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #0000;
+  -webkit-text-stroke: 1px #000;
+  background: 
+    linear-gradient(-60deg, #0000 45%, #000 0 55%, #0000 0) 
+    0/300% 100% no-repeat text;
+  animation: l3 0.35s linear infinite;
+}
+
+.loader:before {
+  content: "Loading";
+}
+
+@keyframes l3 {
+  0% { background-position: 100%; }
+}
+  </style>
+
+</head>
+<body>
+    <!--<div id="loading-container">
+        <h2>ロード中...</h2>
+    </div>-->
+  <div class="loader"></div>
+    <script>
+//if (!localStorage.getItem('condition')) {localStorage.setItem('condition', 'perfect_init');}
+const CACHE_NAME = "ventus-talk-cache-v1"
+
+function direct() {
+  const userId = localStorage.getItem('userID');
+  if (userId) {
+    window.location.href = './talk/index.html';
+  } else {
+    window.location.href = './login/login.html';
+  }
+}
+
+if ('serviceWorker' in navigator) {
   navigator.serviceWorker
     .register('/service-worker.js')
-    .then(reg => { // 別の名前を使用（例: reg）
+    .then(async reg => {
+      direct();
       console.log('ServiceWorker registration successful with scope:', reg.scope);
     })
     .catch(error => {
       console.log('ServiceWorker registration failed:', error);
     });
 }
-  </script>
-</head>
-<body>
-    <div id="loading-container">
-        <h2>ロード中...</h2>
-    </div>
-  
-    <script>
-if (!localStorage.getItem('condition')) {
-    localStorage.setItem('condition', 'perfect_init');
-}
-
-const userId = localStorage.getItem('userID');
-const password = localStorage.getItem('password');
-
-if (userId && password) {
-  window.location.href = './talk/index.html';
-  //window.location.href = './login/login.html';
-} else {
-  // ログイン情報がない場合はログインページへリダイレクト
-  window.location.href = './login/login.html';
-}
-      
-
-
     </script>
   
   <script type="module">

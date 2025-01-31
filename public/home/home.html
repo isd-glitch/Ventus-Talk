@@ -1,93 +1,136 @@
 <!DOCTYPE html>
 <html lang="jp">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Home</title>
-  <link rel="manifest" href="../manifest.json">
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../menu.css">
-    <link rel="stylesheet" href="home.css">
-  <link rel="stylesheet" href="../log.css">
-  <script src="//cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
-</head>
-<body>
+    <link rel="manifest" href="../manifest.json" />
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="../menu.css" />
+    <link rel="stylesheet" href="home.css" />
+    <link rel="stylesheet" href="../log.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+      eruda.init();
+    </script>
+  </head>
+  <body>
     <div id="container">
-        <div id="left-panel">
-            <!-- Add the button with image and text -->
-            <div id="add-friend" style="display: flex; align-items: center;">
-                <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/IMG_3305.PNG?v=1737195730742" alt="友達追加" style="width:32px;height:32px;margin-right: 8px;">
-                <p style="margin: 0;">友達追加</p>
-            </div>
-            <div id="user-info">
-                <img src="profile-pic.jpg" alt="Profile Picture">
-                <div id="username">ユーザー名</div>
-                <div id="status">ステータス</div>
-            </div>
-            <div id="friend-list">
-                
-            </div>
-            <div id="menu-bar">
-                <div class="menu-item" data-page="home">
-                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOHome.png?v=1737195839565" alt="ホームアイコン">
-                    <div>ホーム</div>
-                </div>
-                <div class="menu-item" data-page="talk">
-                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOTalk.png?v=1737195832005" alt="トークアイコン">
-                    <div>トーク</div>
-                </div>
-                <div class="menu-item" data-page="settings">
-                    <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOSetting.png?v=1737195842738" alt="設定アイコン">
-                    <div>設定</div>
-                </div>
-            </div>
+      <div id="left-panel">
+        <!-- Add the button with image and text -->
+        <div
+          id="add-friend"
+          style="display: flex; align-items: center; cursor: pointer"
+        >
+          <img
+            src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/IMG_3305.PNG?v=1737195730742"
+            alt="友達追加"
+            style="width: 32px; height: 32px; margin-right: 8px"
+          />
+          <p style="margin: 0">友達追加</p>
         </div>
-        <div id="right-panel">
-            <!-- ホームページのコンテンツをここに追加 -->
+        <div id="user-info">
+          <img src="profile-pic.jpg" alt="Profile Picture" />
+          <div id="username">ユーザー名</div>
+          <div id="status">ステータス</div>
         </div>
-        <!-- Add the sliding window here -->
-        <div id="add-friend-window" class="hidden">
-            <div class="window-content">
-                <span id="user-id-display">ユーザーID: --Loading--</span>
-              <label onclick="copyUserIdToClipboard()">UserIDをクリップボードにコピー</label>
-                <img id="qr-code" src="qr-code-placeholder.png" alt="QRコード">
-                <label for="friend">友達をUser IDで登録：</label>
-                <input type="text" id="friend" name="friend" autocomplete="off">
-                <button id="register-button" >登録</button>
-            </div>
+        <div id="friend-list"></div>
+        <div id="menu-bar">
+          <div class="menu-item" data-page="home">
+            <img
+              src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOHome.png?v=1737195839565"
+              alt="ホームアイコン"
+            />
+            <div>ホーム</div>
+          </div>
+          <div class="menu-item" data-page="talk">
+            <img
+              src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOTalk.png?v=1737195832005"
+              alt="トークアイコン"
+            />
+            <div>トーク</div>
+          </div>
+          <div class="menu-item" data-page="settings">
+            <img
+              src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOSetting.png?v=1737195842738"
+              alt="設定アイコン"
+            />
+            <div>設定</div>
+          </div>
         </div>
-
-
+      </div>
+      <div id="right-panel">
+        <!-- ホームページのコンテンツをここに追加 -->
+      </div>
+      <!-- Add the sliding window here -->
+      <div id="add-friend-window" class="hidden">
+        <div class="window-content">
+          <span id="user-id-display">ユーザーID: --Loading--</span>
+          <label onclick="copyUserIdToClipboard()"
+            >UserIDをクリップボードにコピー</label
+          >
+          <div id="qr-code" alt="QRコード"></div>
+          <label for="friend">友達をUser IDで登録：</label>
+          <input type="text" id="friend" name="friend" autocomplete="off" />
+          <button id="register-button">登録</button>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="./app.js"></script>
     <script src="../isLogined.js"></script>
     <script src="../menuNavigation.js"></script>
     <script type="module" src="./addFriend.js"></script>
-  
-  <script>
-function copyUserIdToClipboard() {
-    const userIdText = document.getElementById('user-id-display').textContent;
-    navigator.clipboard.writeText(userIdText.replace('ユーザーID: ', '')).then(function() {
-        alert('User IDがクリップボードにコピーされました。');
-    }).catch(function(error) {
-        console.error('コピーに失敗しました: ', error);
-    });
-}
-</script>
-  
-  
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('../service-worker.js')
-        .then(registration => {
-          console.log('ServiceWorker registration successful with scope: ', registration.scope);
-        })
-        .catch(error => {
-          console.log('ServiceWorker registration failed: ', error);
-        });
-    }
-  </script>
-</body>
+
+    <script>
+      function copyUserIdToClipboard() {
+        const userIdText =
+          document.getElementById("user-id-display").textContent;
+        navigator.clipboard
+          .writeText(userIdText.replace("ユーザーID: ", ""))
+          .then(function () {
+            alert("User IDがクリップボードにコピーされました。");
+          })
+          .catch(function (error) {
+            console.error("コピーに失敗しました: ", error);
+          });
+      }
+    </script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("../service-worker.js")
+          .then((registration) => {
+            console.log(
+              "ServiceWorker registration successful with scope: ",
+              registration.scope
+            );
+          })
+          .catch((error) => {
+            console.log("ServiceWorker registration failed: ", error);
+          });
+      }
+
+      function generateQRCode(userId) {
+        const qrCodeElement = document.getElementById("qr-code");
+        const qrCodeUrl = `https://ventus-talk.glitch.me/home/home.html?friendid=${userId}`;
+        qrCodeElement.innerHTML = ""; // 以前のQRコードをクリア
+        new QRCode(qrCodeElement, qrCodeUrl);
+
+        // Faviconの追加
+        const favicon = document.createElement("img");
+        favicon.src =
+          "https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/f192.png?v=1737434510763";
+        favicon.id = "favicon";
+        qrCodeElement.appendChild(favicon);
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const userId = localStorage.getItem("userIdShow");
+        generateQRCode(userId);
+      });
+    </script>
+  </body>
 </html>

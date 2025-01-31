@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>リカバリーガイド</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f8ff;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+      }
+      p {
+        line-height: 1.6;
+      }
+      .button {
+        display: inline-block;
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 4px;
+        text-decoration: none;
+      }
+      .styled-button {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 10px 0;
+        font-size: 16px;
+        color: #ffffff;
+        background-color: #007bff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .styled-button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>リカバリーガイド</h1>
+      <p>
+        このページでは、システムやデータのリカバリーに関する重要な情報を提供します。
+      </p>
+      <p>問題が発生した場合は、以下の手順に従ってください:</p>
+      <ol>
+        <li>システムを再起動します。</li>
+        <li>バックアップからデータを復元します。</li>
+        <li>ソフトウェアの最新バージョンを確認し、必要なら更新します。</li>
+      </ol>
+      <p>
+        さらに詳しい情報が必要な場合やサポートが必要な場合は、<a
+          class="button"
+          href="../talk/index.html"
+          >サポートページ</a
+        >をご覧ください。
+      </p>
+      <button id="update" class="styled-button">バージョンを手動更新</button>
+      <h2>ユーザーローカルストレージ</h2>
+      <form id="localStorageForm">
+        <button type="button" class="styled-button" onclick="showLocalStorage()">ローカルストレージを表示</button>
+      </form>
+      <pre id="localStorageData"></pre>
+      <button id="checkAccount" class="styled-button">アカウント確認</button>
+    </div>
+    <script type="module">
+      import { updateCacheIfNeeded,hash } from "../helper.js";
+      import { getDoc, doc, dbUsers } from "../firebase-setup.js";
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const localStorageData = document.getElementById("localStorageData");
+        document.querySelector("#localStorageForm button").addEventListener("click", () => {
+          let data = "";
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            data += `${key}: ${value}\n`;
+          }
+          localStorageData.textContent = data;
+        });
+
+        const checkAccountButton = document.getElementById("checkAccount");
+        checkAccountButton.addEventListener("click", async () => {
+          const userId = localStorage.getItem("userId");
+          const h = await hash(userId);
+          if (userId) {
+            const docRef = doc(dbUsers, "users", h);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+              alert("アカウントが存在します");
+            } else {
+              alert("アカウントが存在しません");
+            }
+          } else {
+            alert("ユーザーIDが見つかりません");
+          }
+        });
+
+        const updateButton = document.getElementById("update");
+        updateButton.addEventListener("click", () => {
+          localStorage.setItem("lastUpdated", "");
+          updateCacheIfNeeded();
+        });
+      });
+    </script>
+  </body>
+</html>

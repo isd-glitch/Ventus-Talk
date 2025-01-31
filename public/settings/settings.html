@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="jp">
 <head>
+  <script src="../drirectRecover.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Info</title>
@@ -26,13 +27,15 @@
             <!-- ここに追加 --> 
             <div id="settings-list">
                 <div class="settings-item" data-page="profile">プロフィール</div>
-                <div class="settings-item" data-page="privacy-settings">アカウント/プライバシー設定</div>
+                <div class="settings-item" data-page="account-settings">アカウント/通知設定</div>
                 <div class="settings-item" data-page="font">フォント</div>
                 <div class="settings-item" data-page="app-icon">アプリアイコン</div>
                 <div class="settings-item" data-page="photos-videos">写真と動画</div>
                 <div class="settings-item" data-page="talk-settings">トーク</div>
                 <div class="settings-item" data-page="friends">友達</div>
                 <div class="settings-item" data-page="terms">利用規約</div>
+                <div class="settings-item" data-page="privacy">プライバシーポリシー</div>
+                <div class="settings-item" data-page="system">システム情報</div>
                 <div class="settings-item" data-page="developer">開発陣より</div>
             </div>
 
@@ -72,8 +75,8 @@
                     <button id="upload-profile-image" class="styled-button">画像をアップロード</button>
                 </div>
             </div>
-            <div id="privacy-settings" class="settings-page" style="display: none;">
-                <h2>アカウント/プライバシー設定</h2>
+            <div id="account-settings" class="settings-page" style="display: none;">
+                <h2>アカウント/通知設定</h2>
                 <div class="profile-item">
                   <button id="notification" class="styled-button">通知を許可する</button>
                   <button id="renotice" class="styled-button">通知が来ない場合</button>
@@ -143,6 +146,7 @@
                     <option value="gradient-pink">グラデーションピンク</option>
                     <option value="forest-green">フォレストグリーン</option>
                     <option value="gradient-black-pink">ブラック＆ピンクグラデーション</option>
+                    <option value="sophisticated-theme">シックブラック</option>
                 </select>
             </div>
 
@@ -155,6 +159,18 @@
             <div id="terms" class="settings-page" style="display: none;">
                 <h2>利用規約</h2>
                 <iframe src="../policy/terms.html" frameborder="0" style="width: 100%; height: calc(100vh - 50px);"></iframe>
+                <!-- 利用規約の内容 -->
+            </div>
+            <div id="privacy" class="settings-page" style="display: none;">
+                <h2>プライバシーポリシー</h2>
+                <iframe src="../policy/privacy.html" frameborder="0" style="width: 100%; height: calc(100vh - 50px);"></iframe>
+                <!-- 利用規約の内容 -->
+            </div>
+          
+            <div id="system" class="settings-page" style="display: none;">
+                <h2>システム情報</h2>
+                <p>バージョンは、3日に一度自動で更新されます。</p>
+                <button id="update" class="styled-button">バージョンを手動更新</button>
                 <!-- 利用規約の内容 -->
             </div>
 

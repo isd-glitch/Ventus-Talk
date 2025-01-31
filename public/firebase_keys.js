@@ -11,13 +11,13 @@ const firebaseConfigDev = {
 };
 
 
-const firebaseConfig1 = {
-    apiKey: "YOUR_API_KEY_1",
-    authDomain: "YOUR_AUTH_DOMAIN_1",
-    projectId: "Ventus-Talk-1",
-    storageBucket: "YOUR_STORAGE_BUCKET_1",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID_1",
-    appId: "YOUR_APP_ID_1"
+const firebaseServer = {
+  apiKey: "AIzaSyALzk3AnLb_wjhRoJSya-iXac3FaSkXCtY",
+  authDomain: "ventus-talk-server.firebaseapp.com",
+  projectId: "ventus-talk-server",
+  storageBucket: "ventus-talk-server.firebasestorage.app",
+  messagingSenderId: "635884282192",
+  appId: "1:635884282192:web:d2424a2e79f85cd85a0c55"
 };
 
 const firebaseConfig2 = {
@@ -41,17 +41,17 @@ const firebaseConfigUsers = {
 };
 
 const firebaseConfigInfo = {
-    apiKey: "YOUR_API_KEY_INFO",
-    authDomain: "YOUR_AUTH_DOMAIN_INFO",
-    projectId: "Ventus-Talk-info",
-    storageBucket: "YOUR_STORAGE_BUCKET_INFO",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID_INFO",
-    appId: "YOUR_APP_ID_INFO"
+    apiKey: "AIzaSyA7PusX7yazNHGbwdg2-aP6oVQnls26P_E",
+    authDomain: "ventus-talk-info.firebaseapp.com",
+    projectId: "ventus-talk-info",
+    storageBucket: "ventus-talk-info.firebasestorage.app",
+    messagingSenderId: "992033988008",
+    appId: "1:992033988008:web:35a7bf48511f0fa91cd19d"
 };
 
 export {
 firebaseConfigDev,
-    firebaseConfig1,
+    firebaseServer,
     firebaseConfig2,
     // 他のエクスポートも追加します...
     firebaseConfigUsers,

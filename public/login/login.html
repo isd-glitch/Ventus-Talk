@@ -2,6 +2,7 @@
 <html lang="jp">
 <head>
     <meta charset="UTF-8">
+  <script src="../drirectRecover.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login/Register</title>
     <link rel="stylesheet" href="login.css">
@@ -29,6 +30,7 @@
                     <p>これはuserIDで、変更されることはありません。ユーザー名は設定ページで後から変更できます。<br>パスワードはSHA256ハッシュ化によって厳重に保存されています。</p>
                     <small id="username-check"><span id="loading-spinner" style="display:none;">⏳ チェック中...</span></small>
                     <input type="password" id="password" placeholder="パスワード" required>
+                    <a href="../policy/privacy.html" target="_blank">プライバシーポリシーページ</a><br>
                     <a href="../policy/terms.html" target="_blank">利用規約ページ</a>
                     <label>
                         <input type="checkbox" id="terms-checkbox"> 利用規約に同意します

@@ -1,6 +1,5 @@
 const CACHE_NAME = 'ventus-talk-cache-v1';
 const urlsToCache = [
-  '/',
   '/loading.html',
   '/home/home.html',
   '/home/home.css',
@@ -39,32 +38,24 @@ self.addEventListener('install', event => {
 });
 
 
-// フェッチ処理 (開発モード)
-
-self.addEventListener('fetch', event => {
-  console.log('Development mode: Fetch event for ', event.request.url);
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        if (response.status === 404) {
-          console.error('Resource not found: ', event.request.url);
-          return new Response('Not found');
-        }
-        return response;
-      })
-      .catch(err => {
-        console.error('Fetch failed: ', err);
-        return new Response('Service Unavailable', {
-          status: 503,
-          statusText: 'Service Unavailable'
-        });
-      })
+self.addEventListener('activate', event => {
+  var cacheAllowlist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheAllowlist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
+  console.log('Service worker activated.');
 });
 
 
 
-/*
 self.addEventListener('fetch', event => {
   console.log('Fetch event for ', event.request.url);
   event.respondWith(
@@ -96,27 +87,27 @@ self.addEventListener('fetch', event => {
   );
 });
 
-*/
+
+// フェッチ処理 (開発モード)
 /*
 self.addEventListener('fetch', event => {
-    console.log('Fetch event for ', event.request.url);
-    event.respondWith(
-        caches.match(event.request).then(response => {
-            if (response) {
-                console.log('Found ', event.request.url, ' in cache');
-                return response;
-            }
-            console.log('Network request for ', event.request.url);
-            return fetch(event.request).then(response => {
-                return caches.open('dynamic-cache').then(cache => {
-                    cache.put(event.request.url, response.clone());
-                    return response;
-                });
-            });
-        }).catch(error => {
-            console.error('Fetch failed:', error);
-            throw error;
-        })
-    );
+  console.log('Development mode: Fetch event for ', event.request.url);
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        if (response.status === 404) {
+          console.error('Resource not found: ', event.request.url);
+          return new Response('Not found');
+        }
+        return response;
+      })
+      .catch(err => {
+        console.error('Fetch failed: ', err);
+        return new Response('Service Unavailable', {
+          status: 503,
+          statusText: 'Service Unavailable'
+        });
+      })
+  );
 });
 */

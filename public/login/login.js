@@ -1,9 +1,9 @@
 import { 
-    appd, app1, app2, appUsers, appInfo, 
-    dbdev, db1, db2, dbUsers, dbInfo,collection, addDoc, myuserId,serverTimestamp, query, orderBy, username, doc, setDoc, getDoc
+    appd, app1, app2, appUsers, appInfo, arrayUnion,
+    dbdev,dbServer, db2, dbUsers, dbInfo,collection, addDoc, myuserId,serverTimestamp, query, orderBy, username, doc, setDoc, getDoc
 } from '../firebase-setup.js';
-import {addLog} from '../log.js';
-import {setProfileImageFromLocalStorage} from '../log.js';
+import {addLog,setProfileImageFromLocalStorage,hash} from '../helper.js';
+
 const usernameInput = document.getElementById('username');
 const usernameCheck = document.getElementById('username-check');
 const loadingSpinner = document.getElementById('loading-spinner');
@@ -19,6 +19,12 @@ if (username) {
 // Function to check username availability
 async function checkUsernameAvailability() {
   const username = usernameInput.value;
+
+  // 文字数チェック
+  if (username.length >= 20) {
+    addLog("20文字以内で入力してください。", "error");
+    return;
+  }
 
   // 日本語（ひらがな、カタカナ、漢字）・英数字のみを許可する正規表現
   const validUsernamePattern = /^[\u3040-\u30FF\u4E00-\u9FFFa-zA-Z0-9]+$/;
@@ -37,24 +43,24 @@ async function checkUsernameAvailability() {
     return;
   }
 
-
   try {
     console.log('req'); // ここでログを追加
     loadingSpinner.style.display = 'block';
 
-    const usernameDocRef = doc(dbUsers, 'users', username);
+    const usernameDocRef = doc(dbUsers, 'rawUserId', 'enterdRawUserId');
 
     // タイムアウトを設定
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Firestore request timed out')), 8000)
+      setTimeout(() => reject(new Error('Firestore request timed out')), 3000)
     );
+    //毎回呼び出されるが、firebase独自のキャッシュでリソース読み込み削減
 
     const usernameDoc = await Promise.race([getDoc(usernameDocRef), timeoutPromise]);
 
     console.log('res'); // ここでログを追加
     loadingSpinner.style.display = 'none';
 
-    if (usernameDoc.exists()) {
+    if (usernameDoc.exists() && usernameDoc.data().rawUserId.includes(username)) {
       usernameCheck.className = 'username-check-error';
       usernameCheck.textContent = '！重複しています';
       submitButton.className = 'disabled';
@@ -91,6 +97,15 @@ usernameInput.addEventListener('input', () => {
     
 });
 
+function validateInput(input, fieldName) {
+  if (input.length >= 20) {
+    addLog(`${fieldName}は20文字以内で入力してください。`, "error");
+    return false;
+  }
+  return true;
+}
+
+
 // Check the terms checkbox state
 termsCheckbox.addEventListener('change', () => {
     if (termsCheckbox.checked && usernameCheck.textContent === 'Available') {
@@ -105,20 +120,26 @@ termsCheckbox.addEventListener('change', () => {
 // サインイン関数の追加
 document.getElementById('login-form').addEventListener('submit', async function(event) {
     event.preventDefault();
-  localStorage.clear();
-  addLog('サインイン処理中');
-    const userId = document.getElementById('login-username').value;
+    localStorage.clear();
+    addLog('サインイン処理中');
+    const userIdInput = document.getElementById('login-username').value
     const password = document.getElementById('login-password').value;
-    const hash_psw = await hash(password);
-
+    if (!validateInput(userIdInput, "ユーザーID") || !validateInput(password, "パスワード")) {return;}
+    const hashedPassword = await hash(password);
+    const userId = await hash(userIdInput);
+    //if (userId.length >= 20){addLog("20文字以内で入力してください。","error");return;}
     try {
         const userDoc = await getDoc(doc(dbUsers, 'users', userId));
         if (userDoc.exists()) {
             const userData = userDoc.data();
-            if (userData.password === hash_psw) {
-              await localStorage.setItem('username', userData.username);
-              await localStorage.setItem('password', hash_psw);
+            if (userData.password === hashedPassword) {
+              await localStorage.setItem('username', userIdInput);
               await localStorage.setItem('userID', userId);
+              await localStorage.setItem('userIdShow',userIdInput)
+              const condition = localStorage.getItem('condition');
+              //if (!condition ||condition==='init') {
+                //await loadCurrentProfileImage(userId);
+              //}
               console.log('open');
               
               window.location.href = '../talk/index.html';
@@ -136,28 +157,38 @@ document.getElementById('login-form').addEventListener('submit', async function(
 
 document.getElementById('register-form').addEventListener('submit', async function(event) {
     event.preventDefault();
-    const username = usernameInput.value;
     const password = document.getElementById('password').value;
-  addLog('登録処理中です',"info");
-
+    const userIdInput = usernameInput.value;
+    if (!validateInput(userIdInput, "ユーザーID") || !validateInput(password, "パスワード")) {return;}
+    const userId = await hash(userIdInput);
+    if (userId === ''){addLog("userIdを入力してください。","error");return;}
+    addLog('登録処理中です',"info");
     // パスワードのハッシュ化
     const hashedPassword = await hash(password);
-    const userId = username;
-  localStorage.clear();
+    //const username = usernameInput.value;
+    await localStorage.clear();
     // ローカルストレージにログイン情報を保存
-    await localStorage.setItem('username', username);
-    await localStorage.setItem('password', hashedPassword);
+    await localStorage.setItem('username', userIdInput);
     await localStorage.setItem('userID', userId);
+    await localStorage.setItem('userIdShow',userIdInput);
     // ユーザー情報をFirestoreに保存
     
     try {
         await setDoc(doc(dbUsers, 'users', userId), { 
-            username: username,
             password: hashedPassword,
+            username: userIdInput,
             timestamp: serverTimestamp()
         });
-        alert(`あなたのユーザーIDはこれです。スクショしておいてください。${userId}`);
+        await setDoc(doc(dbServer, 'users', userId), { 
+            username: userIdInput,
+        });
+        const docRef = doc(dbUsers, 'rawUserId', 'enterdRawUserId');
+        await setDoc(docRef, {
+          rawUserId: arrayUnion(userIdInput)
+        }, { merge: true });
+        //alert(`あなたのユーザーIDはこれです。スクショしておいてください。${userId}`);
         // メインページへリダイレクト
+        addLog("登録完了","info");
         window.location.href = '../talk/index.html';
     } catch (error) {
         console.error("Error adding document: ", error);
@@ -208,47 +239,22 @@ showRegisterText.addEventListener('click', () => {
 });
 
 
-async function hash(password) {
-    if (!password) {
-        alert('パスワードを入力してください');
-        return;
-    }
-
+async function loadCurrentProfileImage(userId) {
     try {
-        // SHA-256を使ってパスワードをハッシュ化
-        const encoder = new TextEncoder();
-        const data = encoder.encode(password);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-
-        // ハッシュ値を16進数に変換して返す
-        const hashedPassword = Array.from(new Uint8Array(hashBuffer))
-            .map(byte => byte.toString(16).padStart(2, '0'))
-            .join('');
-
-        console.log(hashedPassword);
-        return hashedPassword;  // 毎回同じパスワードなら同じ結果を返す
-    } catch (error) {
-        console.error('エラー:', error);
-      addLog(`${error}`)
-        alert('エラーが発生しました');
-    }
-}
-
-
-const condition = localStorage.getItem('condition');
-if (!condition ||condition==='init'||condition==='perfect_init') {
-    loadCurrentProfileImage();
-}
-function loadCurrentProfileImage() {
-    getDoc(doc(dbUsers, 'users', myuserId)).then(docSnap => {
+        const docRef = doc(dbUsers, 'users', userId);
+        const docSnap = await getDoc(docRef);
+        
         if (docSnap.exists()) {
             const data = docSnap.data();
             const profileImage = data.profile_ico || '';
             localStorage.setItem('profileImage', profileImage);
-            localStorage.setItem('condition',"did");
-          setProfileImageFromLocalStorage();
+            localStorage.setItem('condition', "did");
+            setProfileImageFromLocalStorage();
+        } else {
+            console.log('No such document!');
         }
-    }).catch(error => {
-      addLog('プロフィール画像の読み込みに失敗しました: ', "error");
-    });
+    } catch (error) {
+        console.error('プロフィール画像の読み込みに失敗しました: ', error);
+        //addLog('プロフィール画像の読み込みに失敗しました: ', 'error');
+    }
 }
