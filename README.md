@@ -1,28 +1,47 @@
-# Hello Node (blank)
+# Ventus-Talk
 
-[Node.js](https://nodejs.org/en/about/) is a popular runtime that lets you run JavaScript on the server. This project uses the [Fastify](https://www.fastify.io/) framework and basic templating with [Handlebars](https://handlebarsjs.com/).
+**開発者**: Roughfts
 
-_Last updated: 14 August 2023_
+## 現時点でのVentus-Talkの性能
 
-## What's in this project?
+### 概要
+- **4MB** (npm module除く)・静的サイト
+- 独自サーバー、静的サイトホスティングでも、独立してサイト設立可能 (ただし、サーバーがない場合はそのサイト間での通知は不可、expressサーバーが動かせるなら可能)
+- **3つのFirebaseFirestoreサーバー同時使用**により、請求額とサーバー負荷を軽減 (増設中)
 
-← `README.md`: That’s this file, where you can tell people what your cool website does and how you built it.
+### メッセージ送信性能
+- 約**10,000/日**メッセージ送信可能
+  - それぞれ単一のメッセージ長は、1〜ブラウザの限界まで (数十万文字。ちなみに容量重い100万文字の中国漢字を送ったらエラーになった)
 
-← `public/style.css`: The styling rules for your pages and posts.
+### メッセージ更新速度
+- 平均**0.05秒〜0.15秒**
 
-← `server.js`: The main server script for your new site.
+### その他の特徴
+- 通信制限でもアプリさえ開いたら、安定してやり取り可能
+- 画像・(動画)・様々なファイル共有可能
+- パスワードはハッシュで安全に管理
+- ブラウザや、アプリ化様々な媒体で動作可能 (IE非対応)
+  - 尚、iPadのブラウザでは通知の権限がないため通知にはアプリ化が必須
+- LINEと同じようにアイコン・グループ作成可能 (現在リプライ機能搭載中)
+- 友達追加はQRコード又はuserId入力
+- 複数アカウント作成可能
+- 同期デバイス数制限なし
+- Youtubeリンクサイト規制回避自動変換＆埋め込み
+- その他リンクサイト規制回避URL自動追加
+- **15種類**くらいのフォントと**5種類**のテーマ (テーマの細かいCSSが面倒なので現在やってくれる人募集中)
 
-← `src/`: This folder holds page templates, additional scripts.
+### セキュリティと制限
+- サーバー荒らされる可能性あり
+- セキュリティ対策ほぼなし
+- 動画送信・閲覧にかなり時間がかかる
+- glitchだと、サーバーが起きていないと通知が届かない
 
-### Working in the `src/` folder 📁
+## サーバーの説明
 
-← `src/pages/index.hbs`: This is the main page template for your site.
-
-![Glitch](https://cdn.glitch.com/a9975ea6-8949-4bab-addb-8a95021dc2da%2FLogo_Color.svg?v=1602781328576)
-
-## You built this with Glitch!
-
-[Glitch](https://glitch.com) is a friendly community where millions of people come together to build web apps and websites.
-
-- Need more help? [Check out our Help Center](https://help.glitch.com/) for answers to any common questions.
-- Ready to make it official? [Become a paid Glitch member](https://glitch.com/pricing) to boost your app with private sharing, more storage and memory, domains and more.
+```mermaid
+graph LR
+    A[ユーザー] --> B[独自サーバー]
+    A --> C[静的サイトホスティング]
+    B --> D[Firebase Firestore サーバー 1]
+    B --> E[Firebase Firestore サーバー 2]
+    B --> F[Firebase Firestore サーバー 3]
