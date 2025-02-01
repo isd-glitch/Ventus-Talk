@@ -14,6 +14,9 @@ self.addEventListener("push", function (event) {
       data: { chatId },
     })
   );
+});
+
+
 /*
   // フォアグラウンドでない場合のみ通知を表示
   if (
@@ -22,5 +25,4 @@ self.addEventListener("push", function (event) {
   ) {
     
   }
-  */
-});
+*/

@@ -2,7 +2,7 @@ async function checkIfAwake() {
     try {
         const controller = new AbortController();
         const signal = controller.signal;
-        const timeout = setTimeout(() => controller.abort(), 1000);
+        const timeout = setTimeout(() => controller.abort(), 5000);
 
         const response = await fetch('https://ventus-talk-a.glitch.me/sleep', { signal }).catch(error => {
             if (error.name === 'AbortError') clearCacheAndReload();
@@ -69,7 +69,7 @@ function setProfileImageFromLocalStorage() {
   const base64Image = localStorage.getItem("profileImage");
   if (base64Image) {
     const profileImageElement = document.querySelector("#user-info img");
-    profileImageElement.src = base64Image;
+    profileImageElement.src = base64Image || null;
     console.log("プロフィール画像がローカルストレージから設定されました");
   } else {
     console.log("ローカルストレージにプロフィール画像が見つかりませんでした");
@@ -123,7 +123,16 @@ const urlsToCache = [
   'https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ICOSetting.png?v=1737195842738'
 ];
 
-
+async function deleatCache() {
+  const cacheNames = await caches.keys();
+    await Promise.all(
+      cacheNames.map(cacheName => {
+        console.log(`Deleting cache: ${cacheName}`);
+        addLog('キャッシュを削除しました', "info");
+        return caches.delete(cacheName);
+      })
+    );
+}
 async function updateCacheIfNeeded() {
   console.log('Checking if cache update is needed...');
   const getLastUpdated = () => localStorage.getItem('lastUpdated');
@@ -143,14 +152,7 @@ async function updateCacheIfNeeded() {
   addLog('アプリ更新中',"info")
 
   try {
-    const cacheNames = await caches.keys();
-    await Promise.all(
-      cacheNames.map(cacheName => {
-        console.log(`Deleting cache: ${cacheName}`);
-        addLog('キャッシュを削除しました', "info");
-        return caches.delete(cacheName);
-      })
-    );
+    await deleatCache()
 
     const cache = await caches.open(CACHE_NAME);
     await cache.addAll(urlsToCache);
@@ -189,7 +191,7 @@ async function hash(string) {
     }
 }
 
-export { addLog, setProfileImageFromLocalStorage,compressAndEncodeImage,updateCacheIfNeeded,checkIfAwake,hash };
+export { addLog,deleatCache, setProfileImageFromLocalStorage,compressAndEncodeImage,updateCacheIfNeeded,checkIfAwake,hash };
 
 /*
 

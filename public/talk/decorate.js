@@ -1,3 +1,28 @@
+import {
+  dbdev,
+  dbServer,
+  onMessage,
+  collection,
+  messaging,
+  getToken,
+  doc,
+  addDoc,
+  arrayUnion,
+  reloadPage,
+  updateDoc,
+  dbUsers,
+  setDoc,
+  serverTimestamp,
+  startAfter,
+  onSnapshot,
+  limit,
+  query,
+  orderBy,
+  getDocs,
+  getDoc,
+  dbInfo,
+} from "../firebase-setup.js";
+
 window.addEventListener('message', (event) => {
     if (event.data === 'closeIframe') {
         document.getElementById('callPipContainer').style.display = 'none';
@@ -180,13 +205,13 @@ function convertReplyContent() {
 }
 
 function closeNotification() {
+  callDid(localStorage.getItem('selectedChatId'),localStorage.getItem('skyway-roomId'));
   var modal = document.getElementById("callNotification");
   modal.style.display = "none";
 }
 
 // スライドノブをタッチで動かす関数
 function initSlide() {
-  console.log("knob click");
   var container = document.querySelector(".slide-container");
   var knob = document.querySelector(".slide-knob");
 
@@ -195,20 +220,34 @@ function initSlide() {
     var containerWidth = container.offsetWidth;
     var knobWidth = knob.offsetWidth;
     var newLeft = containerWidth - knobWidth; // Move to the right edge
+    var iframe = document.createElement("iframe");
+    iframe.src = `../call/call.html`;
+    iframe.id = "callPipContainer";
+    iframe.className = "pip";
+    document.body.appendChild(iframe);
 
     knob.style.left = newLeft + "px";
     // Close the notification after the transition is complete (300ms in this case)
     setTimeout(function () {
-      var iframe = document.createElement("iframe");
-      localStorage.setItem("CallTo")
-      iframe.src = "../call/call.html";
-      iframe.id = 'callPipContainer';
-      iframe.className = "pip";
-      document.body.appendChild(iframe);
+      localStorage.setItem("caller",false);
       knob.style.left = 0;
       closeNotification();
     }, 300);
   });
+}
+
+async function callDid(selectedChatId,messageId) {
+  const docRef = doc(dbdev, `ChatGroup/${selectedChatId}`);
+  const docSnapshot = await getDoc(docRef);
+  if (docSnapshot.exists()) {
+    const messages = docSnapshot.data().messages || [];
+    const messageIndex = messages.findIndex(message => message.messageId === messageId);
+    if (messageIndex !== -1) {
+      const updatedMessage = { ...messages[messageIndex], call: 'did' };
+      messages[messageIndex] = updatedMessage;
+      await updateDoc(docRef, { messages });
+    }
+  }
 }
 
 /*

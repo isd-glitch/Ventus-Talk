@@ -10,7 +10,6 @@ const firebaseConfigDev = {
   measurementId: "G-SHZ2Y05NS3"
 };
 
-
 const firebaseServer = {
   apiKey: "AIzaSyALzk3AnLb_wjhRoJSya-iXac3FaSkXCtY",
   authDomain: "ventus-talk-server.firebaseapp.com",

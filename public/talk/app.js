@@ -213,10 +213,10 @@ async function loadMessages(chatId) {
           added_message_id.push(messageId);
         }
         if (!senderCache[sender]) {
-          if (sender !== myuserId) {
+          if (sender !== myuserId && sender) {
             console.log("Fetching user data from database");
-            const userRef = doc(dbServer, "users", sender);
-            const userDoc = await getDoc(userRef);
+            const server_userRef = doc(dbServer, "users", sender);
+            const userDoc = await getDoc(server_userRef);
             if (userDoc.exists()) {
               const userData = userDoc.data();
               senderCache[sender] = {
@@ -291,15 +291,21 @@ async function loadMessages(chatId) {
               message_html += `<a href="https://drive.google.com/file/d/${resourceFileId}" class="message-bubble">${replyTargetDOM}${filename}ファイルを開く</a>`;
             }
           } else if (call) {
+            console.log('t');
             if (
               sender !== myuserId &&
-              3 * 60 * 1000 > new Date() - messageTimestamp
+              1 * 60 * 1000 > new Date() - messageTimestamp &&
+              call === 'first'
             ) {
               console.log(sender);
-              document.getElementById("caller").textContent = `${userName}より電話着信`;
-              document.getElementById("callNotification").style.display ="flex";
+              document.getElementById(
+                "caller"
+              ).textContent = `${userName}より電話着信`;
+              localStorage.setItem("skyway-roomId", messageId);
+              document.getElementById("callNotification").style.display =
+                "flex";
             }
-            message_html += `<div class="message-bubble" messageId="${messageId}">${messageText}</div>`;
+            message_html += `<div class="message-bubble" messageId="${messageId}"><img class="call_bubble" id="call_bubble" src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/call.png?v=1738408814280"></div>`;
           } else {
             const escapedMessageText = escapeHtml(messageText);
             const formattedMessageText =
@@ -519,6 +525,7 @@ function addEventListenersToChatItems() {
       if (selectedChatId == chatId) {
         return;
       } else {
+        localStorage.setItem("selectedChatId", chatId);
         loadMessages(chatId);
       }
     });
@@ -555,6 +562,7 @@ async function profileIcon() {
 
 let chatIdList = [];
 let friendList = [];
+let rowFriendList = [];
 
 async function updateChatList() {
   const chatList = document.getElementById("chat-list");
@@ -572,6 +580,7 @@ async function updateChatList() {
     }
     chatIdList = userDoc.data().chatIdList || [];
     friendList = userDoc.data().friendList || [];
+    rowFriendList = userDoc.data().rowFriendList || [];
 
     if (chatIdList.length === 0) {
       addLog("ChatIdListが空です。");
@@ -609,52 +618,66 @@ async function updateChatList() {
       )
       .join("");
     addEventListenersToChatItems();
-    for (const { chatId } of chatItems) {
+    const chatGroupPromises = chatItems.map(async ({ chatId }) => {
       if (!chatId) {
         console.error("Invalid chatId:", chatId);
-        continue;
+        return;
       }
+
       const chatGroupRef = doc(dbInfo, `ChatGroup/${chatId}`);
-      const chatGroupDoc = await getDoc(chatGroupRef);
-      if (chatGroupDoc.exists()) {
-        const { chatGroupName, mantwo, Icon, rawusernames } =
-          chatGroupDoc.data();
-        const chatItem = document.querySelector(
-          `.chat-item[data-chat-id="${chatId}"]`
-        );
-        const chatGroupNameElement = chatItem.querySelector(".chat-group-name");
-        //if (chatGroupNameElement && chatGroupName) {}
-        if (!mantwo) {
-          console.log(Icon);
-          chatGroupNameElement.textContent = chatGroupName;
-          chatItem.classList.add("icon-base64");
-          chatItem.style.setProperty("--base64-icon", `url(${Icon})`);
-          chatGroupNameMap[chatId] = chatGroupName;
-        } else {
-          const otherUserId = rawusernames.find((id) => id !== rawMyUserId);
-          console.log(otherUserId);
-          chatGroupNameElement.textContent = otherUserId;
-          const h = await hash(otherUserId);
-          const otherUserProfileIco = await getDoc(doc(dbServer, `users/${h}`));
-          chatGroupNameMap[chatId] = otherUserId;
-          if (
-            !otherUserProfileIco.exists() ||
-            !otherUserProfileIco.data() ||
-            !otherUserProfileIco.data().profile_ico
-          ) {
-            console.error("Invalid document structure or data");
-            return;
-          }
-          chatItem.classList.add("icon-base64");
-          chatItem.style.setProperty(
-            "--base64-icon",
-            `url(${otherUserProfileIco.data().profile_ico})`
+      try {
+        const chatGroupDoc = await getDoc(chatGroupRef);
+
+        if (chatGroupDoc.exists()) {
+          const { chatGroupName, mantwo, Icon, rawusernames } =
+            chatGroupDoc.data();
+          const chatItem = document.querySelector(
+            `.chat-item[data-chat-id="${chatId}"]`
           );
+          const chatGroupNameElement =
+            chatItem.querySelector(".chat-group-name");
+
+          if (!mantwo) {
+            console.log(Icon);
+            chatGroupNameElement.textContent = chatGroupName;
+            chatItem.classList.add("icon-base64");
+            chatItem.style.setProperty("--base64-icon", `url(${Icon})`);
+            chatGroupNameMap[chatId] = chatGroupName;
+          } else {
+            const otherUserId = rawusernames?.find((id) => id !== rawMyUserId);
+            if (otherUserId) {
+              console.log(otherUserId);
+              chatGroupNameElement.textContent = otherUserId;
+              const h = await hash(otherUserId);
+              const otherUserProfileIco = await getDoc(
+                doc(dbServer, `users/${h}`)
+              );
+              chatGroupNameMap[chatId] = otherUserId;
+              if (
+                otherUserProfileIco.exists() &&
+                otherUserProfileIco.data()?.profile_ico
+              ) {
+                chatItem.classList.add("icon-base64");
+                chatItem.style.setProperty(
+                  "--base64-icon",
+                  `url(${otherUserProfileIco.data().profile_ico})`
+                );
+              } else {
+                console.error("Invalid document structure or data");
+              }
+            } else {
+              console.error("No valid other user ID found");
+            }
+          }
+        } else {
+          console.error("ChatGroup document does not exist:", chatId);
         }
-      } else {
-        console.error("ChatGroup document does not exist:", chatId);
+      } catch (error) {
+        console.error("Error processing chat group:", error);
       }
-    }
+    });
+
+    await Promise.all(chatGroupPromises);
   } catch (error) {
     console.error("Error updating chat list:", error);
     addLog(
@@ -699,19 +722,19 @@ async function updateFriendList() {
   const selectedFriends = new Set(); // 選択された友達のセット
   //const userDocRef = doc(dbUser s, `users/${myuserId}`);
   //const userDoc = await getDoc(userDocRef);
-  if (!friendList) {
+  if (!rowFriendList) {
     friendListContainer.innerHTML = "<p>No user data found.</p>";
     return;
   }
   //const userData = userDoc.data();
   //const friends = userData.friendList || [];
-  if (friendList.length === 0) {
+  if (rowFriendList.length === 0) {
     friendListContainer.innerHTML = "<p>No friends found.</p>";
     return;
   }
 
   friendListContainer.innerHTML = "";
-  friendList.forEach((userId) => {
+  rowFriendList.forEach((userId) => {
     const friendItem = document.createElement("div");
     friendItem.classList.add("friend-item");
     friendItem.textContent = userId;
@@ -739,6 +762,13 @@ async function updateFriendList() {
   });
 }
 
+
+
+async function hashAllMembers(members) {
+    const hashedMembers = await Promise.all(members.map(member => hash(member)));
+    return hashedMembers;
+}
+
 async function createGroup() {
   const groupNameInput = document.getElementById("group-name-input");
   const selectedFriendsContainer = document.getElementById("selected-friends");
@@ -756,6 +786,7 @@ async function createGroup() {
   }
   const chatId = generateRandomId();
   const allMembers = [myuserId, ...selectedFriends];
+  const hashedAllMembers = await hashAllMembers(allMembers);
   for (const userId of allMembers) {
     const userDocRef = doc(dbUsers, `users/${userId}`);
     await updateDoc(userDocRef, {
@@ -770,7 +801,7 @@ async function createGroup() {
   const chatGroupRef = doc(dbInfo, `ChatGroup/${chatId}`);
   await setDoc(chatGroupRef, {
     chatGroupName: groupName,
-    usernames: allMembers,
+    usernames: hashedAllMembers,
     Icon: base64Image,
   });
   document.getElementById("group-settings-image").src = null;
@@ -1135,22 +1166,29 @@ document.getElementById('scroll-to-bottom').addEventListener('click', function()
 //import SkyWay from 'https://cdn.jsdelivr.net/npm/@skyway-webrtc/sdk';
 
 async function callSend() {
+  const messageId = generateRandomId(); //messageIdとroomIdは共通
+  localStorage.setItem("caller", "first");
+  localStorage.setItem("skyway-roomId", messageId);
   var iframe = document.createElement("iframe");
-  iframe.src = "../call/call.html";
+  iframe.src = `../call/call.html?room=${messageId}`;
   iframe.id = "callPipContainer";
   iframe.className = "pip";
   document.body.appendChild(iframe);
   try {
-    const messageId = generateRandomId();
-    await updateDoc(doc(dbdev, `ChatGroup/${selectedChatId}`), {
-      messages: arrayUnion({
-        message: "Call",
-        messageId: messageId,
-        sender: myuserId,
-        timestamp: new Date().toISOString(),
-        call: true,
-      }),
-    });
+    await setDoc(
+      doc(dbdev, `ChatGroup/${selectedChatId}`),
+      {
+        messages: arrayUnion({
+          message: "Call",
+          messageId: messageId,
+          sender: myuserId,
+          timestamp: new Date().toISOString(),
+          call: "first",
+        }),
+      },
+      { merge: true }
+    );
+
     await setDoc(
       doc(dbInfo, `ChatGroup/${selectedChatId}`),
       {

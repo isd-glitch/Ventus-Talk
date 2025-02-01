@@ -33,7 +33,9 @@ app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}`);
 });
 
-// **Google Drive 認証**
+/*-----------------------------------------------------
+**Google Drive 認証**
+-----------------------------------------------------*/
 const driveKeys = JSON.parse(fs.readFileSync("./ventus-talk-dev-1d6a05c348be.json", "utf-8"));
 const driveClient = new JWT({
   email: driveKeys.client_email,
@@ -60,7 +62,12 @@ app.get("/get-token", async (req, res) => {
   }
 });
 
-// **Firebase 初期化**
+
+
+
+/*-----------------------------------------------------
+**Firestore 通知システム**
+-----------------------------------------------------*/
 const serviceAccountFCM = JSON.parse(fs.readFileSync("./ventus-talk-dev-firebase-adminsdk-1iv00-9d4ecb0874.json", "utf-8"));
 const serviceAccountServer = JSON.parse(fs.readFileSync("./ventus-talk-server-firebase-adminsdk-fbsvc-d615ebb661.json", "utf-8"));
 const serviceAccountInfo = JSON.parse(fs.readFileSync("./ventus-talk-info-firebase-adminsdk-fbsvc-99baed7dfa.json", "utf-8"));
@@ -171,44 +178,31 @@ const notifyUsers = async (chatId, sender, message, usernames, senderUsername) =
   }
 };
 
+
+/*-----------------------------------------------------
+**Sky-Way 通話システム**
+-----------------------------------------------------
+const SKYWAY_API_KEY = 'f7e31d2a-4c74-4909-ad3f-7e845e5a4a53';
+const SKYWAY_SECRET_KEY = 'p9jJDiGR2GrIbyI1d48CqTxJ1cijy/RuC8YvtdqzDcI=';
+app.get('/skyway-token', (req, res) => {
+  const { callerUserId } = req;
+  const token = generateAuthToken({
+    apiKey: SKYWAY_API_KEY,
+    secretKey: SKYWAY_SECRET_KEY,
+    ttl: 3600, // トークンの有効期間（秒）
+    peerId: 'random-peer-id' // ユーザーごとに一意のIDを生成
+  });
+  res.send({ token });
+});
+
+
+*/
+
+
+
+
+
+
 app.get("/sleep", (req, res) => {
   res.json({ iam: "awake" });
 });
-
-/*
-const { promisify } = require("util");
-const authorizeAsync = promisify(client.authorize).bind(client);
-
-async function DRIVEgetAccessToken() {
-  try {
-    await authorizeAsync();
-    const token = client.credentials?.access_token;
-    if (!token) throw new Error("No access token received.");
-    return token;
-  } catch (error) {
-    console.error("Error authorizing Drive client:", error);
-    throw error;
-  }
-}*/
-
-/*
-const startMonitoringMessages = () => {
-  dbInfo.collection("ChatGroup").onSnapshot((snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      if (change.type === "modified") {
-        const chatId = change.doc.id;
-        const data = change.doc.data();
-        if (data.sender) {
-          const sender = data.sender;
-          const message = data.message;
-          const senderUsername = data.senderUsername;
-          const usernames = data.usernames || [];
-          
-          notifyUsers(chatId, sender, message, usernames, senderUsername);
-        }
-      }
-    });
-  });
-};
-*/
-//startMonitoringMessages();

@@ -94,3 +94,42 @@ app.get('/push', async (req, res) => {
   }
 });
 */
+
+
+/*
+const { promisify } = require("util");
+const authorizeAsync = promisify(client.authorize).bind(client);
+
+async function DRIVEgetAccessToken() {
+  try {
+    await authorizeAsync();
+    const token = client.credentials?.access_token;
+    if (!token) throw new Error("No access token received.");
+    return token;
+  } catch (error) {
+    console.error("Error authorizing Drive client:", error);
+    throw error;
+  }
+}*/
+
+/*
+const startMonitoringMessages = () => {
+  dbInfo.collection("ChatGroup").onSnapshot((snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+      if (change.type === "modified") {
+        const chatId = change.doc.id;
+        const data = change.doc.data();
+        if (data.sender) {
+          const sender = data.sender;
+          const message = data.message;
+          const senderUsername = data.senderUsername;
+          const usernames = data.usernames || [];
+          
+          notifyUsers(chatId, sender, message, usernames, senderUsername);
+        }
+      }
+    });
+  });
+};
+*/
+//startMonitoringMessages();

@@ -20,6 +20,7 @@ html, body {
   overflow: hidden; 
 }
 
+
 #left-panel {
   width: 30%;
   background-color: #ffffff;
@@ -684,4 +685,8 @@ body.sophisticated-theme {
   padding: 10px;
   background-color: #3c3c5c;
   border-bottom: 1px solid #dddddd;
+}
+.call_bubble {
+  width: 60px;
+  height: 60px;
 }

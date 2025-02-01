@@ -70,6 +70,7 @@
         >をご覧ください。
       </p>
       <button id="update" class="styled-button">バージョンを手動更新</button>
+      <button id="deleatCache" class="styled-button" onclick="deleatCache()">キャッシュを消去</button>
       <h2>ユーザーローカルストレージ</h2>
       <form id="localStorageForm">
         <button type="button" class="styled-button" onclick="showLocalStorage()">ローカルストレージを表示</button>
@@ -78,7 +79,7 @@
       <button id="checkAccount" class="styled-button">アカウント確認</button>
     </div>
     <script type="module">
-      import { updateCacheIfNeeded,hash } from "../helper.js";
+      import { updateCacheIfNeeded,hash ,deleatCache} from "../helper.js";
       import { getDoc, doc, dbUsers } from "../firebase-setup.js";
 
       document.addEventListener("DOMContentLoaded", () => {

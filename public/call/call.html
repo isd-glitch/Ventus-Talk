@@ -1,27 +1,71 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="call.css">
-    <title>通話画面</title>
-</head>
-<body>
-    <div class="container">
-        <div class="user-icon">
-            <img src="../images/user-icon.png" alt="User Icon">
-        </div>
-        <div class="pip-container" id="videoPipContainer">
-            <p>通話画面</p>
-        </div>
-        <div class="menu">
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>SkyWay Tutorial</title>
+    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+        eruda.init();
+        console.log("eruda-index");
+    </script>
+  </head>
+  <body>
+    <button id="join" class="join">join</button>
+    <p id="idShow">ID: <span id="my-id"></span></p>
+    <div>
+      <div class="menu">
             <button id="audio-toggle">🎙️ 音声オンオフ</button>
             <button id="video-toggle">📹 ビデオオンオフ</button>
-            <button id="end-call">❌ 終了</button>
+            <button id="leave">❌ 終了</button>
         </div>
     </div>
+    <video id="local-video" width="400px" muted playsinline></video>
+    <div id="button-area"></div>
+    <div id="remote-media-area"></div>
+    <link rel="stylesheet" href="call.css">
+    <script src="https://cdn.jsdelivr.net/npm/@skyway-sdk/room/dist/skyway_room-latest.js"></script>
+    <script type="module" src="call.js"></script>
+    <!--<script type="module">
+        import { updateCacheIfNeeded } from "../helper.js";
+        updateCacheIfNeeded();
+    </script>-->
+    <div class="loader" style="display:none;"></div>
+    <style>
+      /* HTML: <div class="loader"></div> */
+.loader {
+  width: 210px; /* 70px * 3 */
+  height: 150px; /* 50px * 3 */
+  box-sizing: border-box;
+  background:
+    conic-gradient(from 135deg at top,#0000, #fff 1deg 90deg,#0000 91deg) right -60px bottom 24px/54px 27px, /* -20px * 3, 8px * 3, 18px * 3, 9px * 3 */
+    linear-gradient(#fff 0 0) bottom/100% 24px, /* 8px * 3 */
+    #000;
+  background-repeat: no-repeat;
+  border-bottom: 24px solid #000; /* 8px * 3 */
+  position: relative;
+  animation: l7-0 2s infinite linear;
+}
 
-    <script src="https://cdn.webrtc.ecl.ntt.com/skyway-4.4.2.js"></script>
-    <script src="./pip.js"></script>
-</body>
+.loader::before {
+  content: "";
+  position: absolute;
+  width: 30px; /* 10px * 3 */
+  height: 42px; /* 14px * 3 */
+  background: lightblue;
+  left: 30px; /* 10px * 3 */
+  animation: l7-1 2s infinite cubic-bezier(0,200,1,200);
+}
+
+@keyframes l7-0 {
+  100% { background-position: left -60px bottom 24px,bottom} /* -20px * 3, 8px * 3 */
+}
+
+@keyframes l7-1 {
+  0%,50%   {bottom: 24px} /* 8px * 3 */
+  90%,100% {bottom: 24.3px} /* 8.1px * 3 */
+}
+
+    </style>
+  </body>
 </html>

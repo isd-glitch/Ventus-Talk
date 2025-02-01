@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventus-Talk</title>
+</head>
+<body>
+
+<h1>Ventus-Talk</h1>
+
+<p><strong>開発者</strong>: Roughfts</p>
+
+<h2>現時点でのVentus-Talkの性能</h2>
+
+<h3>概要</h3>
+<ul>
+    <li><strong>4MB</strong> (npm module除く)・静的サイト</li>
+    <li>独自サーバー、静的サイトホスティングでも、独立してサイト設立可能 (ただし、サーバーがない場合はそのサイト間での通知は不可、expressサーバーが動かせるなら可能)</li>
+    <li><strong>3つのFirebaseFirestoreサーバー同時使用</strong>により、請求額とサーバー負荷を軽減 (増設中)</li>
+</ul>
+
+<h3>メッセージ送信性能</h3>
+<ul>
+    <li>約<strong>10,000/日</strong>メッセージ送信可能
+        <ul>
+            <li>それぞれ単一のメッセージ長は、1〜ブラウザの限界まで (数十万文字。ちなみに容量重い100万文字の中国漢字を送ったらエラーになった)</li>
+        </ul>
+    </li>
+</ul>
+
+<h3>メッセージ更新速度</h3>
+<ul>
+    <li>平均<strong>0.05秒〜0.15秒</strong></li>
+</ul>
+
+<h3>その他の特徴</h3>
+<ul>
+    <li>通信制限でもアプリさえ開いたら、安定してやり取り可能</li>
+    <li>画像・(動画)・様々なファイル共有可能</li>
+    <li>パスワードはハッシュで安全に管理</li>
+    <li>ブラウザや、アプリ化様々な媒体で動作可能 (IE非対応)
+        <ul>
+            <li>尚、iPadのブラウザでは通知の権限がないため通知にはアプリ化が必須</li>
+        </ul>
+    </li>
+    <li>LINEと同じようにアイコン・グループ作成可能 (現在リプライ機能搭載中)</li>
+    <li>友達追加はQRコード又はuserId入力</li>
+    <li>複数アカウント作成可能</li>
+    <li>同期デバイス数制限なし</li>
+    <li>Youtubeリンクサイト規制回避自動変換＆埋め込み</li>
+    <li>その他リンクサイト規制回避URL自動追加</li>
+    <li><strong>15種類</strong>くらいのフォントと<strong>5種類</strong>のテーマ (テーマの細かいCSSが面倒なので現在やってくれる人募集中)</li>
+</ul>
+
+<h3>セキュリティと制限</h3>
+<ul>
+    <li>サーバー荒らされる可能性あり</li>
+    <li>セキュリティ対策ほぼなし</li>
+    <li>動画送信・閲覧にかなり時間がかかる</li>
+    <li>glitchだと、サーバーが起きていないと通知が届かない</li>
+</ul>
+
+<h2>サーバーの説明 (マーメイド記法)</h2>
+
+<div class="mermaid">
+graph LR
+    A[ユーザー] --> B[独自サーバー]
+    A --> C[静的サイトホスティング]
+    B --> D[Firebase Firestore サーバー 1]
+    B --> E[Firebase Firestore サーバー 2]
+    B --> F[Firebase Firestore サーバー 3]
+</div>
+
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true });
+</script>
+
+</body>
+</html>

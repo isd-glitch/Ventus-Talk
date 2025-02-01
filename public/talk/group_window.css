@@ -268,8 +268,10 @@
   right: 10px;
   width: 400px;
   height: 300px;
+  z-index:100000;
   border: 2px solid black;
   background-color: rgba(0, 0, 0, 0.5); /* 半透明の背景 */
+  transform: scale(0.6);
 }
 
 .call-notification-modal-overlay {

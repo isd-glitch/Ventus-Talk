@@ -23,6 +23,7 @@ import {
 } from "../firebase-setup.js";
 
 import { addLog,setProfileImageFromLocalStorage,hash } from "../helper.js";
+const myRowId = localStorage.getItem('userIdShow');
 async function addFriendIDfromPage() {
   const addFriendWindow = document.getElementById("add-friend-window");
   addFriendWindow.classList.toggle("visible");
@@ -31,7 +32,7 @@ async function addFriendIDfromPage() {
   const inputUserId = await hash(rawUserId);
   addFriend_ID(inputUserId,rawUserId);
 }
-const rawMyUserId = localStorage.getItem('userIdShow');
+
 
 async function addFriend_ID(userId,rawUserId) {
   addLog("しばし待て。", "info");
@@ -47,9 +48,11 @@ async function addFriend_ID(userId,rawUserId) {
       console.log("User found:", userDoc.data());
       // Add to friend's friendList
       const friendList = userDoc.data().friendList || [];
+      const friendsRowFriendList = userDoc.data().rowFriendList || [];
       if (!friendList.includes(myuserId)) {
         friendList.push(myuserId);
-        await setDoc(userDocRef, { friendList }, { merge: true });
+        friendsRowFriendList.push(myRowId)
+        await setDoc(userDocRef, { friendList,rowFriendList:friendsRowFriendList }, { merge: true });
         console.log("Friend added successfully.");
         addLog("Friend added successfully.", "success");
       } else {
@@ -60,7 +63,7 @@ async function addFriend_ID(userId,rawUserId) {
 
       // Generate ChatId and update ChatIdList for both users
       const chatId = generateChatId();
-      const chatGroupName = `${rawUserId}と${rawMyUserId}`;
+      const chatGroupName = `${rawUserId}と${myRowId}`;
       const serverID = "dev";
       const newChatItem = { chatId, serverID, pinned: false };
 
@@ -76,9 +79,11 @@ async function addFriend_ID(userId,rawUserId) {
       const myDoc = await getDoc(myDocRef);
 
       const myFriendList = myDoc.data().friendList || [];
+      const myRowFriendList = myDoc.data().rowFriendList || [];
       if (!myFriendList.includes(userId)) {
         myFriendList.push(userId);
-        await setDoc(myDocRef, { friendList: myFriendList }, { merge: true });
+        myRowFriendList.push(myRowId);
+        await setDoc(myDocRef, { friendList: myFriendList ,rowFriendList:myRowFriendList}, { merge: true });
       }
 
       // Update my chatIdList
@@ -92,7 +97,7 @@ async function addFriend_ID(userId,rawUserId) {
       const chatGroupRef = doc(dbInfo, "ChatGroup", chatId);
       await setDoc(chatGroupRef, {
         usernames: [myuserId, userId],
-        rawusernames:[rawMyUserId,rawUserId],
+        rawusernames:[myRowId,rawUserId],
         chatGroupName,
         serverID,
         mantwo,
@@ -101,7 +106,7 @@ async function addFriend_ID(userId,rawUserId) {
       const friendItem = document.createElement("div");
       friendItem.className = "friend-item";
       friendItem.setAttribute("data-friend-user-id", userId);
-      friendItem.textContent = "ハッシュ:"+userId;
+      friendItem.textContent = rawUserId;
       friendListContainer.appendChild(friendItem);
     } else {
       console.log("User not found。");
@@ -195,10 +200,11 @@ function addEventListenersToChatItems() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const friend_query = getQueryParam("friendid");
   if (friend_query && localStorage.getItem("userID")) {
-    addFriend_ID(friend_query);
+    const hashed = await hash(friend_query)
+    addFriend_ID(hashed,friend_query);
   }
   setProfileImageFromLocalStorage();
   //qrcode_set()

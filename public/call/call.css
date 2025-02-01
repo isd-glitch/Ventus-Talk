@@ -6,6 +6,8 @@ body {
     margin: 0;
     background-color: #f0f0f0;
     font-family: Arial, sans-serif;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .container {
@@ -16,37 +18,96 @@ body {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
+    width: 800px;
+    height: 600px;
+    position: relative;
 }
 
-.user-icon {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    overflow: hidden;
+#my-id, #room-name {
     margin-bottom: 20px;
 }
 
-.user-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
 
 .menu {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background-color: #f1f1f1;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  justify-content: center;
 }
 
 .menu button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  width: 100px; /* アスペクト比を固定するための幅 */
+  height: 50px; /* アスペクト比を固定するための高さ */
 }
 
 .menu button:hover {
+  background-color: #0056b3;
+}
+
+#local-video {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 150px;
+    height: 100px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#join {
+    width: 50%;
+    height: 50%;
+    font-size: 2rem;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+}
+button.join:hover {
     background-color: #0056b3;
+}
+@keyframes fadeOutMove {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+}
+
+#remote-media-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  z-index:-100;
+}
+
+#remote-media-area video {
+    width: 90%;
+    height: 90%;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }

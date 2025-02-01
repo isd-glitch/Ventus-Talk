@@ -5,7 +5,6 @@ document.addEventListener('keydown', function(event) {
         s: false,
         c: false,
     };
-
     // キーが押された時の処理
     function keyDownHandler(event) {
         switch (event.key) {
@@ -21,7 +20,6 @@ document.addEventListener('keydown', function(event) {
         }
         checkCombination();
     }
-
     // キーが離された時の処理
     function keyUpHandler(event) {
         switch (event.key) {
@@ -36,14 +34,12 @@ document.addEventListener('keydown', function(event) {
                 break;
         }
     }
-
     // 全てのキーが押されたか確認する処理
     function checkCombination() {
         if (keys.e && keys.s && keys.c) {
             window.location.href = '../recover/recover.html';
         }
     }
-
     // イベントリスナーの登録
     document.addEventListener('keydown', keyDownHandler);
     document.addEventListener('keyup', keyUpHandler);

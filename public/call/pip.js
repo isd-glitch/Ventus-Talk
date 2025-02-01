@@ -1,4 +1,4 @@
-const pipContainer = document.getElementById('videoPipContainer');
+//const pipContainer = document.getElementById('videoPipContainer');
 /*
 pipContainer.addEventListener('click', () => {
     pipContainer.classList.toggle('fullscreen');
@@ -22,19 +22,26 @@ pipContainer.addEventListener('mousedown', function(e) {
 
 */
 // Get the "終了" button
-const endCallButton = document.getElementById('end-call');
+//const endCallButton = document.getElementById('leave');
 
 // Add event listener to the "終了" button
-endCallButton.addEventListener('click', endCall);
+//endCallButton.addEventListener('click', endCall);
 
 // Function to close the iframe
-function endCall() {
-    // Check if the script is running inside an iframe
-    if (window.top !== window.self) {
-        window.top.postMessage('closeIframe', '*');
-    } else {
-        console.log('Not running inside an iframe');
-    }
-}
 
-// Listen for the 'closeIframe' message in the parent window
+
+
+
+/*
+document.addEventListener("DOMContentLoaded", function () {
+  const friend_query = getQueryParam("callTo");
+  if (friend_query && localStorage.getItem("userID")) {
+  }
+  
+});
+
+function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+*/
