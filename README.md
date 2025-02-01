@@ -45,3 +45,4 @@ graph LR
     B --> D[Firebase Firestore サーバー 1]
     B --> E[Firebase Firestore サーバー 2]
     B --> F[Firebase Firestore サーバー 3]
+```
