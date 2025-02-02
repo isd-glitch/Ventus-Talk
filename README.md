@@ -116,61 +116,80 @@ flowchart TD
 ```
 ```mermaid
 graph TD
-    A[Browser User] -->|Login| B(Users DB)
-    A -->|Login| C(Server DB)
-    A -->|Login| L(Local Storage)
-    A -->|Send Message| D(Dev DB)
-    A -->|Send Message| E(Info DB)
-    A -->|Create Group / Add Friend| D
-    A -->|Create Group / Add Friend| E
-    A -->|Video Call| M(SkyWay - Private Key Hard-coded)
-    B -->|Update FCM Token, Chat List, Friend List| C
-    B --> B1[/users/\(userId\)/{chatIdList, friendList, password, rawFriendList, timestamp, username}/]
-    B --> B2[/rawUserId/enteredRawUserId/{rawUserId: 0=user1, 1=user2, ...}/]
-    C --> C1[/users/\(userId\)/{token \(FCM\), profile_ico, username}/]
-    D --> D1[/ChatGroup/\(chatId\)/messages[{message, messageId, sender, timestamp, replyId, resourceURL, extension}]/]
-    E --> E1[/ChatGroup/\(chatId\)/{rawusernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName}/]
-    F(Glitch Server) -->|Snapshot Monitor| E
-    F -->|Reference for Notifications| C
-    F -->|Send Notification| G(FCM - Dev Server)
-    A -->|Send Message with call key| D
-    D -->|Recipient rewrites call key with DID| A
-    L -->|Store Last Message ID & Other Data| A
-    B -->|Updates| L
-    C -->|Updates| L
-    D -->|Updates Last Message| E
-```
-```mermaid
-graph TD
+    %% Firestoreのデータベース
     A[Firestore Database] -->|Contains| B[dev]
     A -->|Contains| C[Users]
     A -->|Contains| D[Server]
     A -->|Contains| E[Info]
     
+    %% devの構造
     B -->|Contains| B1[ChatGroup]
     B1 -->|Contains| B2[(chatId)]
     B2 -->|Contains| B3[messages]
     B3 -->|Attributes| B4[message, messageId, sender, timestamp, replyId, resourceURL, extension]
 
+    %% Usersの構造
     C -->|Contains| C1[users]
     C1 -->|Contains| C2[(userId)]
-    C2 -->|Attributes| C3[chatIdList, friendList, password, rawFriendList, timestamp, username]
-    C2 -->|Contains| C4[rawUserId]
+    C2 -->|Attributes| C3[chatIdList, friendList, password, rowFriendList, timestamp, username]
+    C1 -->|Contains| C4[rawUserId]
     C4 -->|Attributes| C5[enterdRawUserId: 0: user1, 1: user2, ...]
 
+    %% Serverの構造
     D -->|Contains| D1[users]
     D1 -->|Contains| D2[(userId)]
-    D2 -->|Attributes| D3[token, profile_ico, username]
+    D2 -->|Attributes| D3[token (FCM), profile_ico, username]
     
+    %% Infoの構造
     E -->|Contains| E1[ChatGroup]
     E1 -->|Contains| E2[(chatId)]
-    E2 -->|Attributes| E3[rawusernames, usernames, rawusernames, lastMessageId, sender, senderUsername, ChatGroupName]
+    E2 -->|Attributes| E3[rawusernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName]
+
+    %% ローカルストレージ
+    F[Local Storage] -->|Stores| F1[lastMessageId, userId, token]
+
+    %% Glitchサーバー
+    G[Glitch Server] -->|Monitors (Snapshot)| E
+    G -->|References| D
+    G -->|Sends Notification via| H[FCM (Firebase Cloud Messaging)]
+
+    %% SkyWayによるビデオ通話
+    I[SkyWay (Video Call)] -->|Uses| J[Hardcoded Secret Key]
     
-    F[glitch Server] -->|Watches| E
-    F -->|Sends Notification to| D
-```
+    %% 操作のデータフロー
+    %% メッセージ送信
+    User[User Browser] -->|Send Message| B3
+    User -->|Update Last Message| E3
+    
+    %% 通知
+    E3 -->|Trigger Update| G
+    G -->|Retrieve Token| D3
+    G -->|Send Push Notification| H
+    H -->|Deliver Notification| User
 
+    %% ログイン
+    User -->|Login| C3
+    User -->|Update Token| D3
+    User -->|Update Local Storage| F1
 
+    %% グループ作成
+    User -->|Create Group| B1
+    User -->|Update Group Info| E1
+
+    %% 友達追加
+    User -->|Add Friend| C3
+    User -->|Update Info| E1
+
+    %% 電話 (SkyWay)
+    User -->|Initiate Call (call=first)| B3
+    User2[Recipient Browser] -->|Receive Call| B3
+    User2 -->|Accept Call (call=did)| B3
+    User2 -->|Start Video Session| I
+
+    %% 補足的な関係
+    H -->|Requires| D3[token]
+    User -->|Reads Data| F1
+    
 ```mermaid
 sequenceDiagram
     participant User
