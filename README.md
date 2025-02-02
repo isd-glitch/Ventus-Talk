@@ -112,6 +112,7 @@ flowchart TD
 ```
 
 かなり省略しているので、矢印や処理が足りませんが、おおまかにはこれです。
+#Graph TD
 ```mermaid
 graph TD
     %% Firestoreのデータベース
@@ -232,6 +233,82 @@ graph TD
     H -->|Requires| D3
     User -->|Reads Data| L1
 ```
+＃シーケンズ図
+```mermaid
+sequenceDiagram
+    participant User as ユーザー
+    participant Browser as ブラウザ
+    participant ServiceWorker as サービスワーカー
+    participant LocalStorage as ローカルストレージ
+    participant Firebase as Firebase
+    participant FirestoreDev as Firestore-dev
+    participant FirestoreUsers as Firestore-Users
+    participant FirestoreServer as Firestore-Server
+    participant FirestoreInfo as Firestore-Info
+    participant GlitchServer as Glitchサーバー
+    participant FCM as Firebase Cloud Messaging
+    participant SkyWay as SkyWay
+    participant GoogleDrive as Googleドライブ
+    participant AppsScript as Apps Script
+    participant GoogleCloud as Google Cloud
+
+    %% ユーザーの操作
+    User->>Browser: アプリにアクセス
+    Browser->>LocalStorage: データの読み書き
+    Browser->>ServiceWorker: サービスワーカーと通信
+    ServiceWorker->>FCM: 通知の受信
+
+    %% メッセージ送信
+    User->>Browser: メッセージ送信 (F1)
+    Browser->>FirestoreDev: メッセージを保存
+    Browser->>FirestoreInfo: メッセージ情報を更新
+    FirestoreInfo-->>GlitchServer: 変更を検知
+    GlitchServer->>FirestoreServer: トークン取得
+    GlitchServer->>FCM: プッシュ通知を送信
+    FCM->>ServiceWorker: 通知を配信
+    ServiceWorker->>User: 通知表示
+
+    %% ファイル送信
+    ServiceAccount->>GlitchServer: トークン提供
+    User ->>GlitchServer: サービスアカウントトークンを取得
+    User ->>ServeceAccount: ファイル受け取り
+    ServiceAccount->>GoogleDrive: ファイルをアップロード (F1r)
+    GoogleDrive->>ServiceAccount: アクセストークンで認証
+    
+
+    %% メッセージ読み込み
+    User->>Browser: メッセージを読み込む (F2)
+    Browser->>FirestoreDev: メッセージを取得
+
+    %% ビデオ通話
+    User->>Browser: 通話を開始 (F3)
+    Browser->>SkyWay: セッションを開始
+    SkyWay->>User: 通話を確立
+
+    %% ログイン
+    User->>FirestoreUsers: ログイン情報を取得 (F4)
+    FirestoreUsers->>FirestoreServer: トークンを更新
+    FirestoreServer->>LocalStorage: トークンを保存
+    User->>LocalStorage: ローカルストレージを更新
+
+    %% グループ作成
+    User->>FirestoreDev: グループを作成
+    User->>FirestoreInfo: グループ情報を更新
+
+    %% 友達追加
+    User->>FirestoreUsers: フレンドリストを更新
+    User->>FirestoreInfo: ユーザー情報を更新
+
+    %% 初期同期
+    User->>FirestoreServer: データを同期
+    FirestoreServer->>LocalStorage: データを保存
+
+    %% その他の操作
+    AppsScript->>GoogleDrive: ファイル管理
+    GoogleCloud->>Firebase: モニタリング（未実装）
+```
+
+通知の仕組みだけ。
 ```mermaid
 sequenceDiagram
     participant User
