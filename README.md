@@ -154,7 +154,6 @@ L -->|Store Last Message ID & Other Data| A
 B -->|Updates| L
 C -->|Updates| L
 D -->|Updates Last Message| E
-
 ```
 ```mermaid
 graph TD
