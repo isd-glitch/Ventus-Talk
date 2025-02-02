@@ -56,11 +56,6 @@ erDiagram
         timestamp timestamp
     }
     
-    RAW_USER_ID {
-        string rawUserId
-        map enterdRawUserId
-    }
-
     SERVER {
         string userId
         string token
@@ -117,8 +112,47 @@ flowchart TD
 
     style A fill:#f9f,stroke:#333,stroke-width:2px
     style H fill:#ccf,stroke:#333,stroke-width:2px
-    style K fill:#cfc,stroke:#333,stroke-width:2px
-```
+    style K fill:#cfc,stroke:#333,stroke-width:2p
+
+graph TD
+
+%% Main Components
+A[Browser (User)] -->|Login| B[Users DB]
+A -->|Login| C[Server DB]
+A -->|Login| L[Local Storage]
+A -->|Send Message| D[Dev DB]
+A -->|Send Message| E[Info DB]
+A -->|Create Group / Add Friend| D
+A -->|Create Group / Add Friend| E
+A -->|Video Call| M[SkyWay (Private Key Hard-coded)]
+
+%% Firestore DBs
+B -->|Update FCM Token, Chat List, Friend List| C
+B -->|Store| B1[/users/(userId)/chatIdList, friendList, password, rowFriendList, timestamp, username/]
+B -->|Raw User Mapping| B2[/rawUserId/enterdRawUserId/[rawUserId= 0:user1, 1:user2, ...]/]
+
+C -->|Store| C1[/users/(userId)/token (FCM), profile_ico, username/]
+
+D -->|Store Messages| D1[/ChatGroup/(chatId)/messages[{message, messageId, sender, timestamp, replyId, resourceURL, extension}]/]
+
+E -->|Store Group Info| E1[/ChatGroup/(chatId)/{rawusernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName}/]
+
+%% Glitch Server Monitoring
+F[Glitch Server] -->|Snapshot Monitor| E
+F -->|Reference for Notifications| C
+F -->|Send Notification via FCM| G[FCM (Dev Server)]
+
+%% Video Call Flow
+A -->|Send Message with call key| D
+D -->|Recipient rewrites call key with did| A
+
+%% Local Storage Updates
+L -->|Store Last Message ID & Other Data| A
+
+%% Relationships
+B -- Updates --> L
+C -- Updates --> L
+D -- Updates Last Message --> E
 ```mermaid
 graph TD
     A[Firestore Database] -->|Contains| B[dev]
