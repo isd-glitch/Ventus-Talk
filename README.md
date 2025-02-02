@@ -116,7 +116,7 @@ flowchart TD
 ```
 ```mermaid
 graph TD
-    A{Browser User} -->|Login| B(Users DB)
+    A[Browser User] -->|Login| B(Users DB)
     A -->|Login| C(Server DB)
     A -->|Login| L(Local Storage)
     A -->|Send Message| D(Dev DB)
