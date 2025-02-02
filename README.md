@@ -125,16 +125,16 @@ graph TD
     A -->|Create Group / Add Friend| E
     A -->|Video Call| M(SkyWay - Private Key Hard-coded)
     B -->|Update FCM Token, Chat List, Friend List| C
-    B --> B1[/users/(userId)/{chatIdList, friendList, password, rowFriendList, timestamp, username}/]
-    B --> B2[/rawUserId/enterdRawUserId/{rawUserId: 0=user1, 1=user2, ...}/]
-    C --> C1[/users/(userId)/{token (FCM), profile_ico, username}/]
-    D --> D1[/ChatGroup/(chatId)/messages[{message, messageId, sender, timestamp, replyId, resourceURL, extension}]/]
-    E --> E1[/ChatGroup/(chatId)/{rawusernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName}/]
+    B --> B1[/users/\(userId\)/{chatIdList, friendList, password, rawFriendList, timestamp, username}/]
+    B --> B2[/rawUserId/enteredRawUserId/{rawUserId: 0=user1, 1=user2, ...}/]
+    C --> C1[/users/\(userId\)/{token \(FCM\), profile_ico, username}/]
+    D --> D1[/ChatGroup/\(chatId\)/messages[{message, messageId, sender, timestamp, replyId, resourceURL, extension}]/]
+    E --> E1[/ChatGroup/\(chatId\)/{rawusernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName}/]
     F(Glitch Server) -->|Snapshot Monitor| E
     F -->|Reference for Notifications| C
     F -->|Send Notification| G(FCM - Dev Server)
     A -->|Send Message with call key| D
-    D -->|Recipient rewrites call key with did| A
+    D -->|Recipient rewrites call key with DID| A
     L -->|Store Last Message ID & Other Data| A
     B -->|Updates| L
     C -->|Updates| L
