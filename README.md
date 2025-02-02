@@ -45,6 +45,58 @@
 | **Info**         | チャットグループの情報管理 | `ChatGroup - chatId - rawusernames, usernames, rawusernames, lastMessageId, sender, senderUsername, ChatGroupName` |
 
 ```mermaid
+erDiagram
+    USERS {
+        string userId
+        string username
+        array chatIdList
+        array friendList
+        string password
+        array rowFriendList
+        timestamp timestamp
+    }
+    
+    RAW_USER_ID {
+        string rawUserId
+        map enterdRawUserId
+    }
+
+    SERVER {
+        string userId
+        string token
+        string profile_ico
+        string username
+    }
+
+    DEV {
+        string chatId
+        array messages
+    }
+
+    INFO {
+        string chatId
+        array rawusernames
+        array usernames
+        string lastMessageId
+        string sender
+        string senderUsername
+        string ChatGroupName
+    }
+
+    LOCAL_STORAGE {
+        string userId
+        string lastMessageId
+    }
+
+    USERS ||--o{ DEV : "belongs to"
+    USERS ||--o{ SERVER : "syncs with"
+    USERS ||--o{ RAW_USER_ID : "maps to"
+    DEV ||--o{ INFO : "linked with"
+    INFO ||--o{ SERVER : "references for FCM"
+    LOCAL_STORAGE ||--o{ USERS : "caches data"
+```
+
+```mermaid
 flowchart TD
     A[ユーザーのブラウザ] -->|ログイン| B(Users/Server 更新)
     B --> C(FCMトークン保存)
