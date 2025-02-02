@@ -39,24 +39,24 @@
 ## サーバーの説明
 ```mermaid
 graph TD
-    A[Firestore Collections and Roles]
+    A[Firestore Collections]
 
     A -->|Contains| B[dev]
     B -->|Role| B1[Manages chat messages]
-    B1 -->|Details| B2[ChatGroup -> (chatId) -> messages]
+    B -->|Details| B2[ChatGroup - chatId - messages]
 
     A -->|Contains| C[Users]
     C -->|Role| C1[Stores user information]
-    C1 -->|Details| C2[users -> (userId) -> chatIdList, friendList, password, rawFriendList, timestamp, username]
-    C1 -->|Details| C3[rawUserId -> enterdRawUserId: 0: user1, 1: user2, ...]
+    C -->|Details| C2[users - userId - chatIdList, friendList, password, rawFriendList, timestamp, username]
+    C -->|Details| C3[rawUserId - enterdRawUserId]
 
     A -->|Contains| D[Server]
     D -->|Role| D1[Manages notification information]
-    D1 -->|Details| D2[users -> (userId) -> token, profile_ico, username]
+    D -->|Details| D2[users - userId - token, profile_ico, username]
 
     A -->|Contains| E[Info]
     E -->|Role| E1[Manages chat group metadata]
-    E1 -->|Details| E2[ChatGroup -> (chatId) -> rawusernames, usernames, rawusernames, lastMessageId, sender, senderUsername, ChatGroupName]
+    E -->|Details| E2[ChatGroup - chatId - rawusernames, usernames, rawusernames, lastMessageId, sender, senderUsername, ChatGroupName]
 
 ```
 
