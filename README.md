@@ -91,8 +91,8 @@ sequenceDiagram
     User->>Browser: Manage message updates
     FirestoreDev->>User: Snapshot update detected
     FirestoreInfo->>User: Snapshot update detected
+    GlitchServer->>FirestoreInfo: Snapshot update detected
     GlitchServer->>FirestoreServer: Get FCM Token
     GlitchServer->>FCM: Send Notification
     FCM->>User: Receive Notification
-
 ```
