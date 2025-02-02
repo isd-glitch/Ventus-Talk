@@ -154,7 +154,7 @@ graph TD
     G -->|Sends Notification via| H[FCM <Firebase Cloud Messaging>]
 
     %% SkyWayによるビデオ通話
-    I[SkyWay (Video Call)] -->|Uses| J[Hardcoded Secret Key]
+    I[SkyWay <Video Call>] -->|Uses| J[Hardcoded Secret Key]
     
     %% 操作のデータフロー
     %% メッセージ送信
@@ -181,9 +181,9 @@ graph TD
     User -->|Update Info| E1
 
     %% 電話 (SkyWay)
-    User -->|Initiate Call (call=first)| B3
+    User -->|Initiate Call <call=first>| B3
     User2[Recipient Browser] -->|Receive Call| B3
-    User2 -->|Accept Call (call=did)| B3
+    User2 -->|Accept Call <call=did>| B3
     User2 -->|Start Video Session| I
 
     %% 補足的な関係
