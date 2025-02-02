@@ -249,7 +249,6 @@ sequenceDiagram
     participant FCM as Firebase Cloud Messaging
     participant SkyWay as SkyWay
     participant GoogleDrive as Googleドライブ
-    participant GoogleAPIs as GoogleAPIs
     participant AppsScript as Apps Script
     participant GoogleCloud as Google Cloud
 
@@ -271,7 +270,7 @@ sequenceDiagram
 
     %% ファイル送信
     User ->> GlitchServer: サービスアカウントトークン取得
-    GlitchServer ->> Glitchserver: トークンを生成
+    GlitchServer ->> GlitchServer: トークンを生成
     GlitchServer ->> User: トークンを返す
     User ->>ServiceAccount: ファイル受け取り
     ServiceAccount->>GoogleDrive: ファイルをアップロード (F1r)
