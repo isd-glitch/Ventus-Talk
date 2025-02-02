@@ -263,7 +263,7 @@ sequenceDiagram
     Browser->>FirestoreDev: メッセージを保存
     Browser->>FirestoreInfo: メッセージ情報を更新
     FirestoreInfo-->>GlitchServer: 変更を検知
-    GlitchServer->>FirestoreServer: トークン取得
+    GlitchServer->>FirestoreServer: 通知トークン取得
     GlitchServer->>FCM: プッシュ通知を送信
     FCM->>ServiceWorker: 通知を配信
     ServiceWorker->>User: 通知表示
@@ -288,8 +288,7 @@ sequenceDiagram
 
     %% ログイン
     User->>FirestoreUsers: ログイン情報を取得 (F4)
-    FirestoreUsers->>FirestoreServer: トークンを更新
-    FirestoreServer->>LocalStorage: トークンを保存
+    FirestoreUsers->>FirestoreServer: 通知トークンを更新
     User->>LocalStorage: ローカルストレージを更新
 
     %% グループ作成
