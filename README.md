@@ -156,3 +156,55 @@ C -->|Updates| L
 D -->|Updates Last Message| E
 
 ```
+```mermaid
+graph TD
+    A[Firestore Database] -->|Contains| B[dev]
+    A -->|Contains| C[Users]
+    A -->|Contains| D[Server]
+    A -->|Contains| E[Info]
+    
+    B -->|Contains| B1[ChatGroup]
+    B1 -->|Contains| B2[(chatId)]
+    B2 -->|Contains| B3[messages]
+    B3 -->|Attributes| B4[message, messageId, sender, timestamp, replyId, resourceURL, extension]
+
+    C -->|Contains| C1[users]
+    C1 -->|Contains| C2[(userId)]
+    C2 -->|Attributes| C3[chatIdList, friendList, password, rawFriendList, timestamp, username]
+    C2 -->|Contains| C4[rawUserId]
+    C4 -->|Attributes| C5[enterdRawUserId: 0: user1, 1: user2, ...]
+
+    D -->|Contains| D1[users]
+    D1 -->|Contains| D2[(userId)]
+    D2 -->|Attributes| D3[token, profile_ico, username]
+    
+    E -->|Contains| E1[ChatGroup]
+    E1 -->|Contains| E2[(chatId)]
+    E2 -->|Attributes| E3[rawusernames, usernames, rawusernames, lastMessageId, sender, senderUsername, ChatGroupName]
+    
+    F[glitch Server] -->|Watches| E
+    F -->|Sends Notification to| D
+```
+
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Browser
+    participant FirestoreDev as Firestore(dev)
+    participant FirestoreInfo as Firestore(Info)
+    participant GlitchServer
+    participant FirestoreServer as Firestore(Server)
+    participant FCM
+
+    User->>Browser: Send Message
+    Browser->>FirestoreDev: Update messages array
+    Browser->>FirestoreInfo: Update lastMessage
+    User->>Browser: Manage message updates
+    FirestoreDev->>User: Snapshot update detected
+    FirestoreInfo->>User: Snapshot update detected
+    GlitchServer->>FirestoreInfo: Snapshot update detected
+    GlitchServer->>FirestoreServer: Get FCM Token
+    GlitchServer->>FCM: Send Notification
+    FCM->>User: Receive Notification
+```
