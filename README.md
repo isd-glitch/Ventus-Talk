@@ -38,25 +38,18 @@
 
 ## サーバーの説明
 ```mermaid
-graph TD
-    A[Firestore Collections]
-
-    A -->|Contains| B[dev]
-    B -->|Role| B1[Manages chat messages]
-    B -->|Details| B2[ChatGroup - chatId - messages]
-
-    A -->|Contains| C[Users]
-    C -->|Role| C1[Stores user information]
-    C -->|Details| C2[users - userId - chatIdList, friendList, password, rawFriendList, timestamp, username]
-    C -->|Details| C3[rawUserId - enterdRawUserId]
-
-    A -->|Contains| D[Server]
-    D -->|Role| D1[Manages notification information]
-    D -->|Details| D2[users - userId - token, profile_ico, username]
-
-    A -->|Contains| E[Info]
-    E -->|Role| E1[Manages chat group metadata]
-    E -->|Details| E2[ChatGroup - chatId - rawusernames, usernames, rawusernames, lastMessageId, sender, senderUsername, ChatGroupName]
+classDiagram
+    class Firestore {
+        dev : Manages chat messages
+        dev : ChatGroup - chatId - messages [message, messageId, sender, timestamp, replyId, resourceURL, extension]
+        Users : Stores user information
+        Users : users - userId - chatIdList, friendList, password, rawFriendList, timestamp, username
+        Users : rawUserId - enterdRawUserId: 0: user1, 1: user2, ...
+        Server : Manages notification information
+        Server : users - userId - token, profile_ico, username
+        Info : Manages chat group metadata
+        Info : ChatGroup - chatId - rawusernames, usernames, rawusernames, lastMessageId, sender, senderUsername, ChatGroupName
+    }
 
 ```
 
