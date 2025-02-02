@@ -271,7 +271,7 @@ sequenceDiagram
     %% ファイル送信
     ServiceAccount->>GlitchServer: トークン提供
     User ->>GlitchServer: サービスアカウントトークンを取得
-    User ->>ServeceAccount: ファイル受け取り
+    User ->>ServiceAccount: ファイル受け取り
     ServiceAccount->>GoogleDrive: ファイルをアップロード (F1r)
     GoogleDrive->>ServiceAccount: アクセストークンで認証
     
