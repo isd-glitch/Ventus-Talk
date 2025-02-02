@@ -87,8 +87,10 @@ sequenceDiagram
 
     User->>Browser: Send Message
     Browser->>FirestoreDev: Update messages array
-    FirestoreDev->>FirestoreInfo: Update lastMessage
-    FirestoreInfo->>GlitchServer: Snapshot update detected
+    Browser->>FirestoreInfo: Update lastMessage
+    User->>Browser: Manage message updates
+    FirestoreDev->>User: Snapshot update detected
+    FirestoreInfo->>User: Snapshot update detected
     GlitchServer->>FirestoreServer: Get FCM Token
     GlitchServer->>FCM: Send Notification
     FCM->>User: Receive Notification
