@@ -149,7 +149,7 @@ graph TD
     F[Local Storage] -->|Stores| F1[lastMessageId, userId, token]
 
     %% Glitchサーバー
-    G[Glitch Server] -->|Monitors (Snapshot)| E
+    G[Glitch Server] -->|Monitors Snapshot| E
     G -->|References| D
     G -->|Sends Notification via| H[FCM (Firebase Cloud Messaging)]
 
