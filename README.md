@@ -271,7 +271,7 @@ sequenceDiagram
 
     %% ファイル送信
     User ->> GlitchServer: サービスアカウントトークン取得
-    GlitchSer ->> Glitchserver: トークンを生成
+    GlitchServer ->> Glitchserver: トークンを生成
     GlitchServer ->> User: トークンを返す
     User ->>ServiceAccount: ファイル受け取り
     ServiceAccount->>GoogleDrive: ファイルをアップロード (F1r)
