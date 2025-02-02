@@ -229,7 +229,6 @@ graph TD
     H -->|Requires| D3
     User -->|Reads Data| L1
 ```    
-```
 ```mermaid
 sequenceDiagram
     participant User
