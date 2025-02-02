@@ -199,11 +199,11 @@ graph TD
 
     %% ログイン
     F4 --> C1
+    F4 --> Sync
     F4 --> C3
     F4 --> C5
     F4 -->|Update Token| D3
     F4 -->|Update Local Storage| L1
-    F4 --> Sync
 
     %% グループ作成
     User -->|Create Group| B1
@@ -228,7 +228,7 @@ graph TD
     %% 補足的な関係
     H -->|Requires| D3
     User -->|Reads Data| L1
-```    
+```
 ```mermaid
 sequenceDiagram
     participant User
