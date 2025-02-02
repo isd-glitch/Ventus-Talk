@@ -92,22 +92,37 @@ erDiagram
 この真下のフローチャート図は、適当にAIに作らせたので、ちょいと違います。完全に正しいのは、次のGraph TDです。
 ```mermaid
 flowchart TD
+    %% ログイン処理
     A[ユーザーのブラウザ] -->|ログイン| B(Users/Server 更新)
     B --> C(FCMトークン保存)
     B --> D(ローカルストレージ更新)
+    B --> E(Serverのトークン更新)
     
-    A -->|メッセージ送信| E(dev 更新)
-    E --> F(Info 最終メッセージ更新)
+    %% メッセージ送信処理
+    A -->|メッセージ送信| F(Firestore-dev/ChatGroup 更新)
+    F --> G(Info 最終メッセージ更新)
     
-    A -->|グループ作成/友達追加| G(dev/Info 更新)
+    %% グループ作成・友達追加処理
+    A -->|グループ作成/友達追加| H(Firestore-dev/Info 更新)
     
-    F -->|スナップショット監視| H(Glitchサーバー)
-    H -->|通知送信| I(Serverのトークン参照)
-    I -->|FCM通知| J[ユーザーのブラウザ]
+    %% 通知処理
+    G -->|スナップショット監視| I(Glitchサーバー)
+    I -->|トークン参照| J(Server/FCMトークン取得)
+    J -->|FCM通知送信| K[ユーザーのブラウザ通知]
 
-    A -->|ビデオ通話開始| K(SkyWay セットアップ)
-    K -->|call=first| L(dev 更新)
-    L -->|call=did| M(受信者側でフォーム非表示)
+    %% ビデオ通話処理
+    A -->|ビデオ通話開始| L(SkyWay セットアップ)
+    L -->|call=first（発信者）| M(Firestore-dev/ChatGroup 更新)
+    M -->|call=did（受信者）| N(受信者側で通話UI表示)
+    L -->|SkyWay RoomId保存| O(ローカルストレージ更新)
+    
+    %% ファイル送信
+    A -->|ファイル送信| P(Google Drive アップロード)
+    P --> Q(ServiceAccount経由で認証)
+
+    %% 初期同期
+    A -->|初期同期| R(ServerのFCMトークン取得)
+    R -->|ローカルストレージ更新| D
 ```
 
 かなり省略しているので、矢印や処理が足りませんが、おおまかにはこれです。
