@@ -116,44 +116,45 @@ flowchart TD
 ```
 ```mermaid
 graph TD
+    %% Main Components
+    A[Browser (User)] -->|Login| B(Users DB)
+    A -->|Login| C(Server DB)
+    A -->|Login| L(Local Storage)
+    A -->|Send Message| D(Dev DB)
+    A -->|Send Message| E(Info DB)
+    A -->|Create Group / Add Friend| D
+    A -->|Create Group / Add Friend| E
+    A -->|Video Call| M(SkyWay - Private Key Hard-coded)
+    
+    %% Firestore DBs
+    B -->|Update FCM Token, Chat List, Friend List| C
+    B --> B1[/users/(userId)/{chatIdList, friendList, password, rowFriendList, timestamp, username}/]
+    B --> B2[/rawUserId/enterdRawUserId/{rawUserId: 0=user1, 1=user2, ...}/]
+    
+    C --> C1[/users/(userId)/{token (FCM), profile_ico, username}/]
+    
+    D --> D1[/ChatGroup/(chatId)/messages[{message, messageId, sender, timestamp, replyId, resourceURL, extension}]/]
+    
+    E --> E1[/ChatGroup/(chatId)/{rawusernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName}/]
+    
+    %% Glitch Server Monitoring
+    F(Glitch Server) -->|Snapshot Monitor| E
+    F -->|Reference for Notifications| C
+    F -->|Send Notification| G(FCM - Dev Server)
+    
+    %% Video Call Flow
+    A -->|Send Message with call key| D
+    D -->|Recipient rewrites call key with did| A
+    
+    %% Local Storage Updates
+    L -->|Store Last Message ID & Other Data| A
+    
+    %% Relationships
+    B -->|Updates| L
+    C -->|Updates| L
+    D -->|Updates Last Message| E
+    
 
-%% Main Components
-A[Browser (User)] -->|Login| B(Users DB)
-A -->|Login| C(Server DB)
-A -->|Login| L(Local Storage)
-A -->|Send Message| D(Dev DB)
-A -->|Send Message| E(Info DB)
-A -->|Create Group / Add Friend| D
-A -->|Create Group / Add Friend| E
-A -->|Video Call| M(SkyWay - Private Key Hard-coded)
-
-%% Firestore DBs
-B -->|Update FCM Token, Chat List, Friend List| C
-B --> B1[/users/(userId)/{chatIdList, friendList, password, rowFriendList, timestamp, username}/]
-B --> B2[/rawUserId/enterdRawUserId/{rawUserId: 0=user1, 1=user2, ...}/]
-
-C --> C1[/users/(userId)/{token (FCM), profile_ico, username}/]
-
-D --> D1[/ChatGroup/(chatId)/messages[{message, messageId, sender, timestamp, replyId, resourceURL, extension}]/]
-
-E --> E1[/ChatGroup/(chatId)/{rawusernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName}/]
-
-%% Glitch Server Monitoring
-F(Glitch Server) -->|Snapshot Monitor| E
-F -->|Reference for Notifications| C
-F -->|Send Notification| G(FCM - Dev Server)
-
-%% Video Call Flow
-A -->|Send Message with call key| D
-D -->|Recipient rewrites call key with did| A
-
-%% Local Storage Updates
-L -->|Store Last Message ID & Other Data| A
-
-%% Relationships
-B -->|Updates| L
-C -->|Updates| L
-D -->|Updates Last Message| E
 ```
 ```mermaid
 graph TD
