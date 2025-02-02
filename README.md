@@ -114,7 +114,7 @@ flowchart TD
     style H fill:#ccf,stroke:#333,stroke-width:2px
     style K fill:#cfc,stroke:#333,stroke-width:2p
 ```
-```memaid
+```mermaid
 graph TD
     
     %% Main Components
@@ -155,7 +155,7 @@ graph TD
     C -->|Updates| L
     D -->|Updates Last Message| E```mermaid
 ```
-```memaid
+```mermaid
 graph TD
     A[Firestore Database] -->|Contains| B[dev]
     A -->|Contains| C[Users]
