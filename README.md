@@ -109,10 +109,6 @@ flowchart TD
     A -->|ビデオ通話開始| K(SkyWay セットアップ)
     K -->|call=first| L(dev 更新)
     L -->|call=did| M(受信者側でフォーム非表示)
-
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style H fill:#ccf,stroke:#333,stroke-width:2px
-    style K fill:#cfc,stroke:#333,stroke-width:2p
 ```
 ```mermaid
 graph TD
