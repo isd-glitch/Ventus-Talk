@@ -112,7 +112,7 @@ flowchart TD
 ```
 
 かなり省略しているので、矢印や処理が足りませんが、おおまかにはこれです。
-# Graph TD
+## Graph TD
 ```mermaid
 graph TD
     %% Firestoreのデータベース
@@ -233,7 +233,7 @@ graph TD
     H -->|Requires| D3
     User -->|Reads Data| L1
 ```
-＃ シーケンズ図
+## シーケンズ図
 ```mermaid
 sequenceDiagram
     participant User as ユーザー
