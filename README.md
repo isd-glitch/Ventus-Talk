@@ -151,7 +151,7 @@ graph TD
     %% Glitchサーバー
     G[Glitch Server] -->|Monitors Snapshot| E
     G -->|References| D
-    G -->|Sends Notification via| H[FCM (Firebase Cloud Messaging)]
+    G -->|Sends Notification via| H[FCM <Firebase Cloud Messaging>]
 
     %% SkyWayによるビデオ通話
     I[SkyWay (Video Call)] -->|Uses| J[Hardcoded Secret Key]
