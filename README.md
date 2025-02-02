@@ -47,8 +47,7 @@ graph TD
     
     B -->|FCM| B1[ChatGroup]
     B1 -->|contains| B2[(chatId)]
-    B2 -->|contains| B3[messages]
-    B3 --> M[map: [message, messageId, sender, timestamp, replyId, resourceURL, extension]]
+    B2 -->|contains| B3[messages: [message, messageId, sender, timestamp, replyId, resourceURL, extension]]
 
     C -->|contains| C1[users]
     C1 -->|contains| C2[(userId)]
@@ -66,6 +65,7 @@ graph TD
     
     F[glitch Server] -->|watches| E
     F -->|sends notification to| D
+
 ```
 
 
