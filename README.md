@@ -37,22 +37,12 @@
 - glitchだと、サーバーが起きていないと通知が届かない
 
 ## サーバーの説明
-```mermaid
-classDiagram
-    class Firestore {
-        dev : Manages chat messages
-        dev : ChatGroup - chatId - messages [message, messageId, sender, timestamp, replyId, resourceURL, extension]
-        Users : Stores user information
-        Users : users - userId - chatIdList, friendList, password, rawFriendList, timestamp, username
-        Users : rawUserId - enterdRawUserId: 0: user1, 1: user2, ...
-        Server : Manages notification information
-        Server : users - userId - token, profile_ico, username
-        Info : Manages chat group metadata
-        Info : ChatGroup - chatId - rawusernames, usernames, rawusernames, lastMessageId, sender, senderUsername, ChatGroupName
-    }
-
-```
-
+| **サーバー名** | **役割** | **詳細** |
+| ---------------- | -------- | -------- |
+| **dev**          | チャットメッセージの保存と管理 | `ChatGroup - chatId - messages: [message, messageId, sender, timestamp, replyId, resourceURL, extension]` |
+| **Users**        | ユーザー情報の保存と管理 | `users - userId - chatIdList, friendList, password, rawFriendList, timestamp, username`<br>`rawUserId - enterdRawUserId: 0: user1, 1: user2, ...` |
+| **Server**       | 通知関連情報の管理 | `users - userId - token, profile_ico, username` |
+| **Info**         | チャットグループの情報管理 | `ChatGroup - chatId - rawusernames, usernames, rawusernames, lastMessageId, sender, senderUsername, ChatGroupName` |
 
 ```mermaid
 graph TD
