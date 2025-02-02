@@ -113,7 +113,8 @@ flowchart TD
     style A fill:#f9f,stroke:#333,stroke-width:2px
     style H fill:#ccf,stroke:#333,stroke-width:2px
     style K fill:#cfc,stroke:#333,stroke-width:2p
-
+```
+```memaid
 graph TD
 
 %% Main Components
@@ -128,14 +129,14 @@ A -->|Video Call| M[SkyWay (Private Key Hard-coded)]
 
 %% Firestore DBs
 B -->|Update FCM Token, Chat List, Friend List| C
-B -->|Store| B1[/users/(userId)/chatIdList, friendList, password, rowFriendList, timestamp, username/]
-B -->|Raw User Mapping| B2[/rawUserId/enterdRawUserId/[rawUserId= 0:user1, 1:user2, ...]/]
+B --> B1[/users/(userId)/chatIdList, friendList, password, rowFriendList, timestamp, username/]
+B --> B2[/rawUserId/enterdRawUserId/[rawUserId=0:user1, 1:user2, ...]/]
 
-C -->|Store| C1[/users/(userId)/token (FCM), profile_ico, username/]
+C --> C1[/users/(userId)/token (FCM), profile_ico, username/]
 
-D -->|Store Messages| D1[/ChatGroup/(chatId)/messages[{message, messageId, sender, timestamp, replyId, resourceURL, extension}]/]
+D --> D1[/ChatGroup/(chatId)/messages[{message, messageId, sender, timestamp, replyId, resourceURL, extension}]/]
 
-E -->|Store Group Info| E1[/ChatGroup/(chatId)/{rawusernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName}/]
+E --> E1[/ChatGroup/(chatId)/{rawusernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName}/]
 
 %% Glitch Server Monitoring
 F[Glitch Server] -->|Snapshot Monitor| E
@@ -150,10 +151,9 @@ D -->|Recipient rewrites call key with did| A
 L -->|Store Last Message ID & Other Data| A
 
 %% Relationships
-B -- Updates --> L
-C -- Updates --> L
-D -- Updates Last Message --> E
-```mermaid
+B -->|Updates| L
+C -->|Updates| L
+D -->|Updates Last Message| E```mermaid
 graph TD
     A[Firestore Database] -->|Contains| B[dev]
     A -->|Contains| C[Users]
