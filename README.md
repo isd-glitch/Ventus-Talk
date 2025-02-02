@@ -110,7 +110,7 @@ flowchart TD
     K -->|call=first| L(dev 更新)
     L -->|call=did| M(受信者側でフォーム非表示)
 ```
-```mermaid
+```mermaid```mermaid
 graph TD
     %% Firestoreのデータベース
     O(Firebase) --> |Power| A[Firestore Database]
@@ -120,57 +120,65 @@ graph TD
     A --> E[(Firestore-Info)]
     
     %% devの構造
-    B --> |Contains| B1[ChatGroup]
-    B1 --> |Contains| B2[chatId]
-    B2 --> |Contains| B5[messages]
-    B5 --> |Attributes| B4[message, messageId, sender, timestamp, replyId, resourceURL, extension]
+    B -->|Contains| B1[ChatGroup]
+    B1 -->|Contains| B2[chatId]
+    B2 -->|Contains| B5[messages]
+    B5 -->|Attributes| B4[message, messageId, sender, timestamp, replyId, resourceURL, extension]
 
     %% Usersの構造
-    C --> |Contains| C1[userId]
-    C --> |Contains| C2[rawUserId]
-    C1 --> |Attributes| C3[chatIdList, friendList, password, rowFriendList, timestamp, username]
-    C2 --> |Attributes| C5[enteredRawUserIdList]
+    C -->|Contains| C1[userId]
+    C -->|Contains| C2[rawUserId]
+    C1 -->|Attributes| C3[chatIdList, friendList, password, rowFriendList, timestamp, username]
+    C2 -->|Attributes| C5[enterdRawUserIdList]
 
     %% Serverの構造
-    D --> |Contains| D1[users]
-    D1 --> |Contains| D2[userId]
-    D2 --> |Attributes| D3[FCMtoken, profile_ico, username]
+    D -->|Contains| D1[users]
+    D1 -->|Contains| D2[userId]
+    D2 -->|Attributes| D3[FCMtoken,profile_ico,username]
     
     %% Infoの構造
-    E --> |Contains| E1[ChatGroup]
-    E1 --> |Contains| E2[chatId]
-    E2 --> |Attributes| E3[rawUsernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName, TokenLastUpdate]
+    E -->|Contains| E1[ChatGroup]
+    E1 -->|Contains| E2[chatId]
+    E2 -->|Attributes| E3[rawusernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName,TokenLastUpdate]
     
-    %% ブラウザ
+    
+    %%ブラウザ
     Browser(Browser) --> sw[sw.js]
     Browser --> Notification[Notification]
     H --> sw --> Notification
 
     %% ローカルストレージ
+    %%User(User) --> Browser
     Browser --> L[(Local Storage)]
-    L --> |Stores| L1[SkyWay-RoomId, lastMessageId, userId, token, lastUpdated]
-
-    %% GoogleDrive
+    L -->|Stores| L1[SkyWay-RoomId,lastMessageId, userId, token,lastUpdated,]
+    
+    %%GoogleDrive
     F1r --> Drive[(GoogleDrive)]
     
-    %% Google Cloud
+    %%Google Cloud
     GC(GoogleCloud) --> |Monitor| GCM[GCM未実装]
     GC --> ServiceAccount[ServiceAccount]
+    %%GCM --> A
+    %%GCM --> B
+    %%GCM --> C
+    %%GCM --> D
     
-    %% Apps Script
-    N[Apps Script] --> |Manage| Drive
+    %%Apps Script
+    N[Apps Script] --> |Manage|Drive
 
     %% Glitchサーバー
-    G(Glitch Server) --> |Monitors Snapshot| E1
-    G --> |References| D1
-    O --> |Power| H(FCM <Firebase Cloud Messaging>)
-    G --> |Sends Notification via| H
-    G --> |AccessToken| F1r --> |Upload| ServiceAccount
+    G(Glitch Server) -->|Monitors Snapshot| E1
+    G -->|References| D1
+    O -->|Power| H(FCM <Firebase Cloud Messaging>)
+    G -->|Sends Notification via| H
+    G --> |AccessToken| F1r --> |Upload|ServiceAccount
+    
 
     %% SkyWayによるビデオ通話
-    I[SkyWay] --> |Uses| J[Secret Key]
+    I[SkyWay] -->|Uses| J[Secret Key]
     
-    L --> |Store| E3
+    
+    L -->|Store| E3
     
     %% 操作のデータフロー
     User(User) --> F1{Send Message}
@@ -179,46 +187,48 @@ graph TD
     User --> F3{Call}
     User --> F4{Login}
     
-    F1 --> |Save| B
-    F1 --> |Update| E
+    F1 --> |Save|B
+    F1 --> |Update|E
     F2 --> B1
-    F4 --> C1
-    F4 --> C5
-    F4 --> Sync
     
     %% 通知
-    E3 --> |Trigger Update| G
-    G --> |Retrieve Token| D3
-    G --> |Send Push Notification| H
+    E3 -->|Trigger Update| G
+    G -->|Retrieve Token| D3
+    G -->|Send Push Notification| H
+    %%H -->|Deliver Notification| User
 
     %% ログイン
+    F4 --> C1
     F4 --> C3
     F4 --> C5
-    F4 --> |Update Token| D3
-    F4 --> |Update Local Storage| L1
+    F4 -->|Update Token| D3
+    F4 -->|Update Local Storage| L1
+    F4 --> Sync
 
     %% グループ作成
-    User --> |Create Group| B1
-    User --> |Update Group Info| E1
+    User -->|Create Group| B1
+    User -->|Update Group Info| E1
 
     %% 友達追加
-    User --> |Add Friend| C3
-    User --> |Update Info| E1
+    User -->|Add Friend| C3
+    User -->|Update Info| E1
 
     %% 電話 (SkyWay)
-    User --> |Initiate Call <call=first>| F1
-    F3 --> |Receive Call| F1
-    F3 --> |Ask SkyWay RoomId| L1
-    F3 --> |Accept Call <call=did>| F1
-    F3 --> |Start Video Session| I
+    User -->|Initiate Call <call=first>| F1
+    %%F3 --> User2[Call.html]
+    F3 -->|Receive Call| F1
+    F3 -->|Ask SkyWay RoomId| L1
+    F3 -->|Accept Call <call=did>| F1
+    F3 -->|Start Video Session| I
     
-    %% 同期init
+    %%同期init
     User --> Sync(Initial Sync)
-    Sync --> |Fetch| D3
+    Sync -->|Fetch| D3
 
     %% 補足的な関係
-    H --> |Requires| D3
-    User --> |Reads Data| L1
+    H -->|Requires| D3
+    User -->|Reads Data| L1
+```    
 ```
 ```mermaid
 sequenceDiagram
