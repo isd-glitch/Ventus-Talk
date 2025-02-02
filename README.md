@@ -117,27 +117,26 @@ flowchart TD
 ```mermaid
 graph TD
     %% Firestoreのデータベース
-    A[Firestore Database] -->|Contains| B[dev]
-    A -->|Contains| C[Users]
-    A -->|Contains| D[Server]
-    A -->|Contains| E[Info]
+    A[Firestore Database] -->|Contains| B[(dev)]
+    A -->|Contains| C[(Users)]
+    A -->|Contains| D[(Server)]
+    A -->|Contains| E[(Info)]
     
     %% devの構造
     B -->|Contains| B1[ChatGroup]
-    B1 -->|Contains| B2[(chatId)]
+    B1 -->|Contains| B2[chatId]
     B2 -->|Contains| B3[messages]
     B3 -->|Attributes| B4[message, messageId, sender, timestamp, replyId, resourceURL, extension]
 
     %% Usersの構造
-    C -->|Contains| C1[users]
-    C1 -->|Contains| C2[(userId)]
-    C2 -->|Attributes| C3[chatIdList, friendList, password, rowFriendList, timestamp, username]
-    C1 -->|Contains| C4[rawUserId]
-    C4 -->|Attributes| C5[enterdRawUserId: 0: user1, 1: user2, ...]
+    C -->|Contains| C1[userId]
+    C -->|Contains| C2[rawUserId]
+    C1 -->|Attributes| C3[chatIdList, friendList, password, rowFriendList, timestamp, username]
+    C2 -->|Attributes| C5[enterdRawUserId: 0: user1, 1: user2, ...]
 
     %% Serverの構造
     D -->|Contains| D1[users]
-    D1 -->|Contains| D2[(userId)]
+    D1 -->|Contains| D2[userId]
     D2 -->|Attributes| D3[FCMtoken,rofile_ico,username]
     
     %% Infoの構造
@@ -146,7 +145,7 @@ graph TD
     E2 -->|Attributes| E3[rawusernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName]
 
     %% ローカルストレージ
-    F[Local Storage] -->|Stores| F1[lastMessageId, userId, token]
+    F[(Local Storage)] -->|Stores| F1[SkyWay-RoomId,lastMessageId, userId, token,lastUpdated,]
 
     %% Glitchサーバー
     G[Glitch Server] -->|Monitors Snapshot| E
@@ -165,10 +164,11 @@ graph TD
     E3 -->|Trigger Update| G
     G -->|Retrieve Token| D3
     G -->|Send Push Notification| H
-    H -->|Deliver Notification| User
+    %%H -->|Deliver Notification| User
 
     %% ログイン
     User -->|Login| C3
+    User -->|Login| C5
     User -->|Update Token| D3
     User -->|Update Local Storage| F1
 
@@ -182,14 +182,14 @@ graph TD
 
     %% 電話 (SkyWay)
     User -->|Initiate Call <call=first>| B3
-    User2[Recipient Browser] -->|Receive Call| B3
+    User2[Call.html] -->|Receive Call| B3
     User2 -->|Accept Call <call=did>| B3
     User2 -->|Start Video Session| I
 
     %% 補足的な関係
     H -->|Requires| D3[token]
     User -->|Reads Data| F1
-```    
+```
 ```mermaid
 sequenceDiagram
     participant User
