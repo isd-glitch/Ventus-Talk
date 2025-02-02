@@ -202,7 +202,7 @@ graph TD
     F4 --> Sync
     F4 --> C3
     F4 --> C5
-    C5 --> F4
+    F4 --> C5
     F4 -->|Update Token| D3
     F4 -->|Update Local Storage| L1
 
