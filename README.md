@@ -45,6 +45,29 @@
 | **Info**         | チャットグループの情報管理 | `ChatGroup - chatId - rawusernames, usernames, rawusernames, lastMessageId, sender, senderUsername, ChatGroupName` |
 
 ```mermaid
+flowchart TD
+    A[ユーザーのブラウザ] -->|ログイン| B(Users/Server 更新)
+    B --> C(FCMトークン保存)
+    B --> D(ローカルストレージ更新)
+    
+    A -->|メッセージ送信| E(dev 更新)
+    E --> F(Info 最終メッセージ更新)
+    
+    A -->|グループ作成/友達追加| G(dev/Info 更新)
+    
+    F -->|スナップショット監視| H(Glitchサーバー)
+    H -->|通知送信| I(Serverのトークン参照)
+    I -->|FCM通知| J[ユーザーのブラウザ]
+
+    A -->|ビデオ通話開始| K(SkyWay セットアップ)
+    K -->|call=first| L(dev 更新)
+    L -->|call=did| M(受信者側でフォーム非表示)
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style H fill:#ccf,stroke:#333,stroke-width:2px
+    style K fill:#cfc,stroke:#333,stroke-width:2px
+```
+```mermaid
 graph TD
     A[Firestore Database] -->|Contains| B[dev]
     A -->|Contains| C[Users]
