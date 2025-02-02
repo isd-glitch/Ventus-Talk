@@ -45,27 +45,27 @@ graph TD
     A -->|Contains| D[Server]
     A -->|Contains| E[Info]
     
-    B -->|FCM| B1[ChatGroup]
-    B1 -->|contains| B2[(chatId)]
-    B2 -->|contains| B3[messages: [message, messageId, sender, timestamp, replyId, resourceURL, extension]]
+    B -->|Contains| B1[ChatGroup]
+    B1 -->|Contains| B2[(chatId)]
+    B2 -->|Contains| B3[messages]
+    B3 -->|Attributes| B4[message, messageId, sender, timestamp, replyId, resourceURL, extension]
 
-    C -->|contains| C1[users]
-    C1 -->|contains| C2[(userId)]
-    C2 -->|contains| C3[chatIdList, friendList, password, rawFriendList, timestamp, username]
-    C2 -->|contains| C4[rawUserId]
-    C4 -->|contains| C5[enterdRawUserId: 0: user1, 1: user2, ...]
+    C -->|Contains| C1[users]
+    C1 -->|Contains| C2[(userId)]
+    C2 -->|Attributes| C3[chatIdList, friendList, password, rawFriendList, timestamp, username]
+    C2 -->|Contains| C4[rawUserId]
+    C4 -->|Attributes| C5[enterdRawUserId: 0: user1, 1: user2, ...]
 
-    D -->|contains| D1[users]
-    D1 -->|contains| D2[(userId)]
-    D2 -->|contains| D3[token, profile_ico, username]
+    D -->|Contains| D1[users]
+    D1 -->|Contains| D2[(userId)]
+    D2 -->|Attributes| D3[token, profile_ico, username]
     
-    E -->|contains| E1[ChatGroup]
-    E1 -->|contains| E2[(chatId)]
-    E2 -->|contains| E3[rawusernames, usernames, rawusernames, lastMessageId, sender, senderUsername, ChatGroupName]
+    E -->|Contains| E1[ChatGroup]
+    E1 -->|Contains| E2[(chatId)]
+    E2 -->|Attributes| E3[rawusernames, usernames, rawusernames, lastMessageId, sender, senderUsername, ChatGroupName]
     
-    F[glitch Server] -->|watches| E
-    F -->|sends notification to| D
-
+    F[glitch Server] -->|Watches| E
+    F -->|Sends Notification to| D
 ```
 
 
