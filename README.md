@@ -116,7 +116,6 @@ flowchart TD
 ```
 ```mermaid
 graph TD
-    graph TD
 
 %% Main Components
 A[Browser (User)] -->|Login| B(Users DB)
@@ -155,6 +154,7 @@ L -->|Store Last Message ID & Other Data| A
 B -->|Updates| L
 C -->|Updates| L
 D -->|Updates Last Message| E
+
 ```
 ```mermaid
 graph TD
