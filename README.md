@@ -138,7 +138,7 @@ graph TD
     %% Serverの構造
     D -->|Contains| D1[users]
     D1 -->|Contains| D2[(userId)]
-    D2 -->|Attributes| D3[token (FCM), profile_ico, username]
+    D2 -->|Attributes| D3["token (FCM)"," profile_ico"," username"]
     
     %% Infoの構造
     E -->|Contains| E1[ChatGroup]
