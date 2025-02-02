@@ -43,7 +43,6 @@
 | **Users**        | ユーザー情報の保存と管理 | `users - userId - chatIdList, friendList, password, rawFriendList, timestamp, username`<br>`rawUserId - enterdRawUserId: 0: user1, 1: user2, ...` |
 | **Server**       | 通知関連情報の管理 | `users - userId - token, profile_ico, username` |
 | **Info**         | チャットグループの情報管理 | `ChatGroup - chatId - rawusernames, usernames, rawusernames, lastMessageId, sender, senderUsername, ChatGroupName` |
-
 ```mermaid
 erDiagram
     USERS {
