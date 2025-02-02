@@ -90,7 +90,7 @@ erDiagram
     INFO ||--o{ SERVER : "references for FCM"
     LOCAL_STORAGE ||--o{ USERS : "caches data"
 ```
-この真下のフローチャート図は、適当にAIに作らせたので、ちょいと違います。完全に正しいのは、次の、Graph TDです。
+この真下のフローチャート図は、適当にAIに作らせたので、ちょいと違います。完全に正しいのは、次のGraph TDです。
 ```mermaid
 flowchart TD
     A[ユーザーのブラウザ] -->|ログイン| B(Users/Server 更新)
@@ -110,6 +110,8 @@ flowchart TD
     K -->|call=first| L(dev 更新)
     L -->|call=did| M(受信者側でフォーム非表示)
 ```
+
+かなり省略しているので、矢印や処理が足りませんが、おおまかにはこれです。
 ```mermaid
 graph TD
     %% Firestoreのデータベース
