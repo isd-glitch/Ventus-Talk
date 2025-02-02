@@ -110,7 +110,7 @@ flowchart TD
     K -->|call=first| L(dev 更新)
     L -->|call=did| M(受信者側でフォーム非表示)
 ```
-```mermaid```mermaid
+```mermaid
 graph TD
     %% Firestoreのデータベース
     O(Firebase) --> |Power| A[Firestore Database]
