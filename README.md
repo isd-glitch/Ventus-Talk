@@ -90,7 +90,7 @@ erDiagram
     INFO ||--o{ SERVER : "references for FCM"
     LOCAL_STORAGE ||--o{ USERS : "caches data"
 ```
-
+この真下のフローチャート図は、適当にAIに作らせたので、ちょいと違います。完全に正しいのは、次の、Graph TDです。
 ```mermaid
 flowchart TD
     A[ユーザーのブラウザ] -->|ログイン| B(Users/Server 更新)
