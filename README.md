@@ -344,3 +344,112 @@ sequenceDiagram
     GlitchServer->>FCM: Send Notification
     FCM->>User: Receive Notification
 ```
+
+
+
+```mermaid
+graph TD
+    %% Firestoreのデータベース
+    subgraph Firestore
+        subgraph Firestore-dev
+            B[(Firestore-dev)] -->|Contains| B1[ChatGroup]
+            B1 -->|Contains| B2[chatId]
+            B2 -->|Contains| B5[messages]
+            B5 -->|Attributes| B4[message, messageId, sender, timestamp, replyId, resourceURL, extension]
+        end
+        
+        subgraph Firestore-Users
+            C[(Firestore-Users)] -->|Contains| C1[userId]
+            C -->|Contains| C2[rawUserId]
+            C1 -->|Attributes| C3[chatIdList, friendList, password, rowFriendList, timestamp, username]
+            C2 -->|Attributes| C5[enterdRawUserIdList]
+        end
+        
+        subgraph Firestore-Server
+            D[(Firestore-Server)] -->|Contains| D1[users]
+            D1 -->|Contains| D2[userId]
+            D2 -->|Attributes| D3[FCMtoken, profile_ico, username]
+        end
+        
+        subgraph Firestore-Info
+            E[(Firestore-Info)] -->|Contains| E1[ChatGroup]
+            E1 -->|Contains| E2[chatId]
+            E2 -->|Attributes| E3[rawusernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName, TokenLastUpdate]
+        end
+    end
+    
+    %% ブラウザ
+    Browser(Browser) --> sw[sw.js]
+    sw --> |Use Cache| Page
+    sw --> Notification[Notification]
+    
+    %% ローカルストレージ
+    Browser --> L[(Local Storage)]
+    subgraph Local Storage
+        L -->|Stores| L1[SkyWay-RoomId, lastMessageId, userId, token, lastUpdated]
+    end
+    
+    %% GoogleDrive
+    ServiceAccount --> |upload File| Drive[(GoogleDrive)]
+    
+    %% Google Cloud
+    GC(GoogleCloud) --> |Monitor| GCM[GCM未実装]
+    GC --> ServiceAccount[ServiceAccount]
+    
+    %% Apps Script
+    N[GAS] --> |Manage| Drive
+    N --> |CRON| G
+    
+    %% Glitchサーバー
+    G(Glitch Server) -->|Monitors Snapshot| E1
+    G -->|References| D1
+    G --> |AccessToken| F1r --> |Upload| ServiceAccount
+    
+    %% 操作のデータフロー
+    User(User) --> F1{Send Message}
+    User --> F1r{Send File}
+    User --> F2{Load Message}
+    User --> F3{Call}
+    User --> F4{Login}
+    
+    F1 --> |Save| B
+    F1 --> |Update| E
+    F2 --> B1
+    F2 --> |Ask My Entered ChatRoomID| C1
+    
+    %% 通知
+    G -->|Send Push Notification| H(FCM)
+    
+    %% ログイン
+    F4 --> C1
+    F4 --> C3
+    F4 --> C5
+    F4 -->|Update Token| D3
+    F4 -->|Update Local Storage| L1
+    F4 --> Sync
+    
+    %% グループ作成
+    User -->|Create Group| B1
+    B1 -->|Update Group Info| E1
+    
+    %% 友達追加
+    User -->|Add Friend| C3
+    User -->|Update Info| E1
+    
+    %% 電話 (SkyWay)
+    User -->|Initiate Call <call=first>| F1
+    F3 -->|Receive Call| F1
+    F3 -->|Ask SkyWay RoomId| L1
+    F3 -->|Accept Call <call=did>| F1
+    F3 -->|Start Video Session| I[SkyWay]
+    
+    %% 同期init
+    User --> Sync(Initial Sync)
+    Sync -->|Fetch| D3
+    
+    %% 補足的な関係
+    H -->|Requires| D3
+    User -->|Reads Data| L1
+
+
+```
