@@ -79,7 +79,6 @@
     </div>
 
     <script type="module" src="./app.js"></script>
-    <script src="../isLogined.js"></script>
     <script src="../menuNavigation.js"></script>
     <script type="module" src="./addFriend.js"></script>
 
@@ -128,9 +127,18 @@
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-        const myRowId = localStorage.getItem('userIdShow');
+        const myRowId = localStorage.getItem("userIdShow");
         generateQRCode(myRowId);
+        const username = localStorage.getItem("username");
+        if (!username) {
+          // ログイン情報がない場合はログインページにリダイレクト
+          window.location.href = `/login/login.html?friendid=${userId}`;
+        } else {
+          // ログイン情報がある場合は表示
+          document.getElementById("username").textContent = username;
+        }
       });
+      // ログイン情報のチェック
     </script>
   </body>
 </html>

@@ -203,7 +203,9 @@ function addEventListenersToChatItems() {
 document.addEventListener("DOMContentLoaded", async function () {
   const friend_query = getQueryParam("friendid");
   if (friend_query && localStorage.getItem("userID")) {
-    const hashed = await hash(friend_query)
+    const urlDecode = (str) => decodeURIComponent(str);
+    const decoded = urlDecode(friend_query);
+    const hashed = await hash(decoded);
     addFriend_ID(hashed,friend_query);
   }
   setProfileImageFromLocalStorage();

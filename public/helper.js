@@ -19,7 +19,13 @@ async function checkIfAwake() {
         console.error('Error:', error);
     }
 }
-
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(function() {
+    console.log('Text copied to clipboard successfully!');
+  }).catch(function(err) {
+    console.error('Could not copy text: ', err);
+  });
+}
 async function clearCacheAndReload() {
     const cacheNames = await caches.keys();
     await Promise.all(
@@ -141,7 +147,7 @@ async function updateCacheIfNeeded() {
     const lastUpdated = getLastUpdated();
     if (!lastUpdated) return true;
     const now = new Date().getTime();
-    const threeDays = 3 * 60 * 60 * 1000;
+    const threeDays = 2 * 24 * 60 * 60 * 1000;
     return now - lastUpdated >= threeDays;
   };
 
@@ -171,17 +177,14 @@ async function hash(string) {
         alert('パスワードを入力してください');
         return;
     }
-
     try {
         const encoder = new TextEncoder();
         const data = encoder.encode(string);
         const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-
         // ハッシュ値を16進数に変換して返す
         const hashedPassword = Array.from(new Uint8Array(hashBuffer))
             .map(byte => byte.toString(16).padStart(2, '0'))
             .join('');
-
         console.log(hashedPassword);
         return hashedPassword;
     } catch (error) {
@@ -191,7 +194,7 @@ async function hash(string) {
     }
 }
 
-export { addLog,deleatCache, setProfileImageFromLocalStorage,compressAndEncodeImage,updateCacheIfNeeded,checkIfAwake,hash };
+export { copyToClipboard,addLog,deleatCache, setProfileImageFromLocalStorage,compressAndEncodeImage,updateCacheIfNeeded,checkIfAwake,hash };
 
 /*
 

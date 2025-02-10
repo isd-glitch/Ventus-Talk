@@ -27,6 +27,7 @@ import {
   setProfileImageFromLocalStorage,
   updateCacheIfNeeded,
   checkIfAwake,
+  copyToClipboard,
   hash,
 } from "../helper.js";
 const username = localStorage.getItem("username");
@@ -118,13 +119,13 @@ sendButton.addEventListener("click", async () => {
     //setTimeout(() => sendToFirestore(newMessage), 3000);
     chatInput.value = message;
   } else {
-    sendToFirestore(newMessage);
+    sendToFirestore(newMessage,sendChatId);
+    localStorage.setItem(`LastMessageId_${sendChatId}`,messageId);
   }
 });
 
-async function sendToFirestore(newMessage) {
+async function sendToFirestore(newMessage,sendChatId) {
   try {
-    const sendChatId = selectedChatId;
     document.getElementById("chat-input").focus();
     clearReplyShow();
     checkIfAwake();
@@ -221,7 +222,7 @@ async function loadMessages(chatId) {
               const userData = userDoc.data();
               senderCache[sender] = {
                 userName: userData.username || "Unknown",
-                userIcon: userData.profile_ico || "default-icon.png",
+                userIcon: userData.profile_ico || "https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/defaultUserIcon.png?v=1738806359609",
               };
               console.log(senderCache[sender]);
             }
@@ -456,7 +457,8 @@ async function updateOtherChatListeners() {
               );
               if (
                 lastMessageId !== lastSeenMessageId &&
-                selectedChatId !== chatId
+                selectedChatId !== chatId &&
+                lastSeenMessageId !== 'undefined'
               ) {
                 //console.log(`New message in chat ${chatId}:`, message, `from ${sender}`);
                 localStorage.setItem(`LastMessageId_${chatId}`, lastMessageId);
@@ -690,7 +692,7 @@ async function updateChatList() {
 const createGroupWindow = document.getElementById("create-group-window");
 const statusButton = document.getElementById("status");
 const closeButton = document.getElementById("close-window");
-
+const selectedFriendsContainer = document.getElementById("selected-friends");
 statusButton.addEventListener("click", () => {
   createGroupWindow.classList.remove("hidden");
   createGroupWindow.classList.add("show");
@@ -700,12 +702,14 @@ statusButton.addEventListener("click", () => {
 closeButton.addEventListener("click", () => {
   createGroupWindow.classList.remove("show");
   createGroupWindow.classList.add("hidden");
+  selectedFriendsContainer.innerHTML = '';
 });
 
 window.onload = async () => {
   updateCacheIfNeeded();
   await saveuserToken();
   await updateChatList();
+  document.querySelector('.sloader').style.display = "none";
   const createGroupButton = document.getElementById("create-group-button");
   createGroupButton.addEventListener("click", createGroup);
   const savedFont = localStorage.getItem("font");
@@ -718,7 +722,6 @@ window.onload = async () => {
 
 async function updateFriendList() {
   const friendListContainer = document.getElementById("friend-list");
-  const selectedFriendsContainer = document.getElementById("selected-friends");
   const selectedFriends = new Set(); // 選択された友達のセット
   //const userDocRef = doc(dbUser s, `users/${myuserId}`);
   //const userDoc = await getDoc(userDocRef);
@@ -785,9 +788,9 @@ async function createGroup() {
     return;
   }
   const chatId = generateRandomId();
-  const allMembers = [myuserId, ...selectedFriends];
+  const allMembers = [rawMyUserId, ...selectedFriends];
   const hashedAllMembers = await hashAllMembers(allMembers);
-  for (const userId of allMembers) {
+  for (const userId of hashedAllMembers) {
     const userDocRef = doc(dbUsers, `users/${userId}`);
     await updateDoc(userDocRef, {
       chatIdList: arrayUnion({
@@ -864,48 +867,58 @@ async function getAccessToken() {
   const data = await response.json();
   return data.token;
 }
-
 async function createFolderIfNotExists(folderName, parentId) {
-  const accessToken = await getAccessToken();
-  const query = `name='${folderName}' and '${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
-  const response = await fetch(
-    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+  try {
+    const accessToken = await getAccessToken();
+    const query = `name='${folderName}' and '${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+    const response = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`エラーが発生しました: ${response.status}`);
     }
-  );
 
-  const json = await response.json();
-  if (json.files.length > 0) {
-    return json.files[0].id;
-  }
+    const json = await response.json();
 
-  const metadata = {
-    name: folderName,
-    mimeType: "application/vnd.google-apps.folder",
-    parents: [parentId],
-  };
-  const createResponse = await fetch(
-    "https://www.googleapis.com/drive/v3/files",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(metadata),
+    if (json.files && json.files.length > 0) {
+      return json.files[0].id;
     }
-  );
 
-  if (!createResponse.ok) {
-    throw new Error(`フォルダの作成に失敗しました: ${createResponse.status}`);
+    const metadata = {
+      name: folderName,
+      mimeType: "application/vnd.google-apps.folder",
+      parents: [parentId],
+    };
+    const createResponse = await fetch(
+      "https://www.googleapis.com/drive/v3/files",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(metadata),
+      }
+    );
+
+    if (!createResponse.ok) {
+      throw new Error(`フォルダの作成に失敗しました: ${createResponse.status}`);
+    }
+
+    const createJson = await createResponse.json();
+    return createJson.id;
+  } catch (error) {
+    console.error(`Error creating folder: ${error.message}`);
+    throw error;
   }
-
-  const createJson = await createResponse.json();
-  return createJson.id;
 }
+
 
 function updateProgressBar(percentage) {
   const progressBar = document.getElementById("progress-bar");
@@ -924,7 +937,8 @@ function hideProgressBar() {
 
 async function uploadFile(file) {
   const accessToken = await getAccessToken();
-  const parentFolderId = "1QsqLlsAp5MUSHbn7Cibh9WQ8DG-oKdzl";
+  //https://drive.google.com/drive/folders/10sasE7BA_hUO6WDgpGtJ-BDX8MzZvB2U
+  const parentFolderId = "10sasE7BA_hUO6WDgpGtJ-BDX8MzZvB2U";
   const folderId = await createFolderIfNotExists(
     selectedChatId,
     parentFolderId
@@ -1169,11 +1183,20 @@ async function callSend() {
   const messageId = generateRandomId(); //messageIdとroomIdは共通
   localStorage.setItem("caller", "first");
   localStorage.setItem("skyway-roomId", messageId);
+  var newWindow = window.open(`../call/call.html?callTo=${messageId}`,'_blank');
+  if (newWindow) {
+    newWindow.focus()
+  }else{
+    alert('pop up blocked');
+  }
+  /*
   var iframe = document.createElement("iframe");
-  iframe.src = `../call/call.html?room=${messageId}`;
+  iframe.src = `../call/call.html?callTo=${messageId}`;
   iframe.id = "callPipContainer";
   iframe.className = "pip";
   document.body.appendChild(iframe);
+  */
+  copyToClipboard(`https://ventus-talk.glitch.me/call/call.html?callTo=${messageId}`)
   try {
     await setDoc(
       doc(dbdev, `ChatGroup/${selectedChatId}`),

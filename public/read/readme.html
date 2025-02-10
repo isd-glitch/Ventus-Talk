@@ -6,11 +6,12 @@
     <title>Ventus-Talk</title>
 </head>
 <body>
-
+<header><a href="https://github.com/Stasshe/Ventus-Talk">GitHubリポジトリ</a></header>
 <h1>Ventus-Talk</h1>
 
-<p><strong>開発者</strong>: Roughfts</p>
-
+<p><strong>開発者</strong>: Roughfts</p><br>
+<p>サイト内写真素材提供：生ハムの酢漬け</p>
+  
 <h2>現時点でのVentus-Talkの性能</h2>
 
 <h3>概要</h3>
@@ -56,26 +57,329 @@
 <h3>セキュリティと制限</h3>
 <ul>
     <li>サーバー荒らされる可能性あり</li>
-    <li>セキュリティ対策ほぼなし</li>
+    <li>セキュリティ対策ほぼなし。管理者と使用者は自己責任で。</li>
     <li>動画送信・閲覧にかなり時間がかかる</li>
     <li>glitchだと、サーバーが起きていないと通知が届かない</li>
 </ul>
 
-<h2>サーバーの説明 (マーメイド記法)</h2>
+<h2>サーバーの説明</h2>
 
 <div class="mermaid">
-graph LR
-    A[ユーザー] --> B[独自サーバー]
-    A --> C[静的サイトホスティング]
-    B --> D[Firebase Firestore サーバー 1]
-    B --> E[Firebase Firestore サーバー 2]
-    B --> F[Firebase Firestore サーバー 3]
-</div>
+erDiagram
+    USERS {
+        string userId
+        string username
+        array chatIdList
+        array friendList
+        string password
+        array rowFriendList
+        timestamp timestamp
+    }
+    
+    SERVER {
+        string userId
+        string token
+        string profile_ico
+        string username
+    }
 
+    DEV {
+        string chatId
+        array messages
+    }
+
+    INFO {
+        string chatId
+        array rawusernames
+        array usernames
+        string lastMessageId
+        string sender
+        string senderUsername
+        string ChatGroupName
+    }
+
+    LOCAL_STORAGE {
+        string userId
+        string lastMessageId
+    }
+
+    USERS ||--o{ DEV : "belongs to"
+    USERS ||--o{ SERVER : "syncs with"
+    USERS ||--o{ RAW_USER_ID : "maps to"
+    DEV ||--o{ INFO : "linked with"
+    INFO ||--o{ SERVER : "references for FCM"
+    LOCAL_STORAGE ||--o{ USERS : "caches data"
+  </div>
+  
+この真下のフローチャート図は、適当にAIに作らせたので、ちょいと違います。完全に正しいのは、次のGraph TDです。
+<div class="mermaid">
+flowchart TD
+    %% ログイン処理
+    A[ユーザーのブラウザ] -->|ログイン| B(Users/Server 更新)
+    B --> C(FCMトークン保存)
+    B --> D(ローカルストレージ更新)
+    B --> E(Serverのトークン更新)
+    
+    %% メッセージ送信処理
+    A -->|メッセージ送信| F(Firestore-dev/ChatGroup 更新)
+    F --> G(Info 最終メッセージ更新)
+    
+    %% グループ作成・友達追加処理
+    A -->|グループ作成/友達追加| H(Firestore-dev/Info 更新)
+    
+    %% 通知処理
+    G -->|スナップショット監視| I(Glitchサーバー)
+    I -->|トークン参照| J(Server/FCMトークン取得)
+    J -->|FCM通知送信| K[ユーザーのブラウザ通知]
+
+    %% ビデオ通話処理
+    A -->|ビデオ通話開始| L(SkyWay セットアップ)
+    L -->|call=first（発信者）| M(Firestore-dev/ChatGroup 更新)
+    M -->|call=did（受信者）| N(受信者側で通話UI表示)
+    L -->|SkyWay RoomId保存| O(ローカルストレージ更新)
+    
+    %% ファイル送信
+    A -->|ファイル送信| P(Google Drive アップロード)
+    P --> Q(ServiceAccount経由で認証)
+
+    %% 初期同期
+    A -->|初期同期| R(ServerのFCMトークン取得)
+    R -->|ローカルストレージ更新| D
+  </div>
+
+かなり省略しているので、矢印や処理が足りませんが、おおまかにはこれです。
+## Graph TD
+<div class="mermaid">
+graph TD
+    %% Firestoreのデータベース
+    O(Firebase) --> |Power| A[Firestore Database]
+    A --> B[(Firestore-dev)]
+    A --> C[(Firestore-Users)]
+    A --> D[(Firestore-Server)]
+    A --> E[(Firestore-Info)]
+    
+    %% devの構造
+    B -->|Contains| B1[ChatGroup]
+    B1 -->|Contains| B2[chatId]
+    B2 -->|Contains| B5[messages]
+    B5 -->|Attributes| B4[message, messageId, sender, timestamp, replyId, resourceURL, extension]
+
+    %% Usersの構造
+    C -->|Contains| C1[userId]
+    C -->|Contains| C2[rawUserId]
+    C1 -->|Attributes| C3[chatIdList, friendList, password, rowFriendList, timestamp, username]
+    C2 -->|Attributes| C5[enterdRawUserIdList]
+
+    %% Serverの構造
+    D -->|Contains| D1[users]
+    D1 -->|Contains| D2[userId]
+    D2 -->|Attributes| D3[FCMtoken,profile_ico,username]
+    
+    %% Infoの構造
+    E -->|Contains| E1[ChatGroup]
+    E1 -->|Contains| E2[chatId]
+    E2 -->|Attributes| E3[rawusernames, usernames, lastMessageId, sender, senderUsername, ChatGroupName,TokenLastUpdate]
+    
+    
+    %%ブラウザ
+    Browser(Browser) --> sw[sw.js]
+    Browser --> Notification[Notification]
+    H --> sw --> Notification
+
+    %% ローカルストレージ
+    %%User(User) --> Browser
+    Browser --> L[(Local Storage)]
+    L -->|Stores| L1[SkyWay-RoomId,lastMessageId, userId, token,lastUpdated,]
+    
+    %%GoogleDrive
+    F1r --> Drive[(GoogleDrive)]
+    
+    %%Google Cloud
+    GC(GoogleCloud) --> |Monitor| GCM[GCM未実装]
+    GC --> ServiceAccount[ServiceAccount]
+    %%GCM --> A
+    %%GCM --> B
+    %%GCM --> C
+    %%GCM --> D
+    
+    %%Apps Script
+    N[Apps Script] --> |Manage|Drive
+
+    %% Glitchサーバー
+    G(Glitch Server) -->|Monitors Snapshot| E1
+    G -->|References| D1
+    O -->|Power| H(FCM)
+    G -->|Sends Notification via| H
+    G --> |AccessToken| F1r --> |Upload|ServiceAccount
+    
+
+    %% SkyWayによるビデオ通話
+    I[SkyWay] -->|Uses| J[Secret Key]
+    
+    
+    L -->|Store| E3
+    
+    %% 操作のデータフロー
+    User(User) --> F1{Send Message}
+    User --> F1r{Send File}
+    User --> F2{Load Message}
+    User --> F3{Call}
+    User --> F4{Login}
+    
+    F1 --> |Save|B
+    F1 --> |Update|E
+    F2 --> B1
+    
+    %% 通知
+    E3 -->|Trigger Update| G
+    G -->|Retrieve Token| D3
+    G -->|Send Push Notification| H
+    %%H -->|Deliver Notification| User
+
+    %% ログイン
+    F4 --> C1
+    F4 --> Sync
+    F4 --> C3
+    F4 --> C5
+    F4 --> C5
+    F4 -->|Update Token| D3
+    F4 -->|Update Local Storage| L1
+
+    %% グループ作成
+    User -->|Create Group| B1
+    User -->|Update Group Info| E1
+
+    %% 友達追加
+    User -->|Add Friend| C3
+    User -->|Update Info| E1
+
+    %% 電話 (SkyWay)
+    User -->|Initiate Call | F1
+    %%F3 --> User2[Call.html]
+    F3 -->|Receive Call| F1
+    F3 -->|Ask SkyWay RoomId| L1
+    F3 -->|Accept Call | F1
+    F3 -->|Start Video Session| I
+    
+    %%同期init
+    User --> Sync(Initial Sync)
+    Sync -->|Fetch| D3
+
+    %% 補足的な関係
+    H -->|Requires| D3
+    User -->|Reads Data| L1
+  </div>
+## シーケンズ図
+<div class="mermaid">
+sequenceDiagram
+    participant User as ユーザー
+    participant Browser as ブラウザ
+    participant ServiceWorker as サービスワーカー
+    participant LocalStorage as ローカルストレージ
+    participant Firebase as Firebase
+    participant FirestoreDev as Firestore-dev
+    participant FirestoreUsers as Firestore-Users
+    participant FirestoreServer as Firestore-Server
+    participant FirestoreInfo as Firestore-Info
+    participant GlitchServer as Glitchサーバー
+    participant FCM as Firebase Cloud Messaging
+    participant SkyWay as SkyWay
+    participant GoogleDrive as Googleドライブ
+    participant AppsScript as Apps Script
+    participant GoogleCloud as Google Cloud
+
+    %% ユーザーの操作
+    User->>Browser: アプリにアクセス
+    Browser->>LocalStorage: データの読み書き
+    Browser->>ServiceWorker: サービスワーカーと通信
+    ServiceWorker->>FCM: 通知の受信
+
+    %% メッセージ送信
+    User->>Browser: メッセージ送信 (F1)
+    Browser->>FirestoreDev: メッセージを保存
+    Browser->>FirestoreInfo: メッセージ情報を更新
+    FirestoreInfo-->>GlitchServer: 変更を検知
+    GlitchServer->>FirestoreServer: 通知トークン取得
+    GlitchServer->>FCM: プッシュ通知を送信
+    FCM->>ServiceWorker: 通知を配信
+    ServiceWorker->>User: 通知表示
+
+    %% ファイル送信
+    User ->> GlitchServer: サービスアカウントトークン取得
+    GlitchServer ->> GlitchServer: トークンを生成
+    GlitchServer ->> User: トークンを返す
+    User ->>ServiceAccount: ファイル受け取り
+    ServiceAccount->>GoogleDrive: ファイルをアップロード (F1r)
+    GoogleDrive->>ServiceAccount: アクセストークンで認証
+    
+
+    %% メッセージ読み込み
+    User->>Browser: メッセージを読み込む (F2)
+    Browser->>FirestoreDev: メッセージを取得
+
+    %% ビデオ通話
+    User->>Browser: 通話を開始 (F3)
+    Browser->>SkyWay: セッションを開始
+    SkyWay->>User: 通話を確立
+
+    %% ログイン
+    User->>FirestoreUsers: ログイン情報を取得 (F4)
+    FirestoreUsers->>FirestoreServer: 通知トークンを更新
+    User->>LocalStorage: ローカルストレージを更新
+
+    %% グループ作成
+    User->>FirestoreDev: グループを作成
+    User->>FirestoreInfo: グループ情報を更新
+
+    %% 友達追加
+    User->>FirestoreUsers: フレンドリストを更新
+    User->>FirestoreInfo: ユーザー情報を更新
+
+    %% 初期同期
+    User->>FirestoreServer: データを同期
+    FirestoreServer->>LocalStorage: データを保存
+
+    %% その他の操作
+    AppsScript->>GoogleDrive: ファイル管理
+    GoogleCloud->>Firebase: モニタリング（未実装）
+  </div>
+
+通知の仕組みだけ。
+<div class="mermaid">
+sequenceDiagram
+    participant User
+    participant Browser
+    participant FirestoreDev as Firestore(dev)
+    participant FirestoreInfo as Firestore(Info)
+    participant GlitchServer
+    participant FirestoreServer as Firestore(Server)
+    participant FCM
+
+    User->>Browser: Send Message
+    Browser->>FirestoreDev: Update messages array
+    Browser->>FirestoreInfo: Update lastMessage
+    User->>Browser: Manage message updates
+    FirestoreDev->>User: Snapshot update detected
+    FirestoreInfo->>User: Snapshot update detected
+    GlitchServer->>FirestoreInfo: Snapshot update detected
+    GlitchServer->>FirestoreServer: Get FCM Token
+    GlitchServer->>FCM: Send Notification
+    FCM->>User: Receive Notification
+
+
+</div>
 <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
     mermaid.initialize({ startOnLoad: true });
 </script>
-
+<footer>
+  <div class="section">
+<h2>問い合わせ</h2>
+<p>何かご質問がありましたら、以下のメールアドレスまでお問い合わせください。</p>
+<p>
+<a href="mailto:egnm9stasshe@gmail.com">egnm9stasshe@gmail.com</a>
+</p>
+</div>
+  </footer>
 </body>
 </html>

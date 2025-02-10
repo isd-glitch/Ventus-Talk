@@ -6,8 +6,14 @@ const {
   SkyWayStreamFactory,
   uuidV4,
 } = window.skyway_room;
-const roomName = localStorage.getItem("skyway-roomId") || 'developerd';
 
+function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+
+const roomName = getQueryParam("callTo") || localStorage.getItem("skyway-roomId") || 'developerd';
+console.log(roomName,'roomName');
 const API_KEY = "f7e31d2a-4c74-4909-ad3f-7e845e5a4a53";
 const userId = localStorage.getItem("userId");
 const selectedChatId = localStorage.getItem("selectedChatId");
@@ -38,6 +44,7 @@ const token = new SkyWayAuthToken({
     ],
   },
 }).encode("p9jJDiGR2GrIbyI1d48CqTxJ1cijy/RuC8YvtdqzDcI="); // Secret key
+//(async () => {
 
 (async () => {
   const joinButton = document.getElementById("join");
@@ -48,7 +55,7 @@ const token = new SkyWayAuthToken({
   const { audio, video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
   video.attach(myVideo);
   await myVideo.play();
-
+//  document.addEventListener("DOMContentLoaded", async() => {
   joinButton.onclick = async () => {
     idShow.textContent = '~接続しています~'
     joinButton.style.animation = "fadeOutMove 1s forwards";

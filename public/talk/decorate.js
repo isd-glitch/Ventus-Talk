@@ -23,6 +23,7 @@ import {
   dbInfo,
 } from "../firebase-setup.js";
 
+import {copyToClipboard} from '../helper.js';
 window.addEventListener('message', (event) => {
     if (event.data === 'closeIframe') {
         document.getElementById('callPipContainer').style.display = 'none';
@@ -216,15 +217,27 @@ function initSlide() {
   var knob = document.querySelector(".slide-knob");
 
   knob.addEventListener("click", function () {
-    console.log("knob clicked");
+    const skywayRoom = localStorage.getItem('skyway-roomId');
     var containerWidth = container.offsetWidth;
     var knobWidth = knob.offsetWidth;
     var newLeft = containerWidth - knobWidth; // Move to the right edge
+    /*
     var iframe = document.createElement("iframe");
-    iframe.src = `../call/call.html`;
+    iframe.src = `../call/call.html?callTo=${skywayRoom}`;
     iframe.id = "callPipContainer";
     iframe.className = "pip";
     document.body.appendChild(iframe);
+    localStorage.setItem('skyroom-Id',skywayRoom)
+    */
+    copyToClipboard(`https://ventus-talk.glitch.me/call/call.html?callTo=${skywayRoom}`)
+    
+    var newWindow = window.open(`../call/call.html?callTo=${skywayRoom}`,'_blank');
+    if (newWindow) {
+      newWindow.focus()
+    }else{
+      alert('pop up blocked');
+    }
+    
 
     knob.style.left = newLeft + "px";
     // Close the notification after the transition is complete (300ms in this case)

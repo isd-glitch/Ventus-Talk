@@ -351,3 +351,43 @@
   align-items: center;
   transition: left 0.3s ease; /* Explicitly add transition to 'left' property */
 }
+
+/* HTML: <div class="sloader"></div> */
+.sloader {
+  width: 150px;
+  aspect-ratio: 1;
+  color: #ef3bff;
+  border: 2px solid;
+  display: grid;
+  box-sizing: border-box;
+  animation: l1 4s infinite linear;
+
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000; /* Ensures it's on top of other elements */
+}
+
+.sloader::before,
+.sloader::after {
+  content: "";
+  grid-area: 1/1;
+  margin: auto;
+  width: 70.7%;
+  aspect-ratio: 1;
+  border: 2px solid;
+  box-sizing: content-box;
+  animation: inherit;
+}
+
+.sloader::after {
+  width: 50%;
+  aspect-ratio: 1;
+  border: 2px solid;
+  animation-duration: 2s;
+}
+
+@keyframes l1 {
+  100% { transform: rotate(1turn); }
+}
