@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../menu.css" />
     <link rel="stylesheet" href="group_window.css" />
     <link rel="stylesheet" href="../log.css" />
+    <link rel="stylesheet" href="friend-selection.css" />
     <link rel="manifest" href="../manifest.json">
     <link rel="icon" href="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ico64.ico?v=1737435085854" type="image/png">
     <link rel="shortcut icon" href="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ico64.ico?v=1737435085854" type="image/x-icon">
@@ -85,7 +86,6 @@
           <img src="null" alt="Profile Picture" />
           <div id="username">ユーザー名</div>
           <div id="status">トークグループを作る</div>
-          <button id="testButton">通知テストボタン</button>
         </div>
         <div id="chat-list">
           <div class="chat-item" data-chat-id="XXXXXXXXXX">
@@ -262,6 +262,7 @@
           chatInput.style.overflowY = "hidden"; // Hide scroll
         }
       });
+      /*
       document.getElementById("testButton").addEventListener("click", () => {
         console.log("test");
         if ("serviceWorker" in navigator && "PushManager" in window) {
@@ -274,6 +275,7 @@
           });
         }
       });
+      */
       document
         .getElementById("group-settings-image")
         .addEventListener("click", function () {

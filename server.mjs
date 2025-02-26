@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "loading.html"));
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3039;
 app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}`);
 });
@@ -147,7 +147,7 @@ const sendPushNotification = (accessToken, token, message, chatId, senderUsernam
   req.write(data);
   req.end();
 };
-
+/*
 let initialLoad = true;
 dbInfo.collection("ChatGroup").onSnapshot((snapshot) => {
   if (initialLoad) {
@@ -166,7 +166,7 @@ dbInfo.collection("ChatGroup").onSnapshot((snapshot) => {
     }
   });
 });
-
+*/
 const notifyUsers = async (chatId, sender, message, usernames, senderUsername) => {
   for (const userId of usernames) {
     if (userId === sender) continue; // Don't notify the sender

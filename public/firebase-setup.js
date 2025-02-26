@@ -58,7 +58,7 @@ enableIndexedDbPersistence(dbdev).catch((err) => {
 
 import { getMessaging,onMessage, getToken } from "https://www.gstatic.com/firebasejs/9.17.0/firebase-messaging.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.0/firebase-app.js";
-import { getFirestore,arrayUnion,updateDoc, initializeFirestore, startAfter, collection, addDoc, getDocs, limit, serverTimestamp, onSnapshot, query, orderBy, setDoc, doc, getDoc, CACHE_SIZE_UNLIMITED } 
+import { getFirestore,deleteDoc,arrayUnion,updateDoc, initializeFirestore, startAfter, collection, addDoc, getDocs, limit, serverTimestamp, onSnapshot, query, orderBy, setDoc, doc, getDoc, CACHE_SIZE_UNLIMITED } 
 from "https://www.gstatic.com/firebasejs/9.17.0/firebase-firestore.js";
 import { firebaseConfigDev, firebaseServer, firebaseConfig2, firebaseConfigUsers, firebaseConfigInfo } 
 from './firebase_keys.js';
@@ -90,5 +90,5 @@ export {
     appd, app1, app2, appUsers, appInfo,getToken,onMessage,
     dbdev, dbServer, db2, dbUsers, dbInfo, startAfter,messaging,
     collection, addDoc,arrayUnion,updateDoc,reloadPage,serverTimestamp,
-  limit,onSnapshot, query, orderBy, username ,getDocs,setDoc,doc,myuserId,getDoc
+  limit,onSnapshot, query,deleteDoc, orderBy, username ,getDocs,setDoc,doc,myuserId,getDoc
 };

@@ -1,3 +1,4 @@
+/*
 async function checkIfAwake() {
     try {
         const controller = new AbortController();
@@ -19,6 +20,7 @@ async function checkIfAwake() {
         console.error('Error:', error);
     }
 }
+*/
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(function() {
     console.log('Text copied to clipboard successfully!');
@@ -194,7 +196,7 @@ async function hash(string) {
     }
 }
 
-export { copyToClipboard,addLog,deleatCache, setProfileImageFromLocalStorage,compressAndEncodeImage,updateCacheIfNeeded,checkIfAwake,hash };
+export { copyToClipboard,addLog,deleatCache, setProfileImageFromLocalStorage,compressAndEncodeImage,updateCacheIfNeeded,hash };
 
 /*
 

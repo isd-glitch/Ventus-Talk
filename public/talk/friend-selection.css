@@ -1,0 +1,71 @@
+.friend-item {
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.friend-item:hover {
+  background-color: #e0e0e0;
+}
+
+.friend-item.selected {
+  background-color: #d0e8ff;
+  border-left: 4px solid #007bff;
+}
+
+#selected-friends {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  min-height: 40px;
+  padding: 8px;
+  border: 1px dashed #ccc;
+  border-radius: 5px;
+}
+
+.selected-friend-item {
+  display: inline-flex;
+  align-items: center;
+  background-color: #007bff;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.remove-friend {
+  margin-left: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.remove-friend:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.friend-selection-label {
+  margin-top: 15px;
+  font-weight: bold;
+  display: block;
+}
+
+.selection-count {
+  margin-left: 10px;
+  font-size: 12px;
+  color: #666;
+  font-weight: normal;
+}
