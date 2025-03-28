@@ -24,44 +24,15 @@ import {
   myuserId,
 } from "../firebase-setup.js";
 import { addLog,setProfileImageFromLocalStorage,compressAndEncodeImage,updateCacheIfNeeded } from "../helper.js";
+
 function settings() {
   const settingsItems = document.querySelectorAll(".settings-item");
   const settingsPages = document.querySelectorAll(".settings-page");
   const settingsContent = document.getElementById("settings-content");
 
-  settingsItems.forEach((item) => {
-    item.addEventListener("click", () => {
-      const pageId = item.getAttribute("data-page");
-
-      // 全ての設定ページを非表示にする
-      settingsPages.forEach((page) => {
-        page.style.display = "none";
-      });
-
-      // 選択されたページを表示する
-      document.getElementById(pageId).style.display = "block";
-      settingsContent.style.display = "none"; // 初期メッセージを非表示にする
-
-      // プロフィールページを表示する場合、現在のアイコンを取得して表示する
-      if (pageId === "profile") {
-        loadCurrentProfileImage();
-      }
-    });
-  });
-
-  // プロフィール画像のアップロード
-  const profileImageInput = document.getElementById("profile-image-input");
-  const uploadProfileImageBtn = document.getElementById("upload-profile-image");
-  uploadProfileImageBtn.addEventListener("click", () => {
-    const file = profileImageInput.files[0];
-    if (file) {
-      compressAndEncodeImage(file, 128, 128, (base64Image) => {
-        saveProfileImageToFirestore(base64Image);
-      });
-    }
-  });
+  // 設定項目のクリックイベントリスナーを削除
+  // （DOMContentLoadedイベント内の一つのリスナーだけを使用する）
 }
-
 
 function saveProfileImageToFirestore(base64Image) {
   setDoc(
@@ -95,44 +66,78 @@ function loadCurrentProfileImage() {
     });
 }
 
+// 重複したDOMContentLoadedイベントリスナーを整理し、一つにまとめます
 document.addEventListener("DOMContentLoaded", () => {
+  // 基本設定の初期化
   settings();
   change_username();
   signOut();
   font();
   notification_auth();
   setProfileImageFromLocalStorage();
-  init_thema();
-  setProfileImageFromLocalStorage();
+  setupThemeSelector();  // テーマセレクタのセットアップ
   updateVersion();
-  const rightPanel = document.getElementById("right-panel");
+  
+  // 戻るボタンの設定
   const backButton = document.getElementById("back-button");
-
-  backButton.addEventListener("click", function () {
-    rightPanel.classList.remove("open");
-  });
-  /*
-  rightPanel.addEventListener('click', (event) => {
-    // クリックされた要素が<div>タグであることを確認
-    if (event.target && event.target.tagName === 'DIV') {
-      console.log(`${event.target.id}がクリックされました`);
-      rightPanel.classList.remove("open");
-    }
-  });
-  */
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  const settingsItems = document.querySelectorAll(
-    "#settings-list .settings-item"
-  );
-  settingsItems.forEach((item) => {
-    item.addEventListener("click", () => {
-      const clickedElement = item;
-      // クリックされた要素に対して何かを実行（例えば、コンソールに表示）
-      console.log("Touched on:", clickedElement.dataset.page);
+  if (backButton) {
+    backButton.addEventListener("click", function () {
       const rightPanel = document.getElementById("right-panel");
-      rightPanel.classList.toggle("open");
+      if (rightPanel) {
+        rightPanel.classList.remove("open");
+      }
+    });
+  }
+  
+  // 設定項目のクリックイベント（モバイル対応）
+  // このイベントリスナーのみを残し、他の重複したものは削除
+  const settingsItems = document.querySelectorAll("#settings-list .settings-item");
+  settingsItems.forEach((item) => {
+    item.addEventListener("click", (event) => {
+      // クリックされた要素のデータを取得
+      const pageId = item.dataset.page;
+      console.log("設定項目がクリックされました:", pageId);
+      
+      // 右パネルを表示（モバイル表示時のみ）
+      const rightPanel = document.getElementById("right-panel");
+      if (rightPanel && window.innerWidth <= 768) {
+        rightPanel.classList.add("open");
+      }
+      
+      // 設定ページの表示切替
+      const settingsPages = document.querySelectorAll(".settings-page");
+      settingsPages.forEach(page => {
+        page.style.display = "none";
+      });
+      
+      // 選択したページを表示
+      const selectedPage = document.getElementById(pageId);
+      if (selectedPage) {
+        selectedPage.style.display = "block";
+        
+        // プロフィールページの場合、画像を読み込む
+        if (pageId === "profile") {
+          loadCurrentProfileImage();
+        }
+        
+        // 設定内容のタイトルを更新
+        const settingsContent = document.getElementById("settings-content");
+        if (settingsContent) {
+          settingsContent.textContent = item.textContent;
+          settingsContent.style.display = "block";
+        }
+      }
+      
+      // クリックイベントがパネルの表示状態を変更しないようにする
+      // (重要: rightPanel.classList.toggle() を使わない)
+    });
+  });
+  
+  // テーマプレビューのクリックバブリングを防止
+  const themePreviewBoxes = document.querySelectorAll('.theme-preview-box');
+  themePreviewBoxes.forEach(box => {
+    box.addEventListener('click', function(e) {
+      e.stopPropagation(); // イベント伝播を止める
     });
   });
 });
@@ -163,8 +168,6 @@ function change_username() {
     }
   });
 }
-
-
 
 document
   .getElementById("renotice")
@@ -208,9 +211,6 @@ async function saveuserToken() {
   }
 }
 
-// ページが読み込まれた際の初期化
-//document.addEventListener('DOMContentLoaded', notification_auth);
-
 function signOut() {
   const signoutButton = document.getElementById("signout-button");
 
@@ -253,25 +253,132 @@ function updateVersion(){
     updateCacheIfNeeded();
   });
 }
-// テーマの適用関数
-function applyTheme(theme) {
-  document.body.className = ""; // 既存のクラスをクリア
-  if (theme !== "default") {
-    document.body.classList.add(theme);
-  }
-}
-function init_thema() {
-  // 初期テーマを適用
-  const savedTheme = localStorage.getItem("theme") || "default";
-  applyTheme(savedTheme);
-  document.getElementById("theme-select").value = savedTheme;
 
-  // テーマ変更時の処理
-  document
-    .getElementById("theme-select")
-    .addEventListener("change", (event) => {
-      const selectedTheme = event.target.value;
-      applyTheme(selectedTheme);
-      localStorage.setItem("theme", selectedTheme);
+// テーマ選択と適用の設定
+function setupThemeSelector() {
+    const themeSelect = document.getElementById('theme-select');
+    if (!themeSelect) return;
+
+    // 保存されたテーマを取得
+    const currentTheme = localStorage.getItem('theme') || 'default';
+    themeSelect.value = currentTheme;
+
+    // テーマプレビューの選択状態を更新
+    updateThemePreviewSelection(currentTheme);
+
+    // セレクトボックスの変更イベント
+    themeSelect.addEventListener('change', function() {
+        const selectedTheme = this.value;
+        applyTheme(selectedTheme);
+        updateThemePreviewSelection(selectedTheme);
+        localStorage.setItem('theme', selectedTheme);
     });
+
+    // プレビューボックスのクリックイベント
+    const previewBoxes = document.querySelectorAll('.theme-preview-box');
+    previewBoxes.forEach(box => {
+        box.addEventListener('click', function(e) {
+            e.stopPropagation(); // イベントの伝播を止める
+            const selectedTheme = this.getAttribute('data-theme');
+            themeSelect.value = selectedTheme;
+            applyTheme(selectedTheme);
+            updateThemePreviewSelection(selectedTheme);
+            localStorage.setItem('theme', selectedTheme);
+        });
+    });
+}
+
+// テーマプレビューの選択状態を更新
+function updateThemePreviewSelection(selectedTheme) {
+    const previewBoxes = document.querySelectorAll('.theme-preview-box');
+    previewBoxes.forEach(box => {
+        if (box.getAttribute('data-theme') === selectedTheme) {
+            box.classList.add('selected');
+        } else {
+            box.classList.remove('selected');
+        }
+    });
+}
+
+// テーマを適用する関数
+function applyTheme(theme) {
+    // すべての要素からテーマクラスを削除
+    const elements = document.querySelectorAll(
+        "body, #left-panel, #right-panel, #user-info, #chat-box, #menu-bar, #menu-bar-top, #chat-input, #chat-group-name, .menu-item, .chat-item, .date-divider, #chat-menu, #chat-info, #send-button, .settings-page"
+    );
+    
+    elements.forEach(element => {
+        // 現在のクラスからテーマクラスを削除
+        const currentClasses = element.className.split(" ");
+        const newClasses = currentClasses.filter(
+            className => 
+                !className.endsWith("-mode") && 
+                !className.startsWith("forest-") && 
+                !className.startsWith("modern-")
+        );
+        
+        // 選択されたテーマクラスを追加
+        if (theme !== "default") {
+            newClasses.push(theme);
+        }
+        
+        element.className = newClasses.join(" ");
+    });
+    
+    console.log(`テーマを「${theme}」に変更しました`);
+}
+
+// 設定項目のモバイルビュー対応
+document.addEventListener("DOMContentLoaded", () => {
+  const settingsItems = document.querySelectorAll("#settings-list .settings-item");
+  settingsItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      // クリックされた要素のデータを取得
+      const pageId = item.dataset.page;
+      console.log("Touched on:", pageId);
+      
+      // 右パネルを表示
+      const rightPanel = document.getElementById("right-panel");
+      if (rightPanel && !rightPanel.classList.contains("open")) {
+        rightPanel.classList.add("open");
+      }
+      
+      // 設定ページの表示切替
+      const settingsPages = document.querySelectorAll(".settings-page");
+      settingsPages.forEach(page => {
+        page.style.display = "none";
+      });
+      
+      const selectedPage = document.getElementById(pageId);
+      if (selectedPage) {
+        selectedPage.style.display = "block";
+        
+        // 設定内容のタイトルを更新
+        const settingsContent = document.getElementById("settings-content");
+        if (settingsContent) {
+          settingsContent.textContent = item.textContent;
+          settingsContent.style.display = "block";
+        }
+      }
+    });
+  });
+  
+  // テーマプレビューのクリックバブリングを防止
+  const themePreviewBoxes = document.querySelectorAll('.theme-preview-box');
+  themePreviewBoxes.forEach(box => {
+    box.addEventListener('click', function(e) {
+      e.stopPropagation(); // イベント伝播を止める
+    });
+  });
+});
+
+// モバイル用の戻るボタン
+const backButton = document.getElementById("back-button");
+if (backButton) {
+  backButton.addEventListener("click", function () {
+    const rightPanel = document.getElementById("right-panel");
+    if (rightPanel) {
+      rightPanel.classList.remove("open");
+    }
+  });
 }

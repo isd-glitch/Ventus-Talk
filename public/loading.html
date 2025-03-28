@@ -1,120 +1,104 @@
 <!DOCTYPE html>
-<html lang="jp">
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loading</title>
-    <link rel="manifest" href="../manifest.json">
-    <link rel="icon" href="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ico64.ico?v=1737435085854" type="image/png">
-    <link rel="shortcut icon" href="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/ico64.ico?v=1737435085854" type="image/x-icon">
-    <link rel="apple-touch-icon" href="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/f180.png?v=1737434524832">
-  <script src="//cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();console.log('eruda-index')</script>
-    <style>
-    /* HTML: <div class="loader"></div> */
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading - Ventus Talk</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+      overflow: hidden;
+    }
 
-.loader {
-  width: fit-content;
-  font-size: 60px;
-  font-family: system-ui, sans-serif;
-  font-weight: bold;
-  text-transform: uppercase;
-  color: #0000;
-  -webkit-text-stroke: 1px #000;
-  background: 
-    linear-gradient(-60deg, #0000 45%, #000 0 55%, #0000 0) 
-    0/300% 100% no-repeat text;
-  animation: l3 0.35s linear infinite;
-}
+    .app-logo {
+      margin-bottom: 40px;
+      animation: pulse 2s infinite;
+      max-width: 150px;
+      opacity: 0;
+      animation: fadeInLogo 1s forwards;
+    }
 
-.loader:before {
-  content: "Loading";
-}
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
 
-@keyframes l3 {
-  0% { background-position: 100%; }
-}
+    @keyframes fadeInLogo {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
-
 </head>
 <body>
-    <!--<div id="loading-container">
-        <h2>ロード中...</h2>
-    </div>-->
-  <div class="loader"></div>
-    <script>
-//if (!localStorage.getItem('condition')) {localStorage.setItem('condition', 'perfect_init');}
-const CACHE_NAME = "ventus-talk-cache-v1"
-
-function direct() {
-  const userId = localStorage.getItem('userID');
-  if (userId) {
-    window.location.href = './talk/index.html';
-  } else {
-    window.location.href = './login/login.html';
-  }
-}
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker
-    .register('/service-worker.js')
-    .then(async reg => {
-      direct();
-      console.log('ServiceWorker registration successful with scope:', reg.scope);
-    })
-    .catch(error => {
-      console.log('ServiceWorker registration failed:', error);
-    });
-}
-    </script>
+  <img src="https://cdn.glitch.global/4c6a40f6-0654-48bd-96e4-a413b8aa1ec0/IMG_3305.PNG?v=1737195730742" alt="Ventus Talk" class="app-logo">
   
-  <script type="module">
-    /*
-    import { 
-    appd, app1, app2, appUsers, appInfo, getToken,
-    dbdev, db1, db2, dbUsers, dbInfo, updateDoc,messaging,
-    addDoc, serverTimestamp, query, reloadPage, orderBy, username, 
-    setDoc, doc, getDoc, myuserId
-} from '/firebase-setup.js';
+  <div class="loader-container">
+    <div class="loader">
+      <div class="loader-circle"></div>
+      <div class="loader-circle"></div>
+      <div class="loader-circle"></div>
+    </div>
+    <div class="loader-ripple"></div>
+    <div class="loader-ripple"></div>
+    <div class="loader-text">Ventus Talk を読み込み中...</div>
+  </div>
 
-  const btn = document.getElementById('notice');
-  btn.addEventListener("click", function() {
-            //let promise = Notification.requestPermission();
-            //console.log("promise: ",promise);
-            if (!("Notification" in window)) {
-                // ブラウザーが通知に対応しているか調べる
-                alert("このブラウザーはデスクトップ通知には対応していません。");
-            } else if (Notification.permission !== "denied") {
+  <script>
+    // サービスワーカーがサポートされているかチェック
+    function isServiceWorkerSupported() {
+      return 'serviceWorker' in navigator;
+    }
 
-            //if(Notification.permission !== "denied") {
-                Notification.requestPermission().then((permission) => {
-                    const messaging = getMessaging();
-                    // Add the public key generated from the console here.
-                    getToken(messaging, {vapidKey: "BKUDfUUeYgn8uWaWW1_d94Xyt03iBIHoLvyu1MNGPPrc72J2m5E3ckzxLqwHrsCQ9uJ5m-VhuHEjxquWqyKzTGE"})
-                        .then((token) => {
-                            if (token) {
-                                // tokenを出力
-                                await setDoc(doc(dbdev, 'users', "qw"), { token }, { merge: true });
-                                //document.getElementById('output').textContent = `${token.Promise}`;
-                                console.log( "token", token);
-                                document.getElementById('output').textContent = token;
-                            }else{
-                                console.log('登録トークンがありません。生成する許可をリクエストします。');
-                            }
-                        })
-                        .catch((err) => {
-                            console.log('getToken Error',err);
-                        });
-                });
-            }
-  });*/
+    // メインページへリダイレクトする関数
+    function redirectToMainPage() {
+      window.location.href = '/talk/index.html';
+    }
+
+    // 読み込み完了時の処理
+    window.addEventListener('load', function() {
+      // サービスワーカーに対応していない場合は即座にリダイレクト
+      if (!isServiceWorkerSupported()) {
+        console.log('このブラウザはサービスワーカーに対応していません。メインページに移動します。');
+        redirectToMainPage();
+        return;
+      }
+      
+      // サービスワーカー対応ブラウザの場合は少し待ってからリダイレクト
+      setTimeout(function() {
+        redirectToMainPage();
+      }, 2000); // 2秒後に遷移
+    });
+
+    // 何らかの理由で遷移できない場合のバックアップタイマー
+    setTimeout(function() {
+      // 5秒経過してもまだこのページにいる場合は強制的に遷移
+      if (window.location.pathname.includes('loading.html')) {
+        console.log('タイムアウトによる強制リダイレクト');
+        redirectToMainPage();
+      }
+    }, 5000);
   </script>
 </body>
 </html>

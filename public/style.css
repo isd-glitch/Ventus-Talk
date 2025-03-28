@@ -2,24 +2,25 @@ body {
   margin: 0;
   font-family: 'Roboto', 'Noto Sans JP', Arial, sans-serif;
   background-color: #f5f7fa;
-  overflow: hidden;
   color: #333;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+  width: 100%;
 }
 
 html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden; /* 横スクロールを無効化 */
-  width: 100%;
   height: 100%;
-  position: fixed; /* 画面全体を固定 */
+  position: relative;
 }
 /*  jsで動的に変更 log.jsにて。*/
 #container {
   display: flex;
-  height: calc(100vh - 30px);
+  height: 100%;
+  max-height: 100vh;
   overflow: hidden; 
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
 }
@@ -743,210 +744,6 @@ html, body {
   }
 }
 
-/* ===== テーマ1: ダークモード ===== */
-body.dark-mode {
-  background-color: #2e2e2e;
-  color: #ffffff; /* テキストの色を白に */
-}
-#left-panel.dark-mode,
-#right-panel.dark-mode {
-  background-color: #3b3b3b;
-  color: #ffffff; /* テキストの色を白に */
-}
-#user-info.dark-mode {
-  background-color: #444444;
-  color: #ffffff; /* テキストの色を白に */
-}
-#chat-box.dark-mode {
-  background-color: #3b3b3b;
-  color: #ffffff; /* テキストの色を白に */
-}
-.message-item.self .message-bubble.dark-mode {
-  background-color: #4a7c4a;
-  color: #ffffff; /* テキストの色を白に */
-}
-.message-item.other .message-bubble.dark-mode {
-  background-color: #6e4e38;
-  color: #ffffff; /* テキストの色を白に */
-}
-#send-button.dark-mode {
-  background-color: #444444;
-  color: #ffffff; /* テキストの色を白に */
-}
-#send-button.dark-mode:hover {
-  background-color: #5a5a5a;
-  color: #ffffff; /* テキストの色を白に */
-}
-
-/* ===== テーマ2: サマーブルー ===== */
-body.summer-blue {
-  background-color: #dceeff;
-}
-#left-panel.summer-blue,
-#right-panel.summer-blue {
-  background-color: #e7f3ff;
-}
-#user-info.summer-blue {
-  background-color: #b0d8ff;
-}
-#chat-box.summer-blue {
-  background-color: #e7f3ff;
-}
-.message-item.self .message-bubble.summer-blue {
-  background-color: #a2c2ff;
-}
-.message-item.other .message-bubble.summer-blue {
-  background-color: #c2d4ff;
-}
-#send-button.summer-blue {
-  background-color: #007bff;
-}
-#send-button.summer-blue:hover {
-  background-color: #0056b3;
-}
-
-/* ===== テーマ3: グラデーションピンク ===== */
-body.gradient-pink {
-  background: linear-gradient(to right, #ffafbd, #ffc3a0);
-}
-#left-panel.gradient-pink,
-#right-panel.gradient-pink {
-  background: linear-gradient(to right, #ffafbd, #ffc3a0);
-}
-#user-info.gradient-pink {
-  background: linear-gradient(to right, #ffafbd, #ffc3a0);
-}
-#chat-box.gradient-pink {
-  background: linear-gradient(to right, #ffafbd, #ffc3a0);
-}
-.message-item.self .message-bubble.gradient-pink {
-  background-color: #ff9a9e;
-}
-.message-item.other .message-bubble.gradient-pink {
-  background-color: #fecfef;
-}
-#send-button.gradient-pink {
-  background-color: #ff9a9e;
-}
-#send-button.gradient-pink:hover {
-  background-color: #f77062;
-}
-
-/* ===== テーマ4: フォレストグリーン ===== */
-body.forest-green {
-  background-color: #e5efe5;
-}
-#left-panel.forest-green,
-#right-panel.forest-green {
-  background-color: #f0f9f0;
-}
-#user-info.forest-green {
-  background-color: #c8e6c9;
-}
-#chat-box.forest-green {
-  background-color: #f0f9f0;
-}
-.message-item.self .message-bubble.forest-green {
-  background-color: #a5d6a7;
-}
-.message-item.other .message-bubble.forest-green {
-  background-color: #c5e1a5;
-}
-#send-button.forest-green {
-  background-color: #66bb6a;
-}
-#send-button.forest-green:hover {
-  background-color: #4caf50;
-}
-/* ===== テーマ5: ブラック＆ピンクグラデーション ===== */
-body.gradient-black-pink {
-  background: linear-gradient(to right, #000000, #ff69b4);
-  color: #ffffff; /* テキストの色を白に */
-}
-#left-panel.gradient-black-pink,
-#right-panel.gradient-black-pink {
-  background: none;
-  color: #ffffff; /* テキストの色を白に */
-}
-#user-info.gradient-black-pink {
-  background: none;
-  color: #ffffff; /* テキストの色を白に */
-}
-#chat-box.gradient-black-pink {
-  background: none;
-  color: #ffffff; /* テキストの色を白に */
-}
-.message-item.self .message-bubble.gradient-black-pink {
-  background-color: #ff1493; /* 濃いピンク色 */
-  color: #000000; /* テキストの色を白に */
-}
-.message-item.other .message-bubble.gradient-black-pink {
-  background-color: #ff69b4; /* ピンク色 */
-  color: #ffffff; /* テキストの色を白に */
-}
-#send-button.gradient-black-pink {
-  background-color: #ff69b4; /* ピンク色 */
-  color: #ffffff; /* テキストの色を白に */
-}
-#send-button.gradient-black-pink:hover {
-  background-color: #ff1493; /* 濃いピンク色 */
-  color: #ffffff; /* テキストの色を白に */
-}
-
-/* メニューバーにグラデーションを適用 */
-#menu-bar.gradient-black-pink {
-  background: none;
-  color: #ffffff; /* テキストの色を白に */
-}
-.menu-item.gradient-black-pink:hover {
-  background-color: rgba(255, 20, 147, 0.5); /* 濃いピンク色の半透明 */
-  border-radius: 5px;
-}
-
-
-/*sophisticated theme*/
-body.sophisticated-theme {
-  background-color: #1a1a2e; /* ブルーブラック */
-  color: #ffffff; /* ライトグレー */
-}
-
-#left-panel.sophisticated-theme,
-#right-panel.sophisticated-theme {
-  background-color: #252540; /* 少し明るいブルーブラック */
-}
-
-#user-info.sophisticated-theme {
-  background-color: #2e2e3a; /* 中間のブルーブラック */
-}
-
-#chat-box.sophisticated-theme {
-  background-color: #252540; /* 少し明るいブルーブラック */
-}
-
-.message-item.self .message-bubble.sophisticated-theme {
-  background-color: #3c3c5c; /* 少し明るいブルーブラック */
-}
-
-.message-item.other .message-bubble.sophisticated-theme {
-  background-color: #4a4a69; /* 中間のブルーブラック */
-}
-
-#send-button.sophisticated-theme {
-  background-color: #550a1a; /* 暗めの赤 */
-  color: #ffffff; /* 白 */
-}
-
-#send-button.sophisticated-theme:hover {
-  background-color: #750c2c; /* 少し明るい暗めの赤 */
-}
-#menu-bar-top.sophisticated-thema{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  background-color: #3c3c5c;
-  border-bottom: 1px solid #dddddd;
-}
 .call_bubble {
   width: 60px;
   height: 60px;
@@ -964,4 +761,162 @@ body.sophisticated-theme {
 .call_bubble:hover {
   transform: scale(1.1);
   background-color: #4a59c2;
+}
+
+/* ローディングアニメーション */
+.loader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8fafc;
+  z-index: 9999;
+  transition: opacity 0.5s ease;
+}
+
+.loader {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+}
+
+.loader-circle {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 4px solid transparent;
+  border-top-color: #5e72e4;
+  border-radius: 50%;
+  animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.loader-circle:nth-child(1) {
+  animation-delay: -0.45s;
+}
+
+.loader-circle:nth-child(2) {
+  width: 70%;
+  height: 70%;
+  top: 15%;
+  left: 15%;
+  border-top-color: #11cdef;
+  animation-delay: -0.3s;
+}
+
+.loader-circle:nth-child(3) {
+  width: 40%;
+  height: 40%;
+  top: 30%;
+  left: 30%;
+  border-top-color: #fb6340;
+  animation-delay: -0.15s;
+}
+
+.loader-text {
+  font-size: 16px;
+  color: #5e72e4;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 15px;
+  opacity: 0;
+  animation: fadeIn 1.5s forwards;
+  animation-delay: 0.5s;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 波紋エフェクト */
+.loader-ripple {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(94, 114, 228, 0.3);
+  animation: ripple 1.5s ease-out infinite;
+}
+
+.loader-ripple:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+@keyframes ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* テーマ選択のスタイル */
+#theme-select {
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #e6e9ed;
+  background-color: #ffffff;
+  color: #2c3e50;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 70%;
+  outline: none;
+}
+
+#theme-select:hover {
+  border-color: #5e72e4;
+}
+
+#theme-select:focus {
+  border-color: #5e72e4;
+  box-shadow: 0 0 0 2px rgba(94, 114, 228, 0.2);
+}
+
+/* ダークモードのテーマセレクト */
+#theme-select.dark-mode {
+  background-color: #252540;
+  color: #e0e0e0;
+  border-color: #333355;
+}
+
+/* フォレストグリーンのテーマセレクト */
+#theme-select.forest-green {
+  background-color: #ffffff;
+  color: #2c3e2c;
+  border-color: #d5e8d5;
+}
+
+/* モダンブルーのテーマセレクト */
+#theme-select.modern-blue {
+  background-color: #ffffff;
+  color: #2c3e50;
+  border-color: #e6f0fa;
 }

@@ -461,42 +461,57 @@
   transition: left 0.3s ease; /* Explicitly add transition to 'left' property */
 }
 
-/* HTML: <div class="sloader"></div> */
-.sloader {
-  width: 150px;
-  aspect-ratio: 1;
-  color: #ef3bff;
-  border: 2px solid;
-  display: grid;
-  box-sizing: border-box;
-  animation: l1 4s infinite linear;
+/* ローディングオーバーレイ */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8); /* 半透明の白い背景 */
+  backdrop-filter: blur(5px); /* 背景をぼかす効果 */
+  -webkit-backdrop-filter: blur(5px); /* Safari用 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999; /* sloaderより下のレイヤー */
+}
 
+/* 新しいモダンなローディングアニメーション */
+.sloader {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #5e72e4;
+  border-radius: 50%;
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1000; /* Ensures it's on top of other elements */
-}
-
-.sloader::before,
-.sloader::after {
-  content: "";
-  grid-area: 1/1;
-  margin: auto;
-  width: 70.7%;
-  aspect-ratio: 1;
-  border: 2px solid;
-  box-sizing: content-box;
-  animation: inherit;
+  z-index: 1000;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
 }
 
 .sloader::after {
-  width: 50%;
-  aspect-ratio: 1;
-  border: 2px solid;
-  animation-duration: 2s;
+  content: '';  
+  box-sizing: border-box;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-bottom-color: #7795f8;
+  transform: translate(-50%, -50%);
+  animation: rotation 0.5s linear infinite reverse;
 }
 
-@keyframes l1 {
-  100% { transform: rotate(1turn); }
+@keyframes rotation {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }

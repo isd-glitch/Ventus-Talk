@@ -209,43 +209,82 @@ addLog('??',other) black
 */
 
 function applyThemeToAllElements(theme) {
+  // テーマを適用する要素のセレクターをより詳細かつ包括的に設定
   const elements = document.querySelectorAll(
-    "body, #left-panel, #right-panel, #user-info, #chat-box, .message-item .message-bubble, #send-button,#menu-bar"
+    "body, #left-panel, #right-panel, #user-info, #chat-box, #menu-bar, #menu-bar-top, #chat-input, #chat-group-name, .menu-item, .chat-item, .date-divider, #chat-menu, #chat-info, #send-button"
   );
+  
   elements.forEach((element) => {
+    // 現在のクラスからテーマクラスを削除
     const currentClasses = element.className.split(" ");
     const newClasses = currentClasses.filter(
       (className) =>
         !className.endsWith("-mode") &&
-        !className.startsWith("summer-") &&
-        !className.startsWith("gradient-") &&
         !className.startsWith("forest-") &&
-        !className.startsWith("sophisticated")
+        !className.startsWith("modern-")
     );
+    
+    // 選択されたテーマクラスを追加
     if (theme !== "default") {
       newClasses.push(theme);
     }
+    
     element.className = newClasses.join(" ");
   });
+  
+  // メッセージバブル専用の処理（特に注意が必要な要素）
+  const messageBubbles = document.querySelectorAll(".message-bubble, .message-item .message-bubble");
+  messageBubbles.forEach(bubble => {
+    // バブルからテーマクラスを削除
+    const bubbleClasses = bubble.className.split(" ");
+    const newBubbleClasses = bubbleClasses.filter(
+      (className) =>
+        !className.endsWith("-mode") &&
+        !className.startsWith("forest-") &&
+        !className.startsWith("modern-")
+    );
+    
+    // 選択されたテーマクラスを追加
+    if (theme !== "default") {
+      newBubbleClasses.push(theme);
+    }
+    
+    bubble.className = newBubbleClasses.join(" ");
+  });
+  
+  // ログにテーマ変更を記録
+  console.log(`テーマを「${theme}」に変更しました`);
 }
 
 // 初期テーマを適用
 const savedTheme = localStorage.getItem("theme") || "default";
-applyThemeToAllElements(savedTheme);
-try {
-  document.getElementById("theme-select").value = savedTheme;
-} catch (_) {}
 
-// テーマ変更時の処理
-try {
-  document
-    .getElementById("theme-select")
-    .addEventListener("change", (event) => {
-      const selectedTheme = event.target.value;
-      applyThemeToAllElements(selectedTheme);
-      localStorage.setItem("theme", selectedTheme);
-    });
-} catch (_) {}
+// DOMContentLoaded イベントで初期テーマを適用
+document.addEventListener("DOMContentLoaded", () => {
+  applyThemeToAllElements(savedTheme);
+  
+  // テーマセレクタが存在する場合は値を設定
+  try {
+    const themeSelector = document.getElementById("theme-select");
+    if (themeSelector) {
+      themeSelector.value = savedTheme;
+      
+      // テーマ変更イベントリスナーを追加
+      themeSelector.addEventListener("change", (event) => {
+        const selectedTheme = event.target.value;
+        applyThemeToAllElements(selectedTheme);
+        localStorage.setItem("theme", selectedTheme);
+      });
+    }
+  } catch (e) {
+    console.error("テーマセレクタの初期化エラー:", e);
+  }
+});
+
+// ページ読み込み完了時にも適用（画像やその他リソースが読み込まれた後）
+window.addEventListener("load", () => {
+  applyThemeToAllElements(savedTheme);
+});
 
 document.addEventListener("DOMContentLoaded", function () {
   var currentPage = window.location.pathname;
@@ -254,19 +293,25 @@ document.addEventListener("DOMContentLoaded", function () {
     currentPage.endsWith("home/home.html") ||
     currentPage.endsWith("settings/settings.html")
   ) {
-    // iPadかつブラウザ使用のチェック
-    var isIpad = /iPad/.test(navigator.userAgent) && !window.navigator.standalone;
-    
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      document.querySelector("#container").style.height = "100vh";
-    } else if (isIpad) {
-      document.querySelector("#container").style.height = "calc(100vh - 30px)";
-    } else {
-      document.querySelector("#container").style.height = "100vh";
-    }
-
-    // 共通のスタイル設定
+    // コンテナ要素を取得
     var container = document.querySelector("#container");
+    
+    // 高さを適切に設定
+    function adjustContainerHeight() {
+      const windowHeight = window.innerHeight;
+      container.style.height = `${windowHeight}px`;
+    }
+    
+    // 初回実行
+    adjustContainerHeight();
+    
+    // リサイズイベントでも実行
+    window.addEventListener('resize', adjustContainerHeight);
+    
+    // スクロールを防止
+    document.body.style.overflow = 'hidden';
+    
+    // 共通のスタイル設定
     container.style.display = "flex";
     container.style.overflow = "hidden";
   }

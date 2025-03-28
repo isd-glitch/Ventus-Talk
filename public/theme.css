@@ -1,0 +1,386 @@
+/* ===== テーマ1: ダークモード ===== */
+body.dark-mode {
+  background-color: #121220;
+  color: #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+#left-panel.dark-mode, 
+#right-panel.dark-mode {
+  background-color: #1a1a2e;
+  border-color: #333355;
+  transition: all 0.3s ease;
+}
+
+#user-info.dark-mode {
+  background-color: #252540;
+  color: #e0e0e0;
+  border-color: #333355;
+}
+
+#chat-box.dark-mode {
+  background-color: #1a1a2e;
+  color: #e0e0e0;
+  border-color: #333355;
+}
+
+/* メッセージバブルのセレクタ詳細度を上げる */
+.message-item.self .message-bubble.dark-mode,
+.message-bubble.dark-mode.self {
+  background-color: #4a5d8f !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.message-item.other .message-bubble.dark-mode,
+.message-bubble.dark-mode.other {
+  background-color: #2e2e4a !important;
+  color: #e0e0e0 !important;
+  border: 1px solid #333355 !important;
+}
+
+#menu-bar-top.dark-mode {
+  background-color: #252540;
+  border-color: #333355;
+  color: #e0e0e0;
+}
+
+#chat-group-name.dark-mode {
+  color: #e0e0e0;
+}
+
+#send-button.dark-mode {
+  background-color: #4a5d8f;
+  color: #ffffff;
+  border: none;
+}
+
+#send-button.dark-mode:hover {
+  background-color: #5d71a9;
+}
+
+#chat-input.dark-mode {
+  background-color: #252540;
+  color: #e0e0e0;
+  border-color: #333355;
+}
+
+#menu-bar.dark-mode {
+  background-color: #1a1a2e;
+  border-color: #333355;
+}
+
+.menu-item.dark-mode {
+  color: #e0e0e0;
+}
+
+.menu-item.dark-mode img {
+  filter: brightness(1.2) contrast(0.9);
+}
+
+.menu-item.dark-mode:hover {
+  background-color: #2e2e4a;
+}
+
+.chat-item.dark-mode {
+  border-color: #333355;
+}
+
+.chat-item.dark-mode:hover {
+  background-color: #252540;
+}
+
+.chat-item.dark-mode .chat-group-name {
+  color: #e0e0e0;
+}
+
+.chat-item.dark-mode .chat-last-message {
+  color: #b0b0c0;
+}
+
+.date-divider.dark-mode {
+  border-color: #333355;
+  color: #b0b0c0;
+}
+
+.date-divider.dark-mode span {
+  background-color: #1a1a2e;
+}
+
+#chat-menu.dark-mode {
+  background-color: #1a1a2e;
+  border-color: #333355;
+}
+
+#chat-info.dark-mode {
+  background-color: #252540;
+  border-color: #333355;
+  color: #e0e0e0;
+}
+
+/* モーダルとその他要素のダークモード対応 */
+#modal.dark-mode .modal-content {
+  background-color: #252540;
+  color: #e0e0e0;
+  border-color: #333355;
+}
+
+#modal.dark-mode .close {
+  color: #e0e0e0;
+}
+
+#crop-button.dark-mode {
+  background-color: #4a5d8f;
+  color: #ffffff;
+}
+
+#file-upload.dark-mode {
+  background-color: rgba(74, 93, 143, 0.2);
+}
+
+#reply-target.dark-mode {
+  background-color: #252540;
+  border-color: #4a5d8f;
+  color: #e0e0e0;
+}
+
+#close-reply.dark-mode {
+  color: #b0b0c0;
+}
+
+/* ===== テーマ2: フォレストグリーン ===== */
+body.forest-green {
+  background-color: #f0f7f0;
+  color: #2c3e2c;
+  transition: all 0.3s ease;
+}
+
+#left-panel.forest-green,
+#right-panel.forest-green {
+  background-color: #f8fff8;
+  border-color: #d5e8d5;
+}
+
+#user-info.forest-green {
+  background-color: #e8f5e8;
+  color: #2c3e2c;
+  border-color: #d5e8d5;
+}
+
+#chat-box.forest-green {
+  background-color: #f8fff8;
+  color: #2c3e2c;
+}
+
+/* メッセージバブルのセレクタ詳細度を上げる */
+.message-item.self .message-bubble.forest-green,
+.message-bubble.forest-green.self {
+  background-color: #5d8b69 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.message-item.other .message-bubble.forest-green,
+.message-bubble.forest-green.other {
+  background-color: #e8f5e8 !important;
+  color: #2c3e2c !important;
+  border: 1px solid #d5e8d5 !important;
+}
+
+#menu-bar-top.forest-green {
+  background-color: #e8f5e8;
+  border-color: #d5e8d5;
+}
+
+#chat-group-name.forest-green {
+  color: #2c3e2c;
+}
+
+#send-button.forest-green {
+  background-color: #5d8b69;
+  color: #ffffff;
+}
+
+#send-button.forest-green:hover {
+  background-color: #4a7555;
+}
+
+#chat-input.forest-green {
+  background-color: #ffffff;
+  color: #2c3e2c;
+  border-color: #d5e8d5;
+}
+
+#menu-bar.forest-green {
+  background-color: #f8fff8;
+  border-color: #d5e8d5;
+}
+
+.menu-item.forest-green {
+  color: #2c3e2c;
+}
+
+.menu-item.forest-green:hover {
+  background-color: #e8f5e8;
+}
+
+.chat-item.forest-green {
+  border-color: #d5e8d5;
+}
+
+.chat-item.forest-green:hover {
+  background-color: #e8f5e8;
+}
+
+.chat-item.forest-green .chat-group-name {
+  color: #2c3e2c;
+}
+
+.chat-item.forest-green .chat-last-message {
+  color: #5a7a5a;
+}
+
+.date-divider.forest-green {
+  border-color: #d5e8d5;
+  color: #5a7a5a;
+}
+
+.date-divider.forest-green span {
+  background-color: #f8fff8;
+}
+
+#chat-menu.forest-green {
+  background-color: #f8fff8;
+  border-color: #d5e8d5;
+}
+
+#chat-info.forest-green {
+  background-color: #e8f5e8;
+  border-color: #d5e8d5;
+  color: #2c3e2c;
+}
+
+/* ===== テーマ3: モダンブルー ===== */
+body.modern-blue {
+  background-color: #f0f8ff;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+}
+
+#left-panel.modern-blue,
+#right-panel.modern-blue {
+  background-color: #ffffff;
+  border-color: #e6f0fa;
+}
+
+#user-info.modern-blue {
+  background-color: #e6f0fa;
+  color: #2c3e50;
+  border-color: #d5e8f7;
+}
+
+#chat-box.modern-blue {
+  background-color: #ffffff;
+  color: #2c3e50;
+}
+
+/* メッセージバブルのセレクタ詳細度を上げる */
+.message-item.self .message-bubble.modern-blue,
+.message-bubble.modern-blue.self {
+  background-color: #3498db !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.message-item.other .message-bubble.modern-blue,
+.message-bubble.modern-blue.other {
+  background-color: #ecf0f1 !important;
+  color: #2c3e50 !important;
+  border: 1px solid #e6e9ed !important;
+}
+
+#menu-bar-top.modern-blue {
+  background-color: #e6f0fa;
+  border-color: #d5e8f7;
+}
+
+#chat-group-name.modern-blue {
+  color: #2c3e50;
+}
+
+#send-button.modern-blue {
+  background-color: #3498db;
+  color: #ffffff;
+}
+
+#send-button.modern-blue:hover {
+  background-color: #2980b9;
+}
+
+#chat-input.modern-blue {
+  background-color: #ffffff;
+  color: #2c3e50;
+  border-color: #e6f0fa;
+}
+
+#menu-bar.modern-blue {
+  background-color: #ffffff;
+  border-color: #e6f0fa;
+}
+
+.menu-item.modern-blue {
+  color: #2c3e50;
+}
+
+.menu-item.modern-blue:hover {
+  background-color: #e6f0fa;
+}
+
+.chat-item.modern-blue {
+  border-color: #e6f0fa;
+}
+
+.chat-item.modern-blue:hover {
+  background-color: #f5f9ff;
+}
+
+.chat-item.modern-blue .chat-group-name {
+  color: #2c3e50;
+}
+
+.chat-item.modern-blue .chat-last-message {
+  color: #7f8c8d;
+}
+
+.date-divider.modern-blue {
+  border-color: #e6f0fa;
+  color: #7f8c8d;
+}
+
+.date-divider.modern-blue span {
+  background-color: #ffffff;
+}
+
+#chat-menu.modern-blue {
+  background-color: #ffffff;
+  border-color: #e6f0fa;
+}
+
+#chat-info.modern-blue {
+  background-color: #e6f0fa;
+  border-color: #d5e8f7;
+  color: #2c3e50;
+}
+
+/* 共通のトランジション効果 */
+body, #left-panel, #right-panel, #user-info, #chat-box, .message-bubble, 
+#send-button, #menu-bar, #menu-bar-top, #chat-input, .menu-item, .chat-item {
+  transition: all 0.3s ease;
+}
+
+/* メッセージバブルのテーマ適用を確保するための追加スタイル */
+.message-item .message-bubble[class*="-mode"],
+.message-item .message-bubble[class*="forest-"],
+.message-item .message-bubble[class*="modern-"] {
+  transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
+}

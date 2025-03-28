@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "loading.html"));
 });
 
-const PORT = process.env.PORT || 3039;
+const PORT = process.env.PORT || 3034;
 app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}`);
 });
@@ -147,7 +147,7 @@ const sendPushNotification = (accessToken, token, message, chatId, senderUsernam
   req.write(data);
   req.end();
 };
-/*
+
 let initialLoad = true;
 dbInfo.collection("ChatGroup").onSnapshot((snapshot) => {
   if (initialLoad) {
@@ -166,7 +166,7 @@ dbInfo.collection("ChatGroup").onSnapshot((snapshot) => {
     }
   });
 });
-*/
+
 const notifyUsers = async (chatId, sender, message, usernames, senderUsername) => {
   for (const userId of usernames) {
     if (userId === sender) continue; // Don't notify the sender
@@ -174,14 +174,14 @@ const notifyUsers = async (chatId, sender, message, usernames, senderUsername) =
     if (!userDoc.exists) continue;
     const userToken = userDoc.data().token;
     const accessToken = await getAccessToken();
-    sendPushNotification(accessToken, userToken, message, chatId, senderUsername);
+    if (message && userToken) sendPushNotification(accessToken, userToken, message, chatId, senderUsername);
   }
 };
 
 
 /*-----------------------------------------------------
 **Sky-Way 通話システム**
------------------------------------------------------
+-----------------------------------------------------*/
 const SKYWAY_API_KEY = 'f7e31d2a-4c74-4909-ad3f-7e845e5a4a53';
 const SKYWAY_SECRET_KEY = 'p9jJDiGR2GrIbyI1d48CqTxJ1cijy/RuC8YvtdqzDcI=';
 app.get('/skyway-token', (req, res) => {
@@ -194,9 +194,6 @@ app.get('/skyway-token', (req, res) => {
   });
   res.send({ token });
 });
-
-
-*/
 
 
 

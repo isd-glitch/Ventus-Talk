@@ -290,6 +290,8 @@ iframe {
 
     #right-panel.open {
         transform: translateX(0);
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        z-index: 10; /* z-indexを上げて確実に表示されるようにする */
     }
   
 
@@ -300,19 +302,24 @@ iframe {
         background-color: #ffffff;
         transform: translateX(100%);
         transition: transform 0.3s ease-in-out;
+        padding-top: 50px;
     }
   
 
     #back-button {
       display:block;
         position: absolute;
-        top: 10px;
-        left: -10px;
+        top: 15px;
+        left: 15px;
+        padding: 8px 12px;
         font-size: 24px;
-        background: none;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
         border: none;
         cursor: pointer;
-        z-index: 3;
+        z-index: 20;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        color: #5e72e4;
     }
     .profile-item {
         flex-direction: column;
@@ -330,4 +337,126 @@ iframe {
         margin: 0 auto 10px auto; /* 上下の余白を設定し、左右を自動で中央に揃えます */
     }
 
+    /* 設定コンテンツ領域の最小高さを確保 */
+    .settings-page {
+        min-height: 70vh; /* 最小の高さを設定して、コンテンツが見やすくなるようにする */
+    }
+
+    /* テーマプレビューのクリック領域を広げる */
+    .theme-preview-box {
+        padding: 5px;
+        margin: 8px;
+        border-width: 2px; /* ボーダーを太くして選択しやすくする */
+    }
+}
+
+/* テーマ選択スタイル */
+.select-container {
+    margin: 15px 0;
+    width: 100%;
+}
+
+#theme-select {
+    padding: 10px 15px;
+    border-radius: 20px;
+    border: 1px solid #e6e9ed;
+    background-color: #ffffff;
+    color: #2c3e50;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 300px;
+    outline: none;
+}
+
+#theme-select:hover {
+    border-color: #5e72e4;
+}
+
+#theme-select:focus {
+    border-color: #5e72e4;
+    box-shadow: 0 0 0 2px rgba(94, 114, 228, 0.2);
+}
+
+/* テーマプレビュー */
+.theme-preview {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    position: relative;
+    z-index: 10; /* より高い重なり順序を設定 */
+}
+
+.theme-preview-box {
+    width: 120px;
+    height: 80px;
+    border-radius: 8px;
+    margin: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 15; /* 親要素よりもさらに高い重なり順序 */
+}
+
+.theme-preview-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.theme-preview-box.selected {
+    border: 2px solid #5e72e4;
+    box-shadow: 0 0 0 2px rgba(94, 114, 228, 0.3);
+    transform: scale(1.05);
+}
+
+/* デフォルトテーマのプレビュー */
+.theme-preview-box.default {
+    background-color: #f8fafc;
+    border: 1px solid #e6e9ed;
+}
+
+.theme-preview-box.default .preview-header {
+    background-color: #ffffff;
+}
+
+/* ダークモードのプレビュー */
+.theme-preview-box.dark {
+    background-color: #1a1a2e;
+    border: 1px solid #333355;
+}
+
+.theme-preview-box.dark .preview-header {
+    background-color: #252540;
+}
+
+/* モダンブルーのプレビュー */
+.theme-preview-box.blue {
+    background-color: #f0f8ff;
+    border: 1px solid #e6f0fa;
+}
+
+.theme-preview-box.blue .preview-header {
+    background-color: #e6f0fa;
+}
+
+/* フォレストグリーンのプレビュー */
+.theme-preview-box.green {
+    background-color: #f0f7f0;
+    border: 1px solid #d5e8d5;
+}
+
+.theme-preview-box.green .preview-header {
+    background-color: #e8f5e8;
+}
+
+/* ダークモード対応 */
+body.dark-mode #theme-select {
+    background-color: #252540;
+    color: #e0e0e0;
+    border-color: #333355;
 }

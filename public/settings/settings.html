@@ -8,6 +8,7 @@
   
     <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="../theme.css" />
     <link rel="stylesheet" href="../menu.css">
     <link rel="stylesheet" href="settings.css">
   <link rel="stylesheet" href="../log.css">
@@ -138,16 +139,35 @@
 
             <div id="talk-settings" class="settings-page" style="display: none;">
                 <h2>トーク</h2>
-                <label for="theme-select">テーマカラーを選択:</label>
-                <select id="theme-select">
-                    <option value="default">デフォルト</option>
-                    <option value="dark-mode">ダークモード</option>
-                    <option value="summer-blue">サマーブルー</option>
-                    <option value="gradient-pink">グラデーションピンク</option>
-                    <option value="forest-green">フォレストグリーン</option>
-                    <option value="gradient-black-pink">ブラック＆ピンクグラデーション</option>
-                    <option value="sophisticated-theme">シックブラック</option>
-                </select>
+                <div class="settings-item">
+                    <label for="theme-select">テーマカラーを選択:</label>
+                    <div class="select-container">
+                        <select id="theme-select">
+                            <option value="default">デフォルト</option>
+                            <option value="dark-mode">ダークモード</option>
+                            <option value="modern-blue">モダンブルー</option>
+                            <option value="forest-green">フォレストグリーン</option>
+                        </select>
+                    </div>
+                    <div class="theme-preview">
+                        <div class="theme-preview-box default" data-theme="default">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <div class="theme-preview-box dark" data-theme="dark-mode">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <div class="theme-preview-box blue" data-theme="modern-blue">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                        <div class="theme-preview-box green" data-theme="forest-green">
+                            <div class="preview-header"></div>
+                            <div class="preview-content"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
 

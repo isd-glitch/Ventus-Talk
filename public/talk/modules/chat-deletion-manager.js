@@ -168,7 +168,6 @@ export class ChatDeletionManager {
     loader.style.display = "flex";
     loader.innerHTML = `
       <div class="loader-spinner"></div>
-      <div class="loader-text">トークルームを削除中...</div>
     `;
     document.body.appendChild(loader);
   }

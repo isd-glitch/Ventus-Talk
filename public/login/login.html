@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login/Register</title>
     <link rel="stylesheet" href="login.css">
-  <link rel="stylesheet" href="../log.css">
-  <link rel="manifest" href="../manifest.json">
+    <link rel="stylesheet" href="../log.css">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="//cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
 </head>
@@ -17,30 +18,67 @@
             <div id="login-container" class="form-section active">
                 <h2>サインイン</h2>
                 <form id="login-form">
-                    <input type="text" id="login-username" autocomplete="username" placeholder="ユーザーID" required>
-                    <input type="password" id="login-password" autocomplete="current-password" placeholder="パスワード" required>
-                    <button type="submit">サインイン</button>
+                    <div class="input-group">
+                        <input type="text" id="login-username" autocomplete="username" placeholder="ユーザーID" required>
+                    </div>
+                    <div class="password-container">
+                        <input type="password" id="login-password" autocomplete="current-password" placeholder="パスワード" required>
+                        <i class="password-toggle fas fa-eye-slash" onclick="togglePasswordVisibility('login-password', this)"></i>
+                    </div>
+                    <button type="submit" class="enabled"><i class="fas fa-sign-in-alt"></i> サインイン</button>
                 </form>
-                <p class="toggle-text" id="show-register">新規登録はこちら</p>
+                <p class="toggle-text" id="show-register">新規登録はこちら <i class="fas fa-arrow-right"></i></p>
             </div>
             <div id="register-container" class="form-section">
                 <h2>新規登録</h2>
                 <form id="register-form">
-                    <input type="text" id="username" placeholder="ユーザーID" required>
-                    <p>これはuserIDで、変更されることはありません。ユーザー名は設定ページで後から変更できます。<br>パスワードはSHA256ハッシュ化によって厳重に保存されています。</p>
-                    <small id="username-check"><span id="loading-spinner" style="display:none;">⏳ チェック中...</span></small>
-                    <input type="password" id="password" placeholder="パスワード" required>
-                    <a href="../policy/privacy.html" target="_blank">プライバシーポリシーページ</a><br>
-                    <a href="../policy/terms.html" target="_blank">利用規約ページ</a>
+                    <!-- ユーザー名入力グループの修正 -->
+                    <div class="input-group">
+                        <input type="text" id="username" placeholder="ユーザーID" required>
+                        <small id="username-check">
+                            <span id="loading-spinner" style="display:none;"><i class="fas fa-spinner fa-spin"></i> チェック中...</span>
+                        </small>
+                    </div>
+                    <p>これはuserIDで、変更されることはありません。ユーザー名は設定ページで後から変更できます。</p>
+                    
+                    <div class="password-container">
+                        <input type="password" id="password" placeholder="パスワード" required>
+                        <i class="password-toggle fas fa-eye-slash" onclick="togglePasswordVisibility('password', this)"></i>
+                    </div>
+                    
+                    <div class="password-container">
+                        <input type="password" id="confirm-password" placeholder="パスワード（確認）" required>
+                        <i class="password-toggle fas fa-eye-slash" onclick="togglePasswordVisibility('confirm-password', this)"></i>
+                    </div>
+                    <small id="password-match" class="password-match"></small>
+                    
+                    <p>パスワードはSHA256ハッシュ化によって厳重に保存されています。</p>
+                    <div class="policy-links">
+                        <a href="../policy/privacy.html" target="_blank"><i class="fas fa-shield-alt"></i> プライバシーポリシー</a>
+                        <a href="../policy/terms.html" target="_blank"><i class="fas fa-file-contract"></i> 利用規約</a>
+                    </div>
                     <label>
                         <input type="checkbox" id="terms-checkbox"> 利用規約に同意します
                     </label>
-                    <button type="submit" id="submit-button" disabled>登録</button>
+                    <button type="submit" id="submit-button" class="disabled" disabled><i class="fas fa-user-plus"></i> 登録</button>
                 </form>
-                <p class="toggle-text" id="show-login">サインインはこちら</p>
+                <p class="toggle-text" id="show-login"><i class="fas fa-arrow-left"></i> サインインはこちら</p>
             </div>
         </div>
     </div>
+    <script>
+        // パスワード表示切り替え関数
+        function togglePasswordVisibility(inputId, icon) {
+            const passwordInput = document.getElementById(inputId);
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            } else {
+                passwordInput.type = "password";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            }
+        }
+    </script>
     <script type="module" src="login.js"></script>
 </body>
 </html>

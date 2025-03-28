@@ -1,0 +1,285 @@
+/* メッセージメニューのスタイル */
+
+/* メニューボタン */
+.message-menu-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: rgba(240, 240, 240, 0.8);
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background-color 0.2s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.message-menu-btn svg {
+  fill: #555;
+  transition: fill 0.2s;
+}
+
+.message-menu-btn:hover {
+  opacity: 1;
+  background-color: rgba(230, 230, 230, 0.9);
+  transform: scale(1.05);
+}
+
+.message-menu-btn:hover svg {
+  fill: #333;
+}
+
+.message-item:hover .message-menu-btn {
+  opacity: 0.7;
+}
+
+/* アクションメニュー */
+.message-action-menu {
+  position: absolute;
+  top: 30px;
+  right: 5px;
+  background-color: white;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 6px 0;
+  z-index: 100;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  transform-origin: top right;
+  animation: menuAppear 0.15s ease-out;
+  overflow: hidden;
+}
+
+.message-action-menu.hidden {
+  display: none;
+}
+
+@keyframes menuAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* アクションボタン */
+.message-action-btn {
+  background: none;
+  border: none;
+  padding: 10px 16px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  color: #333;
+  position: relative;
+  overflow: hidden;
+}
+
+.message-action-btn::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.1) 0%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  transition: transform 0.6s, opacity 0.6s;
+}
+
+.message-action-btn:hover::after {
+  transform: translate(-50%, -50%) scale(2);
+  opacity: 1;
+}
+
+.message-action-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.message-action-btn:active {
+  background-color: #e5e5e5;
+}
+
+/* リプライボタン */
+.reply-btn::before {
+  content: "↩︎";
+  margin-right: 10px;
+  font-size: 16px;
+  color: #3a86ff;
+}
+
+/* コピーボタン */
+.copy-btn::before {
+  content: "📋";
+  margin-right: 10px;
+  font-size: 16px;
+  color: #555;
+}
+
+/* コピー完了フィードバック */
+.copy-feedback {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(40, 40, 40, 0.9);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  z-index: 1000;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s;
+}
+
+.copy-feedback.fade-out {
+  animation: fadeOut 0.3s forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to { opacity: 0; transform: translate(-50%, 10px); }
+}
+
+/* リプライ表示のスタイル */
+#reply-target {
+  background-color: #f8f8f8;
+  border-left: 4px solid #3a86ff;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: none;
+  position: relative;
+  animation: slideIn 0.2s ease-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+#reply-content {
+  font-size: 14px;
+  color: #555;
+  margin: 0;
+  padding-right: 25px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 30px);
+}
+
+#close-reply {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #999;
+  opacity: 0.7;
+  transition: opacity 0.2s, color 0.2s;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#close-reply:hover {
+  opacity: 1;
+  color: #666;
+}
+
+/* メッセージスワイプのスタイル */
+.message-item {
+  position: relative;
+  transition: transform 0.2s;
+  touch-action: pan-y; /* 縦スクロールを許可 */
+}
+
+.message-item.dragging {
+  z-index: 5;
+  transition: transform 0.1s;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .message-menu-btn {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .message-action-menu {
+    min-width: 180px;
+  }
+}
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+  .message-menu-btn {
+    background-color: rgba(50, 50, 50, 0.8);
+  }
+  
+  .message-menu-btn svg {
+    fill: #ccc;
+  }
+  
+  .message-menu-btn:hover {
+    background-color: rgba(60, 60, 60, 0.9);
+  }
+  
+  .message-menu-btn:hover svg {
+    fill: #fff;
+  }
+  
+  .message-action-menu {
+    background-color: #333;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .message-action-btn {
+    color: #eee;
+  }
+  
+  .message-action-btn:hover {
+    background-color: #444;
+  }
+  
+  .message-action-btn:active {
+    background-color: #555;
+  }
+  
+  #reply-target {
+    background-color: #333;
+    border-left: 4px solid #5e9aff;
+  }
+  
+  #reply-content {
+    color: #ddd;
+  }
+  
+  #close-reply {
+    color: #aaa;
+  }
+  
+  #close-reply:hover {
+    color: #ddd;
+  }
+}

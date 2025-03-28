@@ -1,36 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
 body {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #f0f0f0;
-    font-family: Arial, sans-serif;
+    background: linear-gradient(-45deg, #80b3ff, #9381ff, #42a5f5, #4db6ac);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+    font-family: 'Poppins', sans-serif;
+    overflow: hidden; /* 縦スクロール防止 */
+    /* コンテナをやや上に配置 */
+    padding-bottom: 5vh;
+    box-sizing: border-box;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 #container {
     width: 100%;
     max-width: 400px;
+    min-height: 450px;
     overflow: hidden;
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 35px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+}
+
+#container:hover {
+    transform: translateY(-5px);
 }
 
 #form-container {
     position: relative;
-    width: 200%;
+    width: 230%;
     display: flex;
-    transition: transform 0.5s ease-in-out;
+    transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    overflow: hidden; /* 追加：はみ出し防止 */
 }
 
 .form-section {
-    width: 50%;
+    width: 43%;
+    margin-right: 7%;
     padding: 20px;
     box-sizing: border-box;
     flex-shrink: 0;
-    display: none; /* Ensure only active section is displayed */
+    display: none;
+    overflow-y: auto; /* 必要な場合のみスクロール */
+    max-height: 75vh; /* 高さの最大値を設定 */
 }
 
 #login-container, #register-container {
@@ -41,69 +73,246 @@ body {
 
 #login-container.active, #register-container.active {
     display: flex;
+    animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 25px;
+    font-weight: 600;
+    position: relative;
+}
+
+h2:after {
+    content: '';
+    position: absolute;
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(to right, #23a6d5, #23d5ab);
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 2px;
 }
 
 input[type="text"], input[type="password"] {
-    padding: 10px;
-    border: 1px solid #cccccc;
-    border-radius: 5px;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 8px;
     font-size: 16px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     width: 90%;
-    float: center;
-    /*display: block; Ensures the input is a block-level element */
-    margin-left: auto; /* Centers the input */
-    margin-right: auto; /* Centers the input */
+    background-color: #f5f5f5;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
+
 input:focus {
-    outline: 2px solid blue;
+    outline: none;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(35, 166, 213, 0.3);
 }
 
 button[type="submit"] {
-    padding: 10px;
+    padding: 12px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
-    width: 100%;
+    width: 90%;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    margin-top: 10px;
+    position: relative;
+    overflow: hidden;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 button[type="submit"].enabled {
-    background-color: #4CAF50;
+    background: linear-gradient(to right, #23a6d5, #23d5ab);
     color: white;
 }
 
 button[type="submit"].disabled {
-    background-color: #cccccc;
-    color: #666666;
+    background-color: #e0e0e0;
+    color: #888;
     cursor: not-allowed;
 }
 
 button[type="submit"]:hover.enabled {
-    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(35, 166, 213, 0.4);
+}
+
+button[type="submit"]:active.enabled {
+    transform: translateY(0);
 }
 
 #username-check {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     width: 100%;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    text-align: center;
 }
 
 .username-check-loading {
-    color: black;
+    color: #666;
 }
 
 .username-check-error {
-    color: red;
+    color: #e73c7e;
 }
 
 .username-check-available {
-    color: green;
+    color: #23d5ab;
 }
 
 .toggle-text {
-    margin-top: 20px;
-    color: blue;
+    margin-top: 25px;
+    color: #23a6d5;
     cursor: pointer;
-    text-decoration: underline;
+    text-decoration: none;
+    position: relative;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.toggle-text:hover {
+    color: #e73c7e;
+}
+
+.toggle-text:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    transform: scaleX(0);
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: #e73c7e;
+    transform-origin: bottom right;
+    transition: transform 0.3s ease-out;
+}
+
+.toggle-text:hover:after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
+
+label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 15px 0;
+    cursor: pointer;
+}
+
+input[type="checkbox"] {
+    margin-right: 8px;
+    accent-color: #23a6d5;
+}
+
+a {
+    color: #23a6d5;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #e73c7e;
+}
+
+p {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 5px 0 15px 0;
+    text-align: center;
+}
+
+/* パスワード入力フィールド用スタイル */
+.password-container {
+    position: relative;
+    width: 90%;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.password-container input {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+    color: #23a6d5;
+}
+
+/* 入力一致チェック用スタイル */
+.password-match {
+    font-size: 0.85rem;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    width: 100%;
+    text-align: center;
+}
+
+.password-match.matched {
+    color: #23d5ab;
+}
+
+.password-match.not-matched {
+    color: #e73c7e;
+}
+
+/* ポリシーリンク用スタイル */
+.policy-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 10px 0;
+    justify-content: center;
+    width: 100%;
+}
+
+.policy-links a {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* 入力グループのスタイリング */
+.input-group {
+    width: 90%;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 入力欄を中央揃えに */
+#login-form, #register-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
