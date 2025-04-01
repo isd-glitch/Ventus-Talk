@@ -35,7 +35,7 @@ app.listen(PORT, () => {
 
 /*-----------------------------------------------------
 **Google Drive 認証**
------------------------------------------------------*/
+-----------------------------------------------------
 const driveKeys = JSON.parse(fs.readFileSync("./ventus-talk-dev-1d6a05c348be.json", "utf-8"));
 const driveClient = new JWT({
   email: driveKeys.client_email,
@@ -67,7 +67,7 @@ app.get("/get-token", async (req, res) => {
 
 /*-----------------------------------------------------
 **Firestore 通知システム**
------------------------------------------------------*/
+-----------------------------------------------------
 const serviceAccountFCM = JSON.parse(fs.readFileSync("./ventus-talk-dev-firebase-adminsdk-1iv00-9d4ecb0874.json", "utf-8"));
 const serviceAccountServer = JSON.parse(fs.readFileSync("./ventus-talk-server-firebase-adminsdk-fbsvc-d615ebb661.json", "utf-8"));
 const serviceAccountInfo = JSON.parse(fs.readFileSync("./ventus-talk-info-firebase-adminsdk-fbsvc-99baed7dfa.json", "utf-8"));
@@ -181,7 +181,7 @@ const notifyUsers = async (chatId, sender, message, usernames, senderUsername) =
 
 /*-----------------------------------------------------
 **Sky-Way 通話システム**
------------------------------------------------------*/
+-----------------------------------------------------
 const SKYWAY_API_KEY = 'f7e31d2a-4c74-4909-ad3f-7e845e5a4a53';
 const SKYWAY_SECRET_KEY = 'p9jJDiGR2GrIbyI1d48CqTxJ1cijy/RuC8YvtdqzDcI=';
 app.get('/skyway-token', (req, res) => {
@@ -203,3 +203,4 @@ app.get('/skyway-token', (req, res) => {
 app.get("/sleep", (req, res) => {
   res.json({ iam: "awake" });
 });
+*/
